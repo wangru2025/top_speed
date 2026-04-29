@@ -6,14 +6,18 @@ namespace TopSpeed.Menu
 {
     internal sealed partial class MenuScreen
     {
-        public void ResetSelection(int? preferredSelectionIndex = null)
+        public void ResetSelection(int? preferredSelectionIndex = null, bool autoFocus = true)
         {
             SaveSelectionForActiveView();
             _index = NoSelection;
             _activeActionIndex = NoSelection;
             _pendingFocusIndex = preferredSelectionIndex;
+            _suppressAutoFocus = !autoFocus;
             _justEntered = true;
-            QueueAutoFocusFirstItem();
+            if (autoFocus)
+                QueueAutoFocusFirstItem();
+            else
+                ClearAutoFocusPending();
             CancelHint();
         }
 

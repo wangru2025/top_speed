@@ -2,11 +2,15 @@
   "version": "2026.4.21.1",
   "serverVersion": "2026.4.13.2",
   "changes": [
-    "Android support is finally here.",
-    "Fixed a bug with random vehicle selection",
-    "Fix some translation issues."
+    "Fixed audio issues on Android. There should be no stuttering on most phones now. If you had turned off HRTF audio before, please reenable it back and try again.",
+    "Added controller support on mobile.",
+    "Fixed some gestures not working properly in driving, such as the clutch.",
+    "Fixed radio buttons and slider gestures not working in the multiplayer lobby.",
+    "Rewrote the audio engine to use a more modern high-level library instead of the raw MiniAudioEx directly.",
+    "Added a help menu to directly open the game documentation and latest changes.",
+    "Fixed language loading on mobile."
   ],
   "serverChanges": [
-    "The server for Linux now correctly includes the updater."
+    "Fixed street adventure tracks not working correctly."
   ]
 }

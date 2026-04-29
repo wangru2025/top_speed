@@ -60,7 +60,7 @@ namespace TopSpeed.Menu
         public Action<int>? OnResult { get; }
         public bool OpenAsOverlay { get; set; }
         public bool IsCancelable { get; set; } = true;
-        public bool FocusFirstButtonByDefault { get; set; } = true;
+        public bool FocusFirstButtonByDefault { get; set; }
         public IReadOnlyList<DialogItem> Items { get; }
         public IReadOnlyList<DialogButton> Buttons { get; }
     }
@@ -110,7 +110,8 @@ namespace TopSpeed.Menu
                 return;
 
             var announcement = DialogAnnouncement.Compose(dialog.Title, dialog.Caption);
-            _menu.Push(MenuId, announcement, defaultIndex);
+            var autoFocus = defaultIndex >= 0;
+            _menu.Push(MenuId, announcement, autoFocus ? defaultIndex : null, autoFocus: autoFocus);
         }
 
         private List<MenuItem> BuildItems(Dialog dialog, out int defaultIndex)
@@ -131,9 +132,9 @@ namespace TopSpeed.Menu
 
             var firstDialogItemIndex = string.IsNullOrWhiteSpace(dialog.Caption) ? 1 : 2;
             var firstButtonIndex = items.Count;
-            defaultIndex = dialog.Items.Count > 0
-                ? firstDialogItemIndex
-                : (dialog.FocusFirstButtonByDefault ? firstButtonIndex : 0);
+            defaultIndex = dialog.FocusFirstButtonByDefault && dialog.Buttons.Count > 0
+                ? firstButtonIndex
+                : -1;
             var firstDefaultFound = false;
             for (var i = 0; i < dialog.Buttons.Count; i++)
             {

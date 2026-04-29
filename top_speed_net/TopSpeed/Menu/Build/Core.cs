@@ -62,6 +62,7 @@ namespace TopSpeed.Menu
         {
             RegisterSharedLobbyChatShortcuts();
             RegisterMainMenu();
+            _menu.Register(BuildHelpMenu());
 
             _menu.Register(BuildMultiplayerMenu());
             _menu.Register(BuildMultiplayerServersMenu());
@@ -143,6 +144,7 @@ namespace TopSpeed.Menu
                 new MenuItem(LocalizationService.Mark("Single race"), MenuAction.None, nextMenuId: "single_race_type", onActivate: () => PrepareMode(DriveMode.SingleRace)),
                 new MenuItem(LocalizationService.Mark("MultiPlayer game"), MenuAction.None, nextMenuId: "multiplayer"),
                 new MenuItem(LocalizationService.Mark("Options"), MenuAction.None, nextMenuId: "options_main"),
+                new MenuItem(LocalizationService.Mark("Help"), MenuAction.None, nextMenuId: "help"),
                 new MenuItem(LocalizationService.Mark("Check for updates"), MenuAction.None, onActivate: _settingsActions.CheckForUpdates),
                 new MenuItem(LocalizationService.Mark("About"), MenuAction.None, onActivate: _settingsActions.ShowAboutDialog),
                 new MenuItem(LocalizationService.Mark("Exit Game"), MenuAction.Exit)
@@ -152,6 +154,17 @@ namespace TopSpeed.Menu
             mainMenu.MusicVolume = _settings.MusicVolume;
             mainMenu.MusicVolumeChanged = _audio.SaveMusicVolume;
             _menu.Register(mainMenu);
+        }
+
+        private MenuScreen BuildHelpMenu()
+        {
+            return _menu.CreateMenu("help", new[]
+            {
+                new MenuItem(LocalizationService.Mark("Game guide"), MenuAction.None, onActivate: _settingsActions.OpenGameGuide),
+                new MenuItem(LocalizationService.Mark("Track creation guide"), MenuAction.None, onActivate: _settingsActions.OpenTrackCreationGuide),
+                new MenuItem(LocalizationService.Mark("Vehicle creation guide"), MenuAction.None, onActivate: _settingsActions.OpenVehicleCreationGuide),
+                new MenuItem(LocalizationService.Mark("Latest changes"), MenuAction.None, onActivate: _settingsActions.ShowLatestChanges)
+            }, string.Empty, spec: ScreenSpec.BackSilent);
         }
     }
 }

@@ -19,6 +19,14 @@ namespace TopSpeed.Core.Updates
         public UpdateInfo? Update { get; set; }
     }
 
+    internal sealed class LatestChangesResult
+    {
+        public bool IsSuccess { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
+        public string VersionText { get; set; } = string.Empty;
+        public IReadOnlyList<string> Changes { get; set; } = Array.Empty<string>();
+    }
+
     internal sealed class DownloadProgress
     {
         public long DownloadedBytes { get; set; }

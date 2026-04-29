@@ -2,41 +2,41 @@ namespace TopSpeed.Menu
 {
     internal sealed partial class MenuManager
     {
-        public void ShowRoot(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null)
+        public void ShowRoot(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null, bool autoFocus = true)
         {
             foreach (var existingScreen in _stack)
                 existingScreen.CancelPendingHint();
             _stack.Clear();
             var screen = GetScreen(id);
-            screen.ResetSelection(preferredSelectionIndex);
+            screen.ResetSelection(preferredSelectionIndex, autoFocus);
             screen.Initialize();
             _stack.Push(screen);
             screen.QueueTitleAnnouncement(openingAnnouncement);
         }
 
-        public void Push(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null)
+        public void Push(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null, bool autoFocus = true)
         {
             if (_stack.Count > 0)
                 _stack.Peek().CancelPendingHint();
             var screen = GetScreen(id);
-            screen.ResetSelection(preferredSelectionIndex);
+            screen.ResetSelection(preferredSelectionIndex, autoFocus);
             screen.Initialize();
             _stack.Push(screen);
             screen.QueueTitleAnnouncement(openingAnnouncement);
         }
 
-        public void ReplaceTop(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null)
+        public void ReplaceTop(string id, string? openingAnnouncement = null, int? preferredSelectionIndex = null, bool autoFocus = true)
         {
             if (_stack.Count == 0)
             {
-                ShowRoot(id, openingAnnouncement, preferredSelectionIndex);
+                ShowRoot(id, openingAnnouncement, preferredSelectionIndex, autoFocus);
                 return;
             }
 
             _stack.Peek().CancelPendingHint();
             _stack.Pop();
             var screen = GetScreen(id);
-            screen.ResetSelection(preferredSelectionIndex);
+            screen.ResetSelection(preferredSelectionIndex, autoFocus);
             screen.Initialize();
             _stack.Push(screen);
             screen.QueueTitleAnnouncement(openingAnnouncement);

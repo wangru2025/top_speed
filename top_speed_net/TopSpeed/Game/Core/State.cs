@@ -99,6 +99,7 @@ namespace TopSpeed.Game
         private bool _updateCompleteOpen;
         private string _updateZipPath = string.Empty;
         private bool _manualUpdateRequest;
+        private Task<LatestChangesResult>? _latestChangesTask;
         private bool _textInputPromptActive;
         private Action<TextInputResult>? _textInputPromptCallback;
         private SoundAsset? _raceWinSound;

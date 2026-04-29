@@ -33,8 +33,7 @@ namespace TopSpeed.Game
                 new DialogButton(
                     AboutCopyResultId,
                     LocalizationService.Mark("Copy"),
-                    onClick: () => CopyAboutText(copyText),
-                    flags: DialogButtonFlags.Default),
+                    onClick: () => CopyAboutText(copyText)),
                 new DialogButton(QuestionId.Close, LocalizationService.Mark("Close")));
             _dialogs.Show(dialog);
         }

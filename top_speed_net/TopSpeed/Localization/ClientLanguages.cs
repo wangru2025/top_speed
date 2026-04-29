@@ -47,7 +47,7 @@ namespace TopSpeed.Localization
         {
             var languages = new List<ClientLanguage>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var root = Path.Combine(AppContext.BaseDirectory, "languages", LocalizationBootstrap.ClientCatalogGroup);
+            var root = LocalizationBootstrap.ResolveLanguagesRoot(LocalizationBootstrap.ClientCatalogGroup);
             if (Directory.Exists(root))
             {
                 foreach (var directory in Directory.GetDirectories(root))

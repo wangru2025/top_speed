@@ -45,6 +45,7 @@ namespace TopSpeed.Game
         private void UpdateUpdateFlow()
         {
             HandleUpdateCheckCompletion();
+            HandleLatestChangesCompletion();
             HandleUpdatePrompt();
             HandleUpdateDownload();
         }
@@ -93,6 +94,68 @@ namespace TopSpeed.Game
                     LocalizationService.Mark("You are already using the latest version."),
                     Array.Empty<string>());
             }
+        }
+
+        private void StartLatestChangesFetch()
+        {
+            if (_latestChangesTask != null)
+            {
+                _speech.Speak(LocalizationService.Mark("Latest changes are already being fetched."));
+                return;
+            }
+
+            _latestChangesTask = Task.Run(() => _updateService.GetLatestChangesAsync(CancellationToken.None));
+            _speech.Speak(LocalizationService.Mark("Fetching latest changes."));
+        }
+
+        private void HandleLatestChangesCompletion()
+        {
+            if (_latestChangesTask == null || !_latestChangesTask.IsCompleted)
+                return;
+
+            LatestChangesResult result;
+            if (_latestChangesTask.IsFaulted || _latestChangesTask.IsCanceled)
+            {
+                result = new LatestChangesResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = LocalizationService.Mark("Latest changes request failed.")
+                };
+            }
+            else
+            {
+                result = _latestChangesTask.GetAwaiter().GetResult();
+            }
+
+            _latestChangesTask = null;
+            if (!result.IsSuccess)
+            {
+                ShowMessageDialog(
+                    LocalizationService.Mark("Latest changes"),
+                    string.Empty,
+                    new[] { result.ErrorMessage });
+                return;
+            }
+
+            var items = new List<DialogItem>();
+            if (result.Changes.Count == 0)
+            {
+                items.Add(new DialogItem(LocalizationService.Mark("No changes are listed.")));
+            }
+            else
+            {
+                for (var i = 0; i < result.Changes.Count; i++)
+                    items.Add(new DialogItem(result.Changes[i]));
+            }
+
+            var dialog = new Dialog(
+                LocalizationService.Mark("Latest changes"),
+                null,
+                QuestionId.Close,
+                items,
+                onResult: null,
+                new DialogButton(QuestionId.Close, LocalizationService.Mark("Close")));
+            _dialogs.Show(dialog);
         }
 
         private void HandleUpdatePrompt()

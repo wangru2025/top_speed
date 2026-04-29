@@ -75,7 +75,7 @@ namespace TopSpeed.Menu
         public int CloseResultId { get; }
         public Action<int>? OnResult { get; }
         public bool OpenAsOverlay { get; set; }
-        public bool FocusFirstButtonByDefault { get; set; } = true;
+        public bool FocusFirstButtonByDefault { get; set; }
         public IReadOnlyList<QuestionButton> Buttons { get; }
     }
 
@@ -111,7 +111,7 @@ namespace TopSpeed.Menu
                 new MenuItem(question.Caption, MenuAction.None)
             };
 
-            var defaultIndex = question.FocusFirstButtonByDefault ? 2 : 0;
+            var defaultIndex = question.FocusFirstButtonByDefault && question.Buttons.Count > 0 ? 2 : -1;
             var firstDefaultFound = false;
             for (var i = 0; i < question.Buttons.Count; i++)
             {
@@ -128,7 +128,8 @@ namespace TopSpeed.Menu
 
             _menu.UpdateItems(MenuId, items);
             var announcement = DialogAnnouncement.Compose(question.Title, question.Caption);
-            _menu.Push(MenuId, announcement, defaultIndex);
+            var autoFocus = defaultIndex >= 0;
+            _menu.Push(MenuId, announcement, autoFocus ? defaultIndex : null, autoFocus: autoFocus);
         }
 
         private bool HandleQuestionClose(CloseEvent _)

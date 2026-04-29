@@ -52,7 +52,15 @@ namespace TopSpeed.Menu
                 _speech.Speak(opening, ResolveTitleSpeakFlag());
 
             _index = NoSelection;
-            QueueAutoFocusFirstItem(force: string.IsNullOrWhiteSpace(opening));
+            if (_suppressAutoFocus)
+            {
+                _suppressAutoFocus = false;
+                ClearAutoFocusPending();
+            }
+            else
+            {
+                QueueAutoFocusFirstItem(force: string.IsNullOrWhiteSpace(opening));
+            }
         }
 
         public void QueueTitleAnnouncement(string? openingAnnouncementOverride = null)

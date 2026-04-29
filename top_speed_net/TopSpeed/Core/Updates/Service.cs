@@ -72,6 +72,45 @@ namespace TopSpeed.Core.Updates
             }
         }
 
+        public async Task<LatestChangesResult> GetLatestChangesAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var info = await ReadInfoAsync(cancellationToken).ConfigureAwait(false);
+                if (info == null)
+                    return FailLatestChanges(LocalizationService.Mark("The update info file could not be read."));
+
+                var changes = new List<string>();
+                if (info.Changes != null)
+                {
+                    for (var i = 0; i < info.Changes.Count; i++)
+                    {
+                        var line = info.Changes[i];
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        changes.Add(line.Trim());
+                    }
+                }
+
+                return new LatestChangesResult
+                {
+                    IsSuccess = true,
+                    VersionText = info.Version ?? string.Empty,
+                    Changes = changes
+                };
+            }
+            catch (TaskCanceledException)
+            {
+                return FailLatestChanges(LocalizationService.Mark("Latest changes request timed out."));
+            }
+            catch (Exception ex)
+            {
+                return FailLatestChanges(LocalizationService.Format(
+                    LocalizationService.Mark("Latest changes request failed: {0}"),
+                    ex.Message));
+            }
+        }
+
         public async Task<DownloadResult> DownloadAsync(
             UpdateInfo update,
             string targetDirectory,
@@ -225,6 +264,15 @@ namespace TopSpeed.Core.Updates
         private static UpdateCheckResult Fail(string message)
         {
             return new UpdateCheckResult
+            {
+                IsSuccess = false,
+                ErrorMessage = message ?? LocalizationService.Mark("Unknown update error.")
+            };
+        }
+
+        private static LatestChangesResult FailLatestChanges(string message)
+        {
+            return new LatestChangesResult
             {
                 IsSuccess = false,
                 ErrorMessage = message ?? LocalizationService.Mark("Unknown update error.")

@@ -27,6 +27,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        submodules: recursive
 
     - name: Read Release Info
       id: release_info
@@ -112,6 +113,8 @@ jobs:
         working-directory: top_speed_net
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -139,20 +142,14 @@ jobs:
     - name: Build shared tests (net10.0)
       run: dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --no-restore
 
-    - name: Build game tests (net472)
-      run: dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net472 --no-restore
-
     - name: Run shared tests (net10.0)
       run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --no-build --verbosity normal
-
-    - name: Run game tests (net472)
-      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net472 --no-build --verbosity normal
 
     - name: Publish Windows server
       run: dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseWinX64
 
     - name: Build Windows client
-      run: dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net472
+      run: dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0-windows --runtime win-x64 --no-restore
 
     - name: Create Windows archives
       shell: pwsh
@@ -163,7 +160,7 @@ jobs:
         if (Test-Path $gameZip) { Remove-Item $gameZip -Force }
         if (Test-Path $serverZip) { Remove-Item $serverZip -Force }
 
-        Compress-Archive -Path "TopSpeed\bin\Release\net472\*" -DestinationPath $gameZip -CompressionLevel Optimal
+        Compress-Archive -Path "TopSpeed\bin\Release\net10.0\win-x64\*" -DestinationPath $gameZip -CompressionLevel Optimal
         Compress-Archive -Path "TopSpeed.Server\bin\Publish\win-x64\*" -DestinationPath $serverZip -CompressionLevel Optimal
 
     - name: Verify Windows archives
@@ -200,6 +197,8 @@ jobs:
         working-directory: top_speed_net
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -314,6 +313,8 @@ jobs:
         working-directory: top_speed_net
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -374,6 +375,8 @@ jobs:
         working-directory: top_speed_net
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -454,6 +457,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        submodules: recursive
 
     - name: Download release artifacts
       uses: actions/download-artifact@v4

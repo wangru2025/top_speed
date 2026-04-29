@@ -52,6 +52,7 @@ public class MainActivity : SdlActivityBase
     private AndroidMotionSteeringSource? _motionSteering;
     private AndroidSpeechThreadDispatcher? _speechDispatcher;
     private AndroidUpdatePackageInstaller? _updateInstaller;
+    private AndroidDocumentOpener? _documentOpener;
 
     public MainActivity()
     {
@@ -71,9 +72,11 @@ public class MainActivity : SdlActivityBase
         _motionSteering = new AndroidMotionSteeringSource(this);
         _speechDispatcher = new AndroidSpeechThreadDispatcher();
         _updateInstaller = new AndroidUpdatePackageInstaller(this);
+        _documentOpener = new AndroidDocumentOpener(this);
         global::TopSpeed.Runtime.MotionSteeringRuntime.SetSource(_motionSteering);
         global::TopSpeed.Runtime.SpeechThreadRuntime.SetDispatcher(_speechDispatcher);
         global::TopSpeed.Runtime.UpdatePackageRuntime.SetInstaller(_updateInstaller);
+        global::TopSpeed.Runtime.DocumentOpenRuntime.SetOpener(_documentOpener);
         base.OnCreate(savedInstanceState);
         ApplyImmersiveMode();
     }
@@ -100,10 +103,12 @@ public class MainActivity : SdlActivityBase
         global::TopSpeed.Runtime.MotionSteeringRuntime.SetSource(null);
         global::TopSpeed.Runtime.SpeechThreadRuntime.SetDispatcher(null);
         global::TopSpeed.Runtime.UpdatePackageRuntime.SetInstaller(null);
+        global::TopSpeed.Runtime.DocumentOpenRuntime.SetOpener(null);
         _speechDispatcher?.Dispose();
         _speechDispatcher = null;
         _motionSteering = null;
         _updateInstaller = null;
+        _documentOpener = null;
         global::TopSpeed.AndroidLauncher.RequestClose();
         base.OnDestroy();
     }
@@ -164,11 +169,17 @@ public class MainActivity : SdlActivityBase
             string.IsNullOrWhiteSpace(filesRoot) ? AppContext.BaseDirectory : filesRoot!,
             "topspeed_assets");
 
+        var versionStamp = ResolveAssetVersionStamp();
+        var versionFile = Path.Combine(targetRoot, ".asset-version");
+        if (!IsAssetVersionCurrent(versionFile, versionStamp) && Directory.Exists(targetRoot))
+            Directory.Delete(targetRoot, recursive: true);
+
         CopyAssetTree("Sounds", Path.Combine(targetRoot, "Sounds"));
         CopyAssetTree("Tracks", Path.Combine(targetRoot, "Tracks"));
         CopyAssetTree("Vehicles", Path.Combine(targetRoot, "Vehicles"));
         CopyAssetTree("languages", Path.Combine(targetRoot, "languages"));
         CopyAssetTree("docs", Path.Combine(targetRoot, "docs"));
+        WriteAssetVersion(versionFile, versionStamp);
         return targetRoot;
     }
 
@@ -229,6 +240,55 @@ public class MainActivity : SdlActivityBase
         catch
         {
             // Ignore extraction failures for optional assets.
+        }
+    }
+
+    private string ResolveAssetVersionStamp()
+    {
+        try
+        {
+            var packageManager = PackageManager;
+            if (packageManager == null || string.IsNullOrWhiteSpace(PackageName))
+                return "unknown";
+
+            var packageInfo = packageManager.GetPackageInfo(PackageName!, 0);
+            if (packageInfo == null)
+                return "unknown";
+
+            return packageInfo.LongVersionCode.ToString();
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
+    private static bool IsAssetVersionCurrent(string versionFile, string versionStamp)
+    {
+        try
+        {
+            return File.Exists(versionFile)
+                && string.Equals(File.ReadAllText(versionFile).Trim(), versionStamp, StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void WriteAssetVersion(string versionFile, string versionStamp)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(versionFile);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory!);
+
+            File.WriteAllText(versionFile, versionStamp);
+        }
+        catch
+        {
+            // Asset extraction still works without a stamp; the next launch will recopy if needed.
         }
     }
 

@@ -49,6 +49,7 @@ namespace TopSpeed.Menu
         private bool _justEntered = true;
         private bool _ignoreHeldInput;
         private bool _autoFocusPending;
+        private bool _suppressAutoFocus;
         private bool _waitForTitleSpeechBeforeAutoFocus;
         private int _hintToken;
         private bool _disposed;

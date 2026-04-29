@@ -1,8 +1,10 @@
 using TopSpeed.Core;
 using TopSpeed.Game;
+using TopSpeed.Localization;
 using TopSpeed.Runtime;
 using TopSpeed.Windowing.Sdl;
 using System;
+using System.IO;
 
 namespace TopSpeed
 {
@@ -34,7 +36,10 @@ namespace TopSpeed
 
                 var configuredRoot = _assetRoot;
                 if (!string.IsNullOrWhiteSpace(configuredRoot))
+                {
                     AssetPaths.SetRoot(configuredRoot);
+                    LocalizationBootstrap.SetLanguagesRoot(Path.Combine(configuredRoot!, "languages"));
+                }
 
                 NativeLibraryBootstrap.Initialize();
                 var window = new WindowHost();

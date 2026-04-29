@@ -17,6 +17,10 @@ namespace TopSpeed.Menu
         void RecalibrateScreenReaderRate();
         void CheckForUpdates();
         void ShowAboutDialog();
+        void OpenGameGuide();
+        void OpenTrackCreationGuide();
+        void OpenVehicleCreationGuide();
+        void ShowLatestChanges();
         void SetDevice(InputDeviceMode mode);
         void SetSpeechBackend(ulong? backendId);
         void SetScreenReaderInterrupt(bool enabled);

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-29 04:18+0300\n"
+"POT-Creation-Date: 2026-04-29 16:07+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,7 +36,7 @@ msgstr ""
 msgid "A cleaner lap would have been a much better choice."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:115
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:178
 #, csharp-format
 msgid ""
 "A new version of Top Speed was detected. Your current version is {0}. The "
@@ -48,7 +48,7 @@ msgid "A saved server entry was ignored because the host is empty."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:24
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:147
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:149
 msgid "About"
 msgstr ""
 
@@ -430,7 +430,7 @@ msgstr ""
 msgid "Chat message cannot be empty."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:146
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:148
 msgid "Check for updates"
 msgstr ""
 
@@ -526,9 +526,10 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultDialogs.cs:54
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultDialogs.cs:75
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:38
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:145
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Runtime\Screen\Core.cs:263
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:37
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:157
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:208
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Runtime\Screen\Core.cs:264
 msgid "Close"
 msgstr ""
 
@@ -737,7 +738,7 @@ msgid ""
 "stop."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:49
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:48
 msgid "Copied to clipboard."
 msgstr ""
 
@@ -935,21 +936,21 @@ msgstr ""
 msgid "Download failed"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:97
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:136
 #, csharp-format
 msgid "Download failed with status code {0}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:167
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:206
 #, csharp-format
 msgid "Download failed: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:157
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:196
 msgid "Download timed out or was canceled."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:145
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:208
 msgid "Download update"
 msgstr ""
 
@@ -1124,7 +1125,7 @@ msgstr ""
 msgid "Excellent driving. You beat your previous best time."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:148
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:150
 msgid "Exit Game"
 msgstr ""
 
@@ -1197,6 +1198,10 @@ msgstr ""
 msgid "Fastest recorded lap on this track: {0}."
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:108
+msgid "Fetching latest changes."
+msgstr ""
+
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Vehicles\Catalog\Data.cs:114
 msgid "Fiat 500"
 msgstr ""
@@ -1244,6 +1249,10 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:66
 msgid "GB"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:163
+msgid "Game guide"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:68
@@ -1295,12 +1304,20 @@ msgid "Global shortcuts"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:235
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Runtime\Screen\Core.cs:258
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Runtime\Screen\Core.cs:259
 msgid "Go back"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:29
 msgid "Grave"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:147
+msgid "Help"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:36
+msgid "Help file not found"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:24
@@ -1329,7 +1346,7 @@ msgstr ""
 msgid "Humidity must be between 0 and 1."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:114
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:115
 msgid ""
 "I really have nothing interesting to put here not even the secret to life "
 "except this really long run on sentence that is probably the most boring "
@@ -1621,6 +1638,29 @@ msgstr ""
 msgid "Lap {0}"
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:134
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:152
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:166
+msgid "Latest changes"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:103
+msgid "Latest changes are already being fetched."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:122
+msgid "Latest changes request failed."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:109
+#, csharp-format
+msgid "Latest changes request failed: {0}"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:104
+msgid "Latest changes request timed out."
+msgstr ""
+
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Session.cs:23
 msgid "Leave server?"
 msgstr ""
@@ -1736,7 +1776,7 @@ msgid ""
 "you to the top or bottom of a menu."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:149
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:151
 msgid "Main menu"
 msgstr ""
 
@@ -1867,7 +1907,7 @@ msgstr ""
 msgid "Move or press the controller control for {0}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:144
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:145
 msgid "MultiPlayer game"
 msgstr ""
 
@@ -1917,11 +1957,11 @@ msgstr ""
 msgid "Network send failed. Please check your connection."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:136
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:199
 msgid "New version detected."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:127
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:128
 msgid "Next chat category"
 msgstr ""
 
@@ -1932,6 +1972,10 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Input.cs:60
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Input.cs:88
 msgid "No"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:143
+msgid "No changes are listed."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\Handler\Controller.cs:13
@@ -2029,7 +2073,7 @@ msgstr ""
 msgid "No supported audio files were found in the selected folder."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:92
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:93
 msgid "No updates found"
 msgstr ""
 
@@ -2196,7 +2240,7 @@ msgid "Opens chat input for the global multiplayer lobby chat."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:20
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:145
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:146
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Multiplayer.cs:30
 msgid "Options"
 msgstr ""
@@ -2376,7 +2420,7 @@ msgstr ""
 msgid "Press the new key for {0}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:121
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:122
 msgid "Previous chat category"
 msgstr ""
 
@@ -2407,7 +2451,7 @@ msgstr ""
 msgid "Question"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:141
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:142
 msgid "Quick start"
 msgstr ""
 
@@ -2736,13 +2780,13 @@ msgstr ""
 msgid "Screen reader rate is not a valid number and was reset to default."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:111
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:112
 msgid ""
 "Screen-reader calibration. You'll be presented with a short piece of text on "
 "the next screen. Press ENTER when your screen-reader finishes speaking it."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:112
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:113
 msgid ""
 "Screen-reader calibration. You'll be presented with a short piece of text on "
 "the next screen. Swipe up when your screen-reader finishes speaking it."
@@ -2996,7 +3040,7 @@ msgstr ""
 msgid "Setup wizard."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:134
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:135
 msgid "Shared lobby chat"
 msgstr ""
 
@@ -3026,7 +3070,7 @@ msgstr ""
 msgid "Shuffle mode on."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:143
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:144
 msgid "Single race"
 msgstr ""
 
@@ -3263,12 +3307,12 @@ msgstr ""
 msgid "Switch between metric and imperial units."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:128
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:129
 msgid ""
 "Switches chat history to the next category in the shared lobby chat view."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:122
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:123
 msgid ""
 "Switches chat history to the previous category in the shared lobby chat view."
 msgstr ""
@@ -3404,7 +3448,7 @@ msgstr ""
 msgid "The following are the race details for all players."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:81
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:82
 msgid "The game could not check for updates."
 msgstr ""
 
@@ -3449,6 +3493,14 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Settings\Manager\Apply\Core.cs:26
 msgid "The race section is missing. Defaults were used for race settings."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:37
+msgid "The requested help file could not be found."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:60
+msgid "The requested help file could not be opened."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Panels\RadioPanel\Playlist.cs:35
@@ -3513,6 +3565,7 @@ msgid "The update download is complete."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:34
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:81
 msgid "The update info file could not be read."
 msgstr ""
 
@@ -3581,7 +3634,7 @@ msgstr ""
 msgid "Throttle pedal direction"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:142
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:143
 msgid "Time trial"
 msgstr ""
 
@@ -3629,6 +3682,10 @@ msgstr ""
 msgid ""
 "Track [meta] must define a weather profile reference, for example 'weather = "
 "default'."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:164
+msgid "Track creation guide"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Validate.cs:156
@@ -3688,8 +3745,12 @@ msgstr ""
 msgid "Unable to apply the new shortcut key."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:53
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\About.cs:52
 msgid "Unable to copy to clipboard."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:59
+msgid "Unable to open help file"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:26
@@ -3771,7 +3832,8 @@ msgstr ""
 msgid "Unknown torque curve preset '{0}'. Valid values: {1}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:230
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:269
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Updates\Service.cs:278
 msgid "Unknown update error."
 msgstr ""
 
@@ -3803,11 +3865,11 @@ msgstr ""
 msgid "Up"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:80
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:81
 msgid "Update check failed"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:66
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:67
 msgid "Update check failed."
 msgstr ""
 
@@ -3899,6 +3961,10 @@ msgstr ""
 msgid "Vehicle"
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:165
+msgid "Vehicle creation guide"
+msgstr ""
+
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Volume.cs:20
 msgid "Vehicle engine sounds"
 msgstr ""
@@ -3969,7 +4035,7 @@ msgstr ""
 msgid "What would you like to do?"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:129
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:192
 msgid "What's new in this version:"
 msgstr ""
 
@@ -4101,7 +4167,7 @@ msgstr ""
 msgid "Yes, quit the race"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:93
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:94
 msgid "You are already using the latest version."
 msgstr ""
 

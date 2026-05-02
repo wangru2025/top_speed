@@ -48,6 +48,8 @@ namespace TopSpeed.Runtime
                 return "android";
             if (rid.Contains("win"))
                 return "windows-x64";
+            if ((rid.Contains("osx") || rid.Contains("mac")) && rid.Contains("arm64"))
+                return "mac-arm64";
             if (rid.Contains("osx") || rid.Contains("mac"))
                 return "mac-x64";
             if (rid.Contains("linux"))
@@ -56,7 +58,11 @@ namespace TopSpeed.Runtime
             if (isWindows)
                 return "windows-x64";
             if (isMacOs)
-                return "mac-x64";
+            {
+                return architecture == Architecture.Arm64
+                    ? "mac-arm64"
+                    : "mac-x64";
+            }
             if (isLinux)
                 return "linux-x64";
 
@@ -84,6 +90,8 @@ namespace TopSpeed.Runtime
                 return "linux-arm32";
             if (rid.Contains("linux-x86"))
                 return "linux-x86-fdd";
+            if ((rid.Contains("osx") || rid.Contains("mac")) && rid.Contains("arm64"))
+                return "mac-arm64";
             if (rid.Contains("osx") || rid.Contains("mac"))
                 return "mac-x64";
             if (rid.Contains("win"))
@@ -92,7 +100,11 @@ namespace TopSpeed.Runtime
             if (isWindows)
                 return "win-x64";
             if (isMacOs)
-                return "mac-x64";
+            {
+                return architecture == Architecture.Arm64
+                    ? "mac-arm64"
+                    : "mac-x64";
+            }
 
             if (isLinux)
             {

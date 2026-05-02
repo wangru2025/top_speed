@@ -4,7 +4,7 @@
     <UseCurrentRuntimeIdentifier>false</UseCurrentRuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT' and '$(AndroidHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == '' and '$(OS)' != 'Windows_NT' and '$(AndroidHostBuild)' != 'true'">linux-x64</RuntimeIdentifier>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64')">net10.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">net10.0</TargetFramework>
     <TargetFramework Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == 'win-x64'">net10.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -22,7 +22,7 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PlatformTarget>x64</PlatformTarget>
-    <RuntimeIdentifiers>linux-x64;osx-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
@@ -45,6 +45,18 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64'">
     <MacBuildBundle>false</MacBuildBundle>
     <MacPublishRoot>bin/Publish/osx-x64/</MacPublishRoot>
+    <MacPublishStagingDir>$(MacPublishRoot)_staging/</MacPublishStagingDir>
+    <MacAppBundleName>TopSpeed.app</MacAppBundleName>
+    <MacAppBundleDir>$(MacPublishRoot)$(MacAppBundleName)/</MacAppBundleDir>
+    <MacAppBundleContentsDir>$(MacAppBundleDir)Contents/</MacAppBundleContentsDir>
+    <MacAppBundleMacOSDir>$(MacAppBundleContentsDir)MacOS/</MacAppBundleMacOSDir>
+    <PublishDir>$(MacPublishStagingDir)</PublishDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-arm64'">
+    <PlatformTarget>arm64</PlatformTarget>
+    <MacBuildBundle>false</MacBuildBundle>
+    <MacPublishRoot>bin/Publish/osx-arm64/</MacPublishRoot>
     <MacPublishStagingDir>$(MacPublishRoot)_staging/</MacPublishStagingDir>
     <MacAppBundleName>TopSpeed.app</MacAppBundleName>
     <MacAppBundleDir>$(MacPublishRoot)$(MacAppBundleName)/</MacAppBundleDir>
@@ -81,7 +93,7 @@
     <PackageReference Include="Eto.Platform.Gtk" Version="2.8.3" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64' and '$(AndroidHostBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(AndroidHostBuild)' != 'true'">
     <PackageReference Include="Eto.Platform.Mac64" Version="2.8.3" />
   </ItemGroup>
 
@@ -170,22 +182,17 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64'">
-    <Content Include="ThirdParty\osx\libphonon.dylib">
+    <Content Include="ThirdParty\mac\x64\libphonon.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>lib\libphonon.dylib</TargetPath>
     </Content>
-    <Content Include="ThirdParty\osx\phonon.bundle\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>lib\phonon.bundle\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>
-    <Content Include="ThirdParty\osx\libprism.dylib">
+    <Content Include="ThirdParty\mac\x64\libprism.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>lib\libprism.dylib</TargetPath>
     </Content>
-    <Content Include="ThirdParty\osx\libSDL3.dylib">
+    <Content Include="ThirdParty\mac\x64\libSDL3.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>lib\libSDL3.dylib</TargetPath>
@@ -196,6 +203,43 @@
       <TargetPath>lib\libminiaudio.dylib</TargetPath>
     </Content>
     <Content Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\osx-x64\native\libsoundflow-ffmpeg.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>lib\libsoundflow-ffmpeg.dylib</TargetPath>
+    </Content>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-arm64'">
+    <MacArmPhononPath>ThirdParty\mac\x64\libphonon.dylib</MacArmPhononPath>
+    <MacArmPrismPath>ThirdParty\mac\x64\libprism.dylib</MacArmPrismPath>
+    <MacArmSdlPath>ThirdParty\mac\x64\libSDL3.dylib</MacArmSdlPath>
+    <MacArmPhononPath Condition="Exists('$(MSBuildThisFileDirectory)ThirdParty\mac\arm-64\libphonon.dylib')">ThirdParty\mac\arm-64\libphonon.dylib</MacArmPhononPath>
+    <MacArmPrismPath Condition="Exists('$(MSBuildThisFileDirectory)ThirdParty\mac\arm-64\libprism.dylib')">ThirdParty\mac\arm-64\libprism.dylib</MacArmPrismPath>
+    <MacArmSdlPath Condition="Exists('$(MSBuildThisFileDirectory)ThirdParty\mac\arm-64\libSDL3.dylib')">ThirdParty\mac\arm-64\libSDL3.dylib</MacArmSdlPath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-arm64'">
+    <Content Include="$(MacArmPhononPath)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>lib\libphonon.dylib</TargetPath>
+    </Content>
+    <Content Include="$(MacArmPrismPath)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>lib\libprism.dylib</TargetPath>
+    </Content>
+    <Content Include="$(MacArmSdlPath)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>lib\libSDL3.dylib</TargetPath>
+    </Content>
+    <Content Include="..\SoundFlow\Src\Backends\MiniAudio\runtimes\osx-arm64\native\libminiaudio.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>lib\libminiaudio.dylib</TargetPath>
+    </Content>
+    <Content Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\osx-arm64\native\libsoundflow-ffmpeg.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>lib\libsoundflow-ffmpeg.dylib</TargetPath>
@@ -313,7 +357,7 @@
     <Copy SourceFiles="@(_UpdaterPublishedFiles)" DestinationFiles="@(_UpdaterPublishedFiles->'$(_PublishDestinationPath)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="CreateMacAppBundle" AfterTargets="Publish" DependsOnTargets="PublishUpdaterNet10;CopyRenderedDocsToPublish" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64'">
+  <Target Name="CreateMacAppBundle" AfterTargets="Publish" DependsOnTargets="PublishUpdaterNet10;CopyRenderedDocsToPublish" Condition="'$(TargetFramework)' == 'net10.0' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <ItemGroup>
       <_MacBundleSourceFiles Include="$(MacPublishStagingDir)**\*" />
     </ItemGroup>
@@ -327,7 +371,7 @@
   </Target>
 
   <Target Name="ValidateNet10RuntimeIdentifier" BeforeTargets="Build;Publish" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == ''">
-    <Error Text="net10.0 must be built/published with a runtime identifier (linux-x64 or osx-x64)." />
+    <Error Text="net10.0 must be built/published with a runtime identifier (linux-x64, osx-x64, or osx-arm64)." />
   </Target>
 
   <Target Name="ValidateNet10WindowsRuntimeIdentifier" BeforeTargets="Build;Publish" Condition="'$(TargetFramework)' == 'net10.0-windows' and '$(RuntimeIdentifier)' == ''">

@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "master" ]
     paths-ignore:
-      - '.gitignore'
+      - ".gitignore"
 
 jobs:
   metadata:
@@ -16,570 +16,304 @@ jobs:
       game_zip_win: ${{ steps.release_info.outputs.game_zip_win }}
       game_zip_linux: ${{ steps.release_info.outputs.game_zip_linux }}
       game_zip_osx: ${{ steps.release_info.outputs.game_zip_osx }}
-      game_apk_android: ${{ steps.release_info.outputs.game_apk_android }}
+      game_apk_android_arm64: ${{ steps.release_info.outputs.game_apk_android_arm64 }}
+      game_apk_android_arm32: ${{ steps.release_info.outputs.game_apk_android_arm32 }}
       android_version_code: ${{ steps.release_info.outputs.android_version_code }}
       game_zip_glob: ${{ steps.release_info.outputs.game_zip_glob }}
       server_zip_glob: ${{ steps.release_info.outputs.server_zip_glob }}
       changes_md: ${{ steps.release_info.outputs.changes_md }}
       server_changes_md: ${{ steps.release_info.outputs.server_changes_md }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
-    - name: Read Release Info
-      id: release_info
-      shell: pwsh
-      run: |
-        $infoPath = Join-Path $env:GITHUB_WORKSPACE "info.json"
-        if (-not (Test-Path $infoPath)) {
-          throw "info.json was not found at repository root."
-        }
+      - name: Read Release Info
+        id: release_info
+        shell: pwsh
+        run: |
+          $infoPath = Join-Path $env:GITHUB_WORKSPACE "info.json"
+          if (-not (Test-Path $infoPath)) {
+            throw "info.json was not found at repository root."
+          }
 
-        $info = Get-Content $infoPath -Raw | ConvertFrom-Json
-        if ($null -eq $info.version -or [string]::IsNullOrWhiteSpace([string]$info.version)) {
-          throw "info.json is missing a valid 'version' value."
-        }
-        if ($null -eq $info.serverVersion -or [string]::IsNullOrWhiteSpace([string]$info.serverVersion)) {
-          throw "info.json is missing a valid 'serverVersion' value."
-        }
+          $info = Get-Content $infoPath -Raw | ConvertFrom-Json
+          if ($null -eq $info.version -or [string]::IsNullOrWhiteSpace([string]$info.version)) {
+            throw "info.json is missing a valid 'version' value."
+          }
+          if ($null -eq $info.serverVersion -or [string]::IsNullOrWhiteSpace([string]$info.serverVersion)) {
+            throw "info.json is missing a valid 'serverVersion' value."
+          }
 
-        $version = ([string]$info.version).Trim()
-        $serverVersion = ([string]$info.serverVersion).Trim()
-        if ($version -notmatch '^\d{4}\.\d{1,2}\.\d{1,2}\.\d{1,3}$') {
-          throw "info.json version '$version' is invalid. Expected format: YYYY.M.D.R"
-        }
-        if ($serverVersion -notmatch '^\d{4}\.\d{1,2}\.\d{1,2}\.\d{1,3}$') {
-          throw "info.json serverVersion '$serverVersion' is invalid. Expected format: YYYY.M.D.R"
-        }
+          $version = ([string]$info.version).Trim()
+          $serverVersion = ([string]$info.serverVersion).Trim()
+          if ($version -notmatch '^\d{4}\.\d{1,2}\.\d{1,2}\.\d{1,3}$') {
+            throw "info.json version '$version' is invalid. Expected format: YYYY.M.D.R"
+          }
+          if ($serverVersion -notmatch '^\d{4}\.\d{1,2}\.\d{1,2}\.\d{1,3}$') {
+            throw "info.json serverVersion '$serverVersion' is invalid. Expected format: YYYY.M.D.R"
+          }
 
-        $versionParts = $version.Split('.')
-        $androidVersionCode =
-          ([int]$versionParts[0] * 1000000) +
-          ([int]$versionParts[1] * 10000) +
-          ([int]$versionParts[2] * 100) +
-          [int]$versionParts[3]
+          $versionParts = $version.Split('.')
+          $androidVersionCode =
+            ([int]$versionParts[0] * 1000000) +
+            ([int]$versionParts[1] * 10000) +
+            ([int]$versionParts[2] * 100) +
+            [int]$versionParts[3]
 
-        $changes = @()
-        if ($null -ne $info.changes) {
-          foreach ($change in $info.changes) {
-            $line = [string]$change
-            if (-not [string]::IsNullOrWhiteSpace($line)) {
-              $changes += "* $($line.Trim())"
+          $changes = @()
+          if ($null -ne $info.changes) {
+            foreach ($change in $info.changes) {
+              $line = [string]$change
+              if (-not [string]::IsNullOrWhiteSpace($line)) {
+                $changes += "* $($line.Trim())"
+              }
             }
           }
-        }
-        if ($changes.Count -eq 0) {
-          $changes += "* No listed game changes."
-        }
+          if ($changes.Count -eq 0) {
+            $changes += "* No listed game changes."
+          }
 
-        $serverChanges = @()
-        if ($null -ne $info.serverChanges) {
-          foreach ($change in $info.serverChanges) {
-            $line = [string]$change
-            if (-not [string]::IsNullOrWhiteSpace($line)) {
-              $serverChanges += "* $($line.Trim())"
+          $serverChanges = @()
+          if ($null -ne $info.serverChanges) {
+            foreach ($change in $info.serverChanges) {
+              $line = [string]$change
+              if (-not [string]::IsNullOrWhiteSpace($line)) {
+                $serverChanges += "* $($line.Trim())"
+              }
             }
           }
-        }
-        if ($serverChanges.Count -eq 0) {
-          $serverChanges += "* No listed server changes."
-        }
-
-        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "server_version=$serverVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "game_zip_win=TopSpeed-windows-x64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "game_zip_linux=TopSpeed-linux-x64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "game_zip_osx=TopSpeed-mac-x64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "game_apk_android=TopSpeed-android-arm64-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "android_version_code=$androidVersionCode" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "game_zip_glob=TopSpeed-*-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "server_zip_glob=TopSpeed.Server-*-Release-v-$serverVersion.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        $changes | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "server_changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        $serverChanges | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
-  build_windows:
-    name: Build Windows
-    needs: metadata
-    runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: top_speed_net
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Install Python dependencies
-      shell: pwsh
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install markdown
-
-    - name: Restore Windows build dependencies
-      shell: pwsh
-      run: |
-        dotnet restore TopSpeed.Tests/TopSpeed.Tests.csproj
-        dotnet restore TopSpeed.Server/TopSpeed.Server.csproj
-        dotnet restore TopSpeed/TopSpeed.csproj
-
-    - name: Build shared tests (net10.0-windows)
-      run: dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-restore
-
-    - name: Run shared tests (net10.0-windows)
-      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-build --verbosity normal
-
-    - name: Publish Windows server
-      run: dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseWinX64
-
-    - name: Build Windows client
-      run: dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0-windows --runtime win-x64 --no-restore
-
-    - name: Create Windows archives
-      shell: pwsh
-      run: |
-        $gameZip = "${{ needs.metadata.outputs.game_zip_win }}"
-        $serverZip = "TopSpeed.Server-win-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
-
-        if (Test-Path $gameZip) { Remove-Item $gameZip -Force }
-        if (Test-Path $serverZip) { Remove-Item $serverZip -Force }
-
-        Compress-Archive -Path "TopSpeed\bin\Release\net10.0\win-x64\*" -DestinationPath $gameZip -CompressionLevel Optimal
-        Compress-Archive -Path "TopSpeed.Server\bin\Publish\win-x64\*" -DestinationPath $serverZip -CompressionLevel Optimal
-
-    - name: Verify Windows archives
-      shell: pwsh
-      run: |
-        $gameZip = "${{ needs.metadata.outputs.game_zip_win }}"
-        $serverZip = "TopSpeed.Server-win-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
-
-        if (-not (Test-Path $gameZip)) {
-          throw "Missing Windows client archive: $gameZip"
-        }
-
-        if (-not (Test-Path $serverZip)) {
-          throw "Missing Windows server archive: $serverZip"
-        }
-
-        $requiredDocs = @(
-          "docs/game-guide.html",
-          "docs/track-creation-guide.html",
-          "docs/vehicle-physics-and-creation-guide.html"
-        )
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $gameZip))
-        try {
-          foreach ($doc in $requiredDocs) {
-            $entry = $archive.Entries | Where-Object { $_.FullName -eq $doc } | Select-Object -First 1
-            if ($null -eq $entry) {
-              throw "Missing required documentation file in Windows archive: $doc"
-            }
+          if ($serverChanges.Count -eq 0) {
+            $serverChanges += "* No listed server changes."
           }
-        }
-        finally {
-          $archive.Dispose()
-        }
 
-        Get-Item $gameZip, $serverZip | Select-Object Name, Length
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "server_version=$serverVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_zip_win=TopSpeed-windows-x64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_zip_linux=TopSpeed-linux-x64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_zip_osx=TopSpeed-mac-arm64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_apk_android_arm64=TopSpeed-android-arm64-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_apk_android_arm32=TopSpeed-android-arm-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "android_version_code=$androidVersionCode" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_zip_glob=TopSpeed-*-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "server_zip_glob=TopSpeed.Server-*-Release-v-$serverVersion.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $changes | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "server_changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $serverChanges | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-    - name: Upload Windows artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-assets-windows
-        if-no-files-found: error
-        path: |
-          top_speed_net/${{ needs.metadata.outputs.game_zip_win }}
-          top_speed_net/TopSpeed.Server-win-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-
-  build_linux:
-    name: Build Linux
+  build:
+    name: Build ${{ matrix.platform_name }}
     needs: metadata
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            platform_name: Windows
+            runs_on: windows-latest
+            install_java: "false"
+            install_android_workload: "false"
+            artifact_name: release-assets-windows
+          - platform: linux
+            platform_name: Linux
+            runs_on: ubuntu-latest
+            install_java: "false"
+            install_android_workload: "false"
+            artifact_name: release-assets-linux
+          - platform: macos
+            platform_name: macOS ARM64
+            runs_on: macos-latest
+            install_java: "false"
+            install_android_workload: "false"
+            artifact_name: release-assets-macos
+          - platform: android
+            platform_name: Android
+            runs_on: ubuntu-latest
+            install_java: "true"
+            install_android_workload: "true"
+            artifact_name: release-assets-android
     defaults:
       run:
         working-directory: top_speed_net
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: ${{ matrix.install_java }}
+          java-version: "21"
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
+      - name: Install Android workload
+        if: matrix.install_android_workload == 'true'
+        run: dotnet workload install android
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install markdown
+      - name: Build and package platform artifacts
+        id: platform_build
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+          SERVER_VERSION: ${{ needs.metadata.outputs.server_version }}
+          ANDROID_VERSION_CODE: ${{ needs.metadata.outputs.android_version_code }}
+          GAME_ZIP_WIN: ${{ needs.metadata.outputs.game_zip_win }}
+          GAME_ZIP_LINUX: ${{ needs.metadata.outputs.game_zip_linux }}
+          GAME_ZIP_OSX: ${{ needs.metadata.outputs.game_zip_osx }}
+          GAME_APK_ANDROID_ARM64: ${{ needs.metadata.outputs.game_apk_android_arm64 }}
+          GAME_APK_ANDROID_ARM32: ${{ needs.metadata.outputs.game_apk_android_arm32 }}
+        run: |
+          $platform = "${{ matrix.platform }}"
+          $serverZipWin = "TopSpeed.Server-win-x64-Release-v-$env:SERVER_VERSION.zip"
+          $serverZipMac = "TopSpeed.Server-mac-arm64-Release-v-$env:SERVER_VERSION.zip"
 
-    # - name: Install NativeAOT toolchains
-    #   run: |
-    #     sudo dpkg --add-architecture arm64
-    #     # Retry apt-get update up to 3 times with 5-second delays
-    #     for attempt in {1..3}; do
-    #       echo "Attempt $attempt of apt-get update..."
-    #       if sudo apt-get update; then
-    #         break
-    #       fi
-    #       if [ $attempt -lt 3 ]; then
-    #         echo "Update failed, waiting 5 seconds before retry..."
-    #         sleep 5
-    #       else
-    #         echo "Failed after 3 attempts"
-    #         exit 1
-    #       fi
-    #     done
-    #     sudo apt-get install -y clang llvm zlib1g-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu zlib1g-dev:arm64
+          if ($platform -eq "windows") {
+            ./build/ci/windows.ps1 `
+              -Version $env:VERSION `
+              -ServerVersion $env:SERVER_VERSION `
+              -GameZip $env:GAME_ZIP_WIN `
+              -ServerZip $serverZipWin
+            exit $LASTEXITCODE
+          }
 
-    - name: Build shared project
-      run: dotnet build TopSpeed.Shared/TopSpeed.Shared.csproj --configuration Release
+          if ($platform -eq "linux") {
+            bash build/ci/linux.sh "$env:VERSION" "$env:SERVER_VERSION" "$env:GAME_ZIP_LINUX"
+            exit $LASTEXITCODE
+          }
 
-    - name: Publish Linux servers
-      shell: bash
-      run: |
-        set -euo pipefail
-        dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseLinuxX64 -p:UseTrimmedUpdater=true
-        dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseLinuxArm64 -p:UseTrimmedUpdater=true
+          if ($platform -eq "macos") {
+            bash build/ci/macos.sh "$env:VERSION" "$env:SERVER_VERSION" "$env:GAME_ZIP_OSX" "$serverZipMac"
+            exit $LASTEXITCODE
+          }
 
-        profiles=(
-          ReleaseLinuxArm32
-          ReleaseLinuxMuslX64
-          ReleaseLinuxMuslArm64
-        )
+          if ($platform -eq "android") {
+            bash build/ci/android.sh "$env:VERSION" "$env:ANDROID_VERSION_CODE" "$env:GAME_APK_ANDROID_ARM64" "$env:GAME_APK_ANDROID_ARM32"
+            exit $LASTEXITCODE
+          }
 
-        for profile in "${profiles[@]}"; do
-          dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile="$profile" -p:UseTrimmedUpdater=true
-        done
+          throw "Unknown matrix platform '$platform'."
 
-        dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseLinuxX86FrameworkDependent
-
-    - name: Build Linux client
-      run: dotnet build TopSpeed/TopSpeed.csproj --configuration Release -p:RuntimeIdentifier=linux-x64 -p:UseTrimmedUpdater=true
-
-    - name: Create Linux archives
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        game_zip="${{ needs.metadata.outputs.game_zip_linux }}"
-        rm -f "$game_zip"
-        (
-          cd TopSpeed/bin/Release/net10.0/linux-x64
-          test -f docs/game-guide.html
-          test -f docs/track-creation-guide.html
-          test -f docs/vehicle-physics-and-creation-guide.html
-          zip -rq "$GITHUB_WORKSPACE/top_speed_net/$game_zip" .
-        )
-
-        server_version="${{ needs.metadata.outputs.server_version }}"
-        targets=(
-          linux-x64
-          linux-arm64
-          linux-arm32
-          linux-musl-x64
-          linux-musl-arm64
-          linux-x86-fdd
-        )
-
-        for rid in "${targets[@]}"; do
-          destination="$GITHUB_WORKSPACE/top_speed_net/TopSpeed.Server-$rid-Release-v-$server_version.zip"
-          rm -f "$destination"
-          (
-            cd "TopSpeed.Server/bin/Publish/$rid"
-            zip -rq "$destination" .
-          )
-        done
-
-        unzip -l "$game_zip" | grep -F "docs/game-guide.html"
-        unzip -l "$game_zip" | grep -F "docs/track-creation-guide.html"
-        unzip -l "$game_zip" | grep -F "docs/vehicle-physics-and-creation-guide.html"
-
-    - name: Upload Linux artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-assets-linux
-        if-no-files-found: error
-        path: |
-          top_speed_net/${{ needs.metadata.outputs.game_zip_linux }}
-          top_speed_net/TopSpeed.Server-linux-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-          top_speed_net/TopSpeed.Server-linux-arm64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-          top_speed_net/TopSpeed.Server-linux-arm32-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-          top_speed_net/TopSpeed.Server-linux-musl-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-          top_speed_net/TopSpeed.Server-linux-musl-arm64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-          top_speed_net/TopSpeed.Server-linux-x86-fdd-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-
-  build_macos:
-    name: Build macOS
-    needs: metadata
-    runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: top_speed_net
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install markdown
-
-    - name: Build shared project
-      run: dotnet build TopSpeed.Shared/TopSpeed.Shared.csproj --configuration Release
-
-    - name: Publish macOS client
-      run: dotnet publish TopSpeed/TopSpeed.csproj --configuration Release -p:RuntimeIdentifier=osx-x64 -p:UseNativeAotUpdater=true
-
-    - name: Publish macOS server
-      run: dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseMacX64 -p:UseNativeAotUpdater=true
-
-    - name: Create macOS archives
-      shell: bash
-      run: |
-        set -euo pipefail
-        game_zip="${{ needs.metadata.outputs.game_zip_osx }}"
-        server_zip="TopSpeed.Server-mac-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
-        rm -f "$game_zip"
-        rm -f "$server_zip"
-        (
-          cd TopSpeed/bin/Publish/osx-x64
-          test -f TopSpeed.app/Contents/MacOS/docs/game-guide.html
-          test -f TopSpeed.app/Contents/MacOS/docs/track-creation-guide.html
-          test -f TopSpeed.app/Contents/MacOS/docs/vehicle-physics-and-creation-guide.html
-          ditto -c -k --sequesterRsrc --keepParent TopSpeed.app "$GITHUB_WORKSPACE/top_speed_net/$game_zip"
-        )
-        (
-          cd TopSpeed.Server/bin/Publish/mac-x64
-          zip -rq "$GITHUB_WORKSPACE/top_speed_net/$server_zip" .
-        )
-
-    - name: Upload macOS artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-assets-macos
-        if-no-files-found: error
-        path: |
-          top_speed_net/${{ needs.metadata.outputs.game_zip_osx }}
-          top_speed_net/TopSpeed.Server-mac-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip
-
-  build_android:
-    name: Build Android
-    needs: metadata
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: top_speed_net
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: '21'
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install markdown
-
-    - name: Install Android workload
-      run: dotnet workload install android
-
-    - name: Restore Android project
-      run: dotnet restore TopSpeed.Android/TopSpeed.Android.csproj
-
-    - name: Publish Android APK
-      shell: bash
-      run: |
-        set -euo pipefail
-        dotnet publish TopSpeed.Android/TopSpeed.Android.csproj \
-          --configuration Release \
-          --framework net10.0-android \
-          --runtime android-arm64 \
-          -p:AndroidPackageFormat=apk \
-          -p:ApplicationDisplayVersion="${{ needs.metadata.outputs.version }}" \
-          -p:ApplicationVersion="${{ needs.metadata.outputs.android_version_code }}"
-
-    - name: Stage Android APK
-      shell: bash
-      run: |
-        set -euo pipefail
-        apk_name="${{ needs.metadata.outputs.game_apk_android }}"
-        apk_path="$(find TopSpeed.Android/bin/Release/net10.0-android -type f -name '*Signed.apk' | sort | head -n 1)"
-        if [ -z "$apk_path" ]; then
-          apk_path="$(find TopSpeed.Android/bin/Release/net10.0-android -type f -name '*.apk' ! -name '*unaligned*' | sort | head -n 1)"
-        fi
-        if [ -z "$apk_path" ]; then
-          echo "No Android APK was produced."
-          find TopSpeed.Android/bin/Release/net10.0-android -type f | sort || true
-          exit 1
-        fi
-
-        cp "$apk_path" "$apk_name"
-        unzip -l "$apk_name" | grep -F "assets/docs/game-guide.html"
-        unzip -l "$apk_name" | grep -F "assets/docs/track-creation-guide.html"
-        unzip -l "$apk_name" | grep -F "assets/docs/vehicle-physics-and-creation-guide.html"
-        ls -lh "$apk_name"
-
-    - name: Upload Android artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-assets-android
-        if-no-files-found: error
-        path: top_speed_net/${{ needs.metadata.outputs.game_apk_android }}
+      - name: Upload platform artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          if-no-files-found: error
+          path: ${{ steps.platform_build.outputs.artifact_paths }}
 
   release:
     name: Publish Release
     needs:
       - metadata
-      - build_windows
-      - build_linux
-      - build_macos
-      - build_android
+      - build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
-    - name: Download release artifacts
-      uses: actions/download-artifact@v4
-      with:
-        pattern: release-assets-*
-        path: release-assets
-        merge-multiple: true
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-assets-*
+          path: release-assets
+          merge-multiple: true
 
-    - name: Verify downloaded release artifacts
-      shell: bash
-      run: |
-        set -euo pipefail
-        find release-assets -type f \( -name '*.zip' -o -name '*.apk' \) | sort
-        test -f "release-assets/${{ needs.metadata.outputs.game_apk_android }}"
+      - name: Verify downloaded release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          find release-assets -type f \( -name '*.zip' -o -name '*.apk' \) | sort
+          test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm64 }}"
+          test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm32 }}"
 
-    - name: Generate Commit Log
-      id: changelog
-      shell: pwsh
-      run: |
-        $log = git log -n 10 --pretty=format:"* %h - %s (%an)"
-        "COMMIT_LOG<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        $log | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      - name: Generate Commit Log
+        id: changelog
+        shell: pwsh
+        run: |
+          $log = git log -n 10 --pretty=format:"* %h - %s (%an)"
+          "COMMIT_LOG<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $log | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-    - name: Update Tag
-      shell: bash
-      run: |
-        git config --global user.email "actions@github.com"
-        git config --global user.name "GitHub Actions"
-        git tag -fa release-build -m "Latest Release Build"
-        git push -f origin release-build
+      - name: Update Tag
+        shell: bash
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git tag -fa release-build -m "Latest Release Build"
+          git push -f origin release-build
 
-    - name: Clean Existing Release Assets
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const tag = "release-build";
-          let release;
-          try {
-            const releaseResponse = await github.rest.repos.getReleaseByTag({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag
-            });
-            release = releaseResponse.data;
-          } catch (error) {
-            if (error.status === 404) {
-              core.info(`Release '${tag}' does not exist yet. Skipping asset cleanup.`);
-              return;
+      - name: Clean Existing Release Assets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = "release-build";
+            let release;
+            try {
+              const releaseResponse = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag
+              });
+              release = releaseResponse.data;
+            } catch (error) {
+              if (error.status === 404) {
+                core.info(`Release '${tag}' does not exist yet. Skipping asset cleanup.`);
+                return;
+              }
+              throw error;
             }
-            throw error;
-          }
 
-          const assets = await github.paginate(github.rest.repos.listReleaseAssets, {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            release_id: release.id,
-            per_page: 100
-          });
-
-          for (const asset of assets) {
-            core.info(`Deleting old release asset: ${asset.name}`);
-            await github.rest.repos.deleteReleaseAsset({
+            const assets = await github.paginate(github.rest.repos.listReleaseAssets, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              asset_id: asset.id
+              release_id: release.id,
+              per_page: 100
             });
-          }
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: release-build
-        name: Release Build v${{ needs.metadata.outputs.version }}
-        body: |
-          Game version: ${{ needs.metadata.outputs.version }}
-          Server version: ${{ needs.metadata.outputs.server_version }}
+            for (const asset of assets) {
+              core.info(`Deleting old release asset: ${asset.name}`);
+              await github.rest.repos.deleteReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                asset_id: asset.id
+              });
+            }
 
-          ### Game Changes
-          ${{ needs.metadata.outputs.changes_md }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release-build
+          name: Release Build v${{ needs.metadata.outputs.version }}
+          body: |
+            Game version: ${{ needs.metadata.outputs.version }}
+            Server version: ${{ needs.metadata.outputs.server_version }}
 
-          ### Server Changes
-          ${{ needs.metadata.outputs.server_changes_md }}
+            ### Game Changes
+            ${{ needs.metadata.outputs.changes_md }}
 
-          ### Recent Commits
-          ${{ steps.changelog.outputs.COMMIT_LOG }}
-          
-          ---
-          *Build from commit ${{ github.sha }}*
-        draft: false
-        prerelease: false
-        files: |
-          release-assets/**/*.zip
-          release-assets/**/*.apk
+            ### Server Changes
+            ${{ needs.metadata.outputs.server_changes_md }}
+
+            ### Recent Commits
+            ${{ steps.changelog.outputs.COMMIT_LOG }}
+
+            ---
+            *Build from commit ${{ github.sha }}*
+          draft: false
+          prerelease: false
+          files: |
+            release-assets/**/*.zip
+            release-assets/**/*.apk

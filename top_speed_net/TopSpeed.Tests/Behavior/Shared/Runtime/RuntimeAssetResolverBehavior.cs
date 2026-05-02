@@ -8,15 +8,20 @@ namespace TopSpeed.Tests;
 public sealed class RuntimeAssetResolverBehaviorTests
 {
     [Theory]
-    [InlineData("win-x64", false, false, false, "windows-x64")]
-    [InlineData("android-arm64", false, false, false, "android-arm64")]
-    [InlineData("linux-x64", false, false, false, "linux-x64")]
-    [InlineData("osx-x64", false, false, false, "mac-x64")]
-    [InlineData("", true, false, false, "windows-x64")]
-    [InlineData("", false, true, false, "linux-x64")]
-    [InlineData("", false, false, true, "mac-x64")]
+    [InlineData("win-x64", Architecture.X64, false, false, false, "windows-x64")]
+    [InlineData("android-arm64", Architecture.Arm64, false, false, false, "android-arm64")]
+    [InlineData("android-arm", Architecture.Arm, false, false, false, "android-arm")]
+    [InlineData("linux-x64", Architecture.X64, false, false, false, "linux-x64")]
+    [InlineData("osx-x64", Architecture.X64, false, false, false, "mac-x64")]
+    [InlineData("osx-arm64", Architecture.Arm64, false, false, false, "mac-arm64")]
+    [InlineData("osx.13-arm64", Architecture.Arm64, false, false, false, "mac-arm64")]
+    [InlineData("", Architecture.X64, true, false, false, "windows-x64")]
+    [InlineData("", Architecture.X64, false, true, false, "linux-x64")]
+    [InlineData("", Architecture.X64, false, false, true, "mac-x64")]
+    [InlineData("", Architecture.Arm64, false, false, true, "mac-arm64")]
     public void DetectClientRuntimeAssetTag_ShouldMatchReleaseTemplate(
         string runtimeIdentifier,
+        Architecture architecture,
         bool isWindows,
         bool isLinux,
         bool isMacOs,
@@ -24,7 +29,7 @@ public sealed class RuntimeAssetResolverBehaviorTests
     {
         var actual = RuntimeAssetResolver.DetectClientRuntimeAssetTag(
             runtimeIdentifier,
-            Architecture.X64,
+            architecture,
             isWindows,
             isLinux,
             isMacOs);
@@ -40,9 +45,12 @@ public sealed class RuntimeAssetResolverBehaviorTests
     [InlineData("linux-musl-x64", Architecture.X64, false, false, false, "linux-musl-x64")]
     [InlineData("linux-musl-arm64", Architecture.X64, false, false, false, "linux-musl-arm64")]
     [InlineData("osx-x64", Architecture.X64, false, false, false, "mac-x64")]
+    [InlineData("osx-arm64", Architecture.Arm64, false, false, false, "mac-arm64")]
+    [InlineData("osx.13-arm64", Architecture.Arm64, false, false, false, "mac-arm64")]
     [InlineData("", Architecture.X64, true, false, false, "win-x64")]
     [InlineData("", Architecture.X64, false, true, false, "linux-x64")]
     [InlineData("", Architecture.X64, false, false, true, "mac-x64")]
+    [InlineData("", Architecture.Arm64, false, false, true, "mac-arm64")]
     [InlineData("", Architecture.Arm64, false, true, false, "linux-arm64")]
     [InlineData("", Architecture.Arm, false, true, false, "linux-arm32")]
     [InlineData("", Architecture.X86, false, true, false, "linux-x86-fdd")]

@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>TopSpeed.Server</RootNamespace>
     <AssemblyName>TopSpeed.Server</AssemblyName>
-    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64;linux-arm64;linux-arm;linux-musl-x64;linux-musl-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64;linux-arm;linux-musl-x64;linux-musl-arm64</RuntimeIdentifiers>
     <SelfContained>false</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
@@ -42,6 +42,14 @@
     <PublishSingleFile>false</PublishSingleFile>
     <PublishTrimmed>false</PublishTrimmed>
     <PublishDir>bin/Publish/mac-x64/</PublishDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ServerPublishProfile)' == 'ReleaseMacArm64'">
+    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishDir>bin/Publish/mac-arm64/</PublishDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(ServerPublishProfile)' == 'ReleaseLinuxArm64'">

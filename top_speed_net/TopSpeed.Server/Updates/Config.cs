@@ -16,7 +16,8 @@ namespace TopSpeed.Server.Updates
         {
             new RuntimeAssetOption("Automatic", AutoRuntimeAssetTag),
             new RuntimeAssetOption("Windows 64-bit", "win-x64"),
-            new RuntimeAssetOption("Mac 64-bit", "mac-x64"),
+            new RuntimeAssetOption("Mac x64", "mac-x64"),
+            new RuntimeAssetOption("Mac ARM64", "mac-arm64"),
             new RuntimeAssetOption("Linux 64-bit", "linux-x64"),
             new RuntimeAssetOption("Linux ARM64", "linux-arm64"),
             new RuntimeAssetOption("Linux ARM32", "linux-arm32"),

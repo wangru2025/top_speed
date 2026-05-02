@@ -11,7 +11,7 @@
     <ApplicationId>com.topspeed.game</ApplicationId>
     <ApplicationVersion>2026041501</ApplicationVersion>
     <ApplicationDisplayVersion>2026.4.15.1</ApplicationDisplayVersion>
-    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">android-arm64</RuntimeIdentifier>
     <TrimMode>partial</TrimMode>
     <AndroidStoreUncompressedFileExtensions>.so</AndroidStoreUncompressedFileExtensions>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,18 +21,27 @@
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RepoDocsDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\docs\'))</RepoDocsDir>
+    <RepoDocsRenderScript>$([System.IO.Path]::Combine('$(RepoDocsDir)', 'render_docs.py'))</RepoDocsRenderScript>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Concentus" Version="1.1.7" />
     <PackageReference Include="LiteNetLib" Version="1.3.1" />
     <PackageReference Include="GetText.NET" Version="10.0.1" />
     <PackageReference Include="Xamarin.AndroidX.Core" Version="1.13.1.1" />
     <AndroidLibrary Include="..\TopSpeed\ThirdParty\android\sdl3-android-classes.jar" Bind="false" />
-    <AndroidLibrary Include="..\TopSpeed\ThirdParty\android\prism-release.aar" Bind="false" />
+    <AndroidLibrary Include="..\TopSpeed\ThirdParty\android\arm-64\prism-release.aar" Bind="false" />
     <AndroidMavenLibrary Include="com.ibm.icu:icu4j" Version="78.1" Repository="Central" Bind="false" />
-    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\libSDL3.so" Abi="arm64-v8a" />
-    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\libphonon.so" Abi="arm64-v8a" />
-    <AndroidNativeLibrary Include="..\SoundFlow\Src\Backends\MiniAudio\runtimes\android-arm64\native\libminiaudio.so" Abi="arm64-v8a" />
-    <AndroidNativeLibrary Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\android-arm64\native\libsoundflow-ffmpeg.so" Abi="arm64-v8a" />
+    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\arm-64\libSDL3.so" Abi="arm64-v8a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm64'" />
+    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\arm-32\libSDL3.so" Abi="armeabi-v7a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm'" />
+    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\arm-64\libphonon.so" Abi="arm64-v8a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm64'" />
+    <AndroidNativeLibrary Include="..\TopSpeed\ThirdParty\android\arm-32\libphonon.so" Abi="armeabi-v7a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm'" />
+    <AndroidNativeLibrary Include="..\SoundFlow\Src\Backends\MiniAudio\runtimes\android-arm64\native\libminiaudio.so" Abi="arm64-v8a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm64'" />
+    <AndroidNativeLibrary Include="..\SoundFlow\Src\Backends\MiniAudio\runtimes\android-arm\native\libminiaudio.so" Abi="armeabi-v7a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm'" />
+    <AndroidNativeLibrary Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\android-arm64\native\libsoundflow-ffmpeg.so" Abi="arm64-v8a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm64'" />
+    <AndroidNativeLibrary Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\android-arm\native\libsoundflow-ffmpeg.so" Abi="armeabi-v7a" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'android-arm'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,22 +60,28 @@
 
   <ItemGroup>
     <AndroidAsset Include="..\Sounds\**\*">
-      <Link>Sounds\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>Sounds/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\Tracks\**\*">
-      <Link>Tracks\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>Tracks/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\Vehicles\**\*">
-      <Link>Vehicles\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>Vehicles/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\languages\client\**\*">
-      <Link>languages\client\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>languages/client/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\languages\server\**\*">
-      <Link>languages\server\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>languages/server/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\docs\**\*.html">
-      <Link>docs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <AndroidAsset Include="$(RepoDocsDir)game-guide.html">
+      <Link>docs/game-guide.html</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="$(RepoDocsDir)track-creation-guide.html">
+      <Link>docs/track-creation-guide.html</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="$(RepoDocsDir)vehicle-physics-and-creation-guide.html">
+      <Link>docs/vehicle-physics-and-creation-guide.html</Link>
     </AndroidAsset>
   </ItemGroup>
 
@@ -78,14 +93,8 @@
       RemoveProperties="RuntimeIdentifier;RuntimeIdentifiers;TargetFramework;PlatformTarget" />
   </Target>
 
-  <Target Name="RenderAndIncludeDocsAssets" BeforeTargets="PrepareForBuild" Condition="Exists('..\..\docs\render_docs.py')">
-    <Exec Command="python &quot;..\..\docs\render_docs.py&quot; --all" ContinueOnError="WarnAndContinue" />
-    <ItemGroup>
-      <AndroidAsset Remove="..\..\docs\**\*.html" />
-      <AndroidAsset Include="..\..\docs\**\*.html">
-        <Link>docs\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      </AndroidAsset>
-    </ItemGroup>
+  <Target Name="RenderAndIncludeDocsAssets" BeforeTargets="PrepareForBuild" Condition="Exists('$(RepoDocsRenderScript)')">
+    <Exec Command="python &quot;$(RepoDocsRenderScript)&quot; --all" ContinueOnError="WarnAndContinue" />
   </Target>
 
 </Project>

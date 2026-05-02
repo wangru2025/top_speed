@@ -24,12 +24,10 @@ namespace TopSpeed.Core.Multiplayer
             var isCreator = session != null && eventInfo.HostPlayerId == session.PlayerId;
             var localPlayerId = session?.PlayerId ?? 0u;
 
-            _state.Rooms.ApplyRoomListEvent(eventInfo);
-            var updatedCurrentRoom = _state.Rooms.TryApplyCurrentRoomEvent(
-                eventInfo,
-                localPlayerId,
-                out var localHostChanged);
-            _roomUi.HandleRoomEvent(eventInfo, isCreator, localPlayerId, updatedCurrentRoom, localHostChanged);
+            var result = _roomReducer.ApplyRoomEvent(eventInfo, localPlayerId);
+            if (result.UpdatedCurrentRoom)
+                SyncClientStateFromRoomStore();
+            _roomUi.HandleRoomEvent(eventInfo, isCreator, localPlayerId, result.UpdatedCurrentRoom, result.LocalHostChanged);
         }
     }
 }

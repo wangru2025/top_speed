@@ -11,13 +11,15 @@ namespace TS.Audio
     internal sealed class SourcePlayer : SoundComponent
     {
         private readonly ISoundDataProvider _provider;
+        private readonly Action<Exception>? _onAudioThreadException;
         private int _pendingPlaybackEnded;
         private bool _ended;
 
-        public SourcePlayer(SfAudioEngine engine, SfAudioFormat format, ISoundDataProvider provider)
+        public SourcePlayer(SfAudioEngine engine, SfAudioFormat format, ISoundDataProvider provider, Action<Exception>? onAudioThreadException = null)
             : base(engine, format)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _onAudioThreadException = onAudioThreadException;
             Enabled = false;
         }
 
@@ -59,6 +61,14 @@ namespace TS.Audio
             Interlocked.Exchange(ref _pendingPlaybackEnded, 0);
         }
 
+        public void Silence()
+        {
+            Enabled = false;
+            State = PlaybackState.Stopped;
+            _ended = false;
+            Interlocked.Exchange(ref _pendingPlaybackEnded, 0);
+        }
+
         public bool Seek(int sampleOffset)
         {
             if (!_provider.CanSeek)
@@ -84,24 +94,34 @@ namespace TS.Audio
             }
 
             var output = buffer;
-            while (!output.IsEmpty)
+            try
             {
-                var read = _provider.ReadBytes(output);
-                if (read > 0)
+                while (!output.IsEmpty)
                 {
-                    output = output.Slice(read);
-                    continue;
-                }
+                    var read = _provider.ReadBytes(output);
+                    if (read > 0)
+                    {
+                        output = output.Slice(read);
+                        continue;
+                    }
 
-                if (IsLooping && _provider.CanSeek && _provider.Length > 0)
-                {
-                    _provider.Seek(0);
-                    continue;
-                }
+                    if (IsLooping && _provider.CanSeek && _provider.Length > 0)
+                    {
+                        _provider.Seek(0);
+                        continue;
+                    }
 
+                    output.Clear();
+                    EndPlayback();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
                 output.Clear();
+                Silence();
+                _onAudioThreadException?.Invoke(ex);
                 EndPlayback();
-                return;
             }
         }
 

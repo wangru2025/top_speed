@@ -8,6 +8,9 @@ namespace TS.Audio
         {
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 _localPosition = localPosition;
                 _direction = ToDirection(localPosition);
                 _distanceAttenuation = Clamp01(distanceAttenuation);
@@ -24,6 +27,9 @@ namespace TS.Audio
         {
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 _hasDirectSimulation = true;
                 _simulationOcclusion = Clamp01(occlusion);
                 _simulationAirAbsorption[0] = Clamp01(airLow);
@@ -39,6 +45,9 @@ namespace TS.Audio
         {
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 _hasDirectSimulation = false;
                 _simulationOcclusion = 1f;
                 _simulationAirAbsorption[0] = 1f;
@@ -54,6 +63,9 @@ namespace TS.Audio
         {
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 _hasReverbSimulation = timeLow > 0f || timeMid > 0f || timeHigh > 0f || wetScale > 0f;
                 _reverbTimes[0] = System.Math.Max(0f, timeLow);
                 _reverbTimes[1] = System.Math.Max(0f, timeMid);
@@ -70,6 +82,9 @@ namespace TS.Audio
         {
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 _hasReverbSimulation = false;
                 _reverbTimes[0] = 0f;
                 _reverbTimes[1] = 0f;

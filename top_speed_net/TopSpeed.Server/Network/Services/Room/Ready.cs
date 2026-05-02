@@ -41,7 +41,7 @@ namespace TopSpeed.Server.Network
                     ready.AutomaticTransmission,
                     room.PendingLoadouts.Count,
                     room.PlayerIds.Count));
-                _owner.SendProtocolMessageToRoom(
+                _owner._notify.ProtocolToRoom(
                     room,
                     LocalizationService.Format(
                         LocalizationService.Mark("{0} is ready."),
@@ -82,7 +82,7 @@ namespace TopSpeed.Server.Network
                     string.IsNullOrWhiteSpace(player.Name)
                         ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), player.PlayerNumber + 1)
                         : player.Name);
-                _owner.SendProtocolMessageToRoom(
+                _owner._notify.ProtocolToRoom(
                     room,
                     LocalizationService.Format(
                         LocalizationService.Mark("{0} left race preparation."),

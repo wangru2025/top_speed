@@ -11,7 +11,9 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void HandleRoomStateCore(PacketRoomState roomState)
         {
-            var change = _state.Rooms.ApplyRoomState(roomState);
+            var change = _roomReducer.ApplyRoomState(roomState);
+            if (change.Applied)
+                SyncClientStateFromRoomStore();
             _roomUi.HandleRoomState(change);
         }
     }

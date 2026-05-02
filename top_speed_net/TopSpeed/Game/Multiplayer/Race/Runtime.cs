@@ -41,6 +41,11 @@ namespace TopSpeed.Game
                 _binding.ResetPending();
             }
 
+            public void ReplaceNetworkSession(TopSpeed.Network.MultiplayerSession session)
+            {
+                _mode?.ReplaceNetwork(session);
+            }
+
             public void SetLoadout(int vehicleIndex, bool automaticTransmission)
             {
                 _binding.SetLoadout(VehicleCatalog.VehicleCount, vehicleIndex, automaticTransmission);
@@ -57,9 +62,9 @@ namespace TopSpeed.Game
                 _mode?.SetHostPaused(roomState.RacePaused);
             }
 
-            public void ApplyRaceState(TopSpeed.Protocol.PacketRoomRaceStateChanged changed)
+            public bool ApplyRaceState(TopSpeed.Protocol.PacketRoomRaceStateChanged changed)
             {
-                _binding.ApplyRaceState(changed);
+                return _binding.ApplyRaceState(changed);
             }
 
             public bool MatchesRoom(uint roomId)
@@ -70,6 +75,16 @@ namespace TopSpeed.Game
             public bool MatchesContext(uint roomId, uint raceInstanceId, bool allowBindRaceInstance)
             {
                 return _binding.MatchesContext(roomId, raceInstanceId, allowBindRaceInstance);
+            }
+
+            public bool AcceptRaceEvent(uint roomId, uint raceInstanceId, uint eventSequence, bool allowBindRaceInstance)
+            {
+                return _binding.AcceptRaceEvent(roomId, raceInstanceId, eventSequence, allowBindRaceInstance);
+            }
+
+            public bool ShouldRequestResync(uint roomId, uint raceInstanceId, uint eventSequence)
+            {
+                return _binding.ShouldRequestResync(roomId, raceInstanceId, eventSequence);
             }
 
             public void Run(float elapsed)

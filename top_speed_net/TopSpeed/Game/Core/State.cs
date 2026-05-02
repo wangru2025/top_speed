@@ -62,6 +62,8 @@ namespace TopSpeed.Game
         private readonly MenuRegistry _menuRegistry;
         private readonly IMultiplayerRuntime _multiplayerCoordinator;
         private readonly IMultiplayerMenuTouch _multiplayerMenuTouch;
+        private readonly MultiplayerConnector _multiplayerConnector;
+        private readonly SessionReconnector _sessionReconnector;
         private readonly UpdateConfig _updateConfig;
         private readonly UpdateService _updateService;
         private readonly MultiplayerDispatch _multiplayerDispatch;
@@ -79,6 +81,9 @@ namespace TopSpeed.Game
         private Stopwatch? _calibrationStopwatch;
         private bool _pendingDriveStart;
         private CoreRaceMode _pendingMode;
+        private int _lastSingleRacePlayerNumber = -1;
+        private readonly Queue<int> _singleRacePlayerNumberBag = new Queue<int>();
+        private int _singleRacePlayerNumberSlots = -1;
         private bool _pauseKeyReleased = true;
         private TimeTrialSession? _timeTrial;
         private SingleSession? _singleRace;

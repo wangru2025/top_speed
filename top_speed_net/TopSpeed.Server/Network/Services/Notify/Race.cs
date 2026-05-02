@@ -11,32 +11,40 @@ namespace TopSpeed.Server.Network
         {
             public void RaceStateChanged(RaceRoom room)
             {
+                var sequence = NextEventSequence(room);
                 var payload = PacketSerializer.WriteRoomRaceStateChanged(new PacketRoomRaceStateChanged
                 {
                     RoomId = room.Id,
                     RoomVersion = room.Version,
+                    EventSequence = sequence,
                     RaceInstanceId = room.RaceInstanceId,
                     State = room.RaceState
                 });
-                _owner.SendToRoomOnStream(room, payload, PacketStream.Room);
+                RoomEventJournal.Record(room, Command.RoomRaceStateChanged, sequence, payload, PacketStream.Room);
+                ToRoom(room, payload, PacketStream.Room);
             }
 
             public void RacePlayerFinished(RaceRoom room, uint playerId, byte playerNumber, byte finishOrder, int timeMs)
             {
+                var sequence = NextEventSequence(room);
                 var payload = PacketSerializer.WriteRoomRacePlayerFinished(new PacketRoomRacePlayerFinished
                 {
                     RoomId = room.Id,
+                    RoomVersion = room.Version,
+                    EventSequence = sequence,
                     RaceInstanceId = room.RaceInstanceId,
                     PlayerId = playerId,
                     PlayerNumber = playerNumber,
                     FinishOrder = finishOrder,
                     TimeMs = Math.Max(0, timeMs)
                 });
-                _owner.SendToRoomOnStream(room, payload, PacketStream.Room);
+                RoomEventJournal.Record(room, Command.RoomRacePlayerFinished, sequence, payload, PacketStream.Room);
+                ToRoom(room, payload, PacketStream.Room);
             }
 
             public void RaceCompleted(RaceRoom room)
             {
+                var sequence = NextEventSequence(room);
                 var packet = BuildRoomRaceCompleted(room);
                 _owner._logger.Debug(string.Format(
                     System.Globalization.CultureInfo.InvariantCulture,
@@ -45,19 +53,31 @@ namespace TopSpeed.Server.Network
                     room.RaceInstanceId,
                     packet.Results.Length));
                 var payload = PacketSerializer.WriteRoomRaceCompleted(packet);
-                _owner.SendToRoomOnStream(room, payload, PacketStream.Room);
+                RoomEventJournal.Record(room, Command.RoomRaceCompleted, sequence, payload, PacketStream.Room);
+                ToRoom(room, payload, PacketStream.Room);
+            }
+
+            public void RaceCompletedTo(PlayerConnection player, RaceRoom room)
+            {
+                if (player == null || room == null)
+                    return;
+
+                _owner.SendStream(player, PacketSerializer.WriteRoomRaceCompleted(BuildRoomRaceCompleted(room)), PacketStream.Room);
             }
 
             public void RaceAborted(RaceRoom room, RoomRaceAbortReason reason)
             {
+                var sequence = NextEventSequence(room);
                 var payload = PacketSerializer.WriteRoomRaceAborted(new PacketRoomRaceAborted
                 {
                     RoomId = room.Id,
                     RoomVersion = room.Version,
+                    EventSequence = sequence,
                     RaceInstanceId = room.RaceInstanceId,
                     Reason = reason
                 });
-                _owner.SendToRoomOnStream(room, payload, PacketStream.Room);
+                RoomEventJournal.Record(room, Command.RoomRaceAborted, sequence, payload, PacketStream.Room);
+                ToRoom(room, payload, PacketStream.Room);
             }
 
             private PacketRoomRaceCompleted BuildRoomRaceCompleted(RaceRoom room)
@@ -73,9 +93,7 @@ namespace TopSpeed.Server.Network
                 for (var i = 0; i < ordered.Length; i++)
                 {
                     var item = ordered[i];
-                    var status = item.Status;
-                    if (status != RoomRaceResultStatus.Finished && status != RoomRaceResultStatus.Dnf)
-                        status = RoomRaceResultStatus.Dnf;
+                    var status = RaceResultRules.NormalizeCompletionStatus(item.Status);
 
                     results[i] = new PacketRoomRaceResultEntry
                     {
@@ -91,6 +109,7 @@ namespace TopSpeed.Server.Network
                 {
                     RoomId = room.Id,
                     RoomVersion = room.Version,
+                    EventSequence = CurrentEventSequence(room),
                     RaceInstanceId = room.RaceInstanceId,
                     Results = results
                 };

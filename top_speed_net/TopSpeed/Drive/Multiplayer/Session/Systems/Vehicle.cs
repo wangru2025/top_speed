@@ -70,7 +70,7 @@ namespace TopSpeed.Drive.Multiplayer.Session.Systems
 
         public override void Update(TopSpeed.Drive.Session.SessionContext context, float elapsed)
         {
-            if (_isHostPaused())
+            if (_isHostPaused() && !_isFinished())
                 RunPausedStep(elapsed);
             else
                 RunActiveStep(elapsed);
@@ -111,12 +111,6 @@ namespace TopSpeed.Drive.Multiplayer.Session.Systems
         private void RunPausedStep(float elapsed)
         {
             _car.StopMotionImmediately();
-            _car.Run(elapsed);
-
-            var spatialTrackLength = _getSpatialTrackLength();
-            foreach (var remote in _remotePlayers.Values)
-                remote.Player.UpdateRemoteAudio(_car.PositionX, _car.PositionY, spatialTrackLength, elapsed);
-
             UpdateListener(elapsed);
         }
 
@@ -124,9 +118,7 @@ namespace TopSpeed.Drive.Multiplayer.Session.Systems
         {
             if (!_isStarted() || _isFinished())
                 return;
-            if (_car.Gear == previousGear)
-                return;
-            if (!_input.Intents.IsTriggered(DriveIntent.GearUp) && !_input.Intents.IsTriggered(DriveIntent.GearDown))
+            if (!TopSpeed.Drive.Session.Systems.GearAnnouncements.ShouldAnnounceUserShift(_car, _input, previousGear))
                 return;
 
             _speakText(TopSpeed.Drive.Session.SessionText.FormatGearCode(_car));

@@ -156,7 +156,9 @@ namespace TopSpeed.Protocol
         PrepareCancelled = 14,
         RaceStarted = 15,
         RaceStopped = 16,
-        GameRulesChanged = 17
+        GameRulesChanged = 17,
+        RacePaused = 18,
+        RaceResumed = 19
     }
 
     public enum RoomRaceState : byte
@@ -190,6 +192,25 @@ namespace TopSpeed.Protocol
         Pause = 2,
         Resume = 3,
         Stop = 4
+    }
+
+    public enum MediaTransferState : byte
+    {
+        Idle = 0,
+        Receiving = 1,
+        Complete = 2,
+        Cancelled = 3,
+        Expired = 4
+    }
+
+    public enum ConnectionLifecycleState : byte
+    {
+        Connected = 0,
+        Suspended = 1,
+        Reconnecting = 2,
+        Resumed = 3,
+        Expired = 4,
+        Closed = 5
     }
 
     public enum ProtocolCompatStatus : byte

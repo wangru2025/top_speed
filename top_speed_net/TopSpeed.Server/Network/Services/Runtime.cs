@@ -36,7 +36,7 @@ namespace TopSpeed.Server.Network
 
                         _owner.UpdateBots(ServerSimulationStepSeconds);
                         _owner.CheckForBumps();
-                        _owner._race.UpdateCompletions(ServerSimulationStepSeconds);
+                        _owner._race.UpdateCompletions();
 
                         if (_owner._snapshotAccumulator >= ServerSnapshotIntervalSeconds)
                         {

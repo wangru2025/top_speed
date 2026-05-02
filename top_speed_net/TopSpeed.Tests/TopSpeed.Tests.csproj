@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -24,13 +24,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TopSpeed.Shared\TopSpeed.Shared.csproj" />
+    <ProjectReference Include="..\TopSpeed.Server\TopSpeed.Server.csproj" />
+    <ProjectReference Include="..\TopSpeed\TopSpeed.csproj" />
     <ProjectReference Include="..\TS.Sdl\TS.Sdl.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <Compile Remove="Game\**\*.cs" />
-    <Compile Remove="Behavior\Client\**\*.cs" />
-    <Compile Remove="Harness\Client\**\*.cs" />
-    <Compile Remove="Regression\Client\**\*.cs" />
   </ItemGroup>
 </Project>

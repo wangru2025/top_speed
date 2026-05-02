@@ -12,6 +12,7 @@ namespace TopSpeed.Vehicles
         public bool TryLoadFromFile(string path, uint mediaId, bool preservePlaybackState, out string error)
         {
             error = string.Empty;
+            string? tempPlaybackPath = null;
             if (string.IsNullOrWhiteSpace(path))
             {
                 error = LocalizationService.Mark("No media file selected.");
@@ -27,46 +28,54 @@ namespace TopSpeed.Vehicles
                     return false;
                 }
 
+                var playablePath = PreparePlayablePath(fullPath, mediaId, out tempPlaybackPath);
                 var wasPlaying = preservePlaybackState ? _desiredPlaying : false;
                 DisposeSource();
-                var asset = _audio.LoadStream(fullPath);
+                var asset = _audio.LoadStream(playablePath);
                 _source = _audio.CreateSpatialSource(asset, AudioEngineOptions.RadioBusName, allowHrtf: true);
                 _source.SetDopplerFactor(0f);
                 _source.SetVolumePercent(_volumePercent);
                 _mediaPath = fullPath;
                 _mediaId = mediaId;
                 _desiredPlaying = wasPlaying;
+                ReplaceOwnedTempFile(tempPlaybackPath);
                 if (_desiredPlaying && !_pausedByGame)
                     _source.Play(loop: _loopPlayback);
                 return true;
             }
             catch (IOException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
             catch (UnauthorizedAccessException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
             catch (ArgumentException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
             catch (NotSupportedException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
             catch (ObjectDisposedException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
             catch (InvalidOperationException ex)
             {
+                SafeDelete(tempPlaybackPath);
                 error = ex.Message;
                 return false;
             }
@@ -138,7 +147,39 @@ namespace TopSpeed.Vehicles
                 trimmed = "." + trimmed;
             if (trimmed.Length > ProtocolConstants.MaxMediaFileExtensionLength + 1)
                 trimmed = trimmed.Substring(0, ProtocolConstants.MaxMediaFileExtensionLength + 1);
+            for (var i = 1; i < trimmed.Length; i++)
+            {
+                var ch = trimmed[i];
+                if (!char.IsLetterOrDigit(ch))
+                    return ".bin";
+            }
+
             return trimmed;
+        }
+
+        private static string PreparePlayablePath(string path, uint mediaId, out string? tempPlaybackPath)
+        {
+            tempPlaybackPath = null;
+            if (!RequiresAsciiPlaybackPath(path))
+                return path;
+
+            var folder = Path.Combine(Path.GetTempPath(), "TopSpeed", "Radio");
+            Directory.CreateDirectory(folder);
+            var extension = NormalizeExtension(Path.GetExtension(path));
+            tempPlaybackPath = Path.Combine(folder, $"radio_local_{mediaId}_{Guid.NewGuid():N}{extension}");
+            File.Copy(path, tempPlaybackPath, overwrite: true);
+            return tempPlaybackPath;
+        }
+
+        private static bool RequiresAsciiPlaybackPath(string path)
+        {
+            for (var i = 0; i < path.Length; i++)
+            {
+                if (path[i] > 127)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

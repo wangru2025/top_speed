@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-29 19:31+0300\n"
+"POT-Creation-Date: 2026-05-01 03:33+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -135,7 +135,7 @@ msgstr ""
 msgid "Are you sure you want to leave the current room?"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:205
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:220
 msgid "Are you sure you want to quit this multiplayer race?"
 msgstr ""
 
@@ -465,7 +465,7 @@ msgid ""
 "and player positions."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:231
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:246
 msgid "Choose how to proceed with the current game."
 msgstr ""
 
@@ -545,7 +545,7 @@ msgstr ""
 msgid "Colon"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:184
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:186
 msgid "Compatibility warning"
 msgstr ""
 
@@ -587,7 +587,7 @@ msgstr ""
 msgid "Congratulations! You have made it to the first position."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:154
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:156
 msgid "Connected to server."
 msgstr ""
 
@@ -599,11 +599,11 @@ msgstr ""
 msgid "Connection attempt failed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:211
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:213
 msgid "Connection canceled."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:233
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:235
 msgid "Connection failed"
 msgstr ""
 
@@ -611,13 +611,17 @@ msgstr ""
 msgid "Connection failed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:86
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:91
 #, csharp-format
 msgid "Connection failed: {0}"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Result\ConnectResult.cs:65
 msgid "Connection lost before session initialization."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:24
+msgid "Connection lost. Reconnecting."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Poll.cs:126
@@ -636,7 +640,7 @@ msgstr ""
 msgid "Continue"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:189
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:191
 msgid "Continue connection"
 msgstr ""
 
@@ -906,7 +910,7 @@ msgstr ""
 msgid "Discard changes"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:190
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:192
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Multiplayer.cs:31
 msgid "Disconnect"
 msgstr ""
@@ -1129,7 +1133,7 @@ msgstr ""
 msgid "Exit Game"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:61
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:66
 msgid "Failed to initialize network client."
 msgstr ""
 
@@ -1157,7 +1161,7 @@ msgstr ""
 msgid "Failed to load track '{0}'."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:49
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:56
 msgid "Failed to open local radio media for live streaming."
 msgstr ""
 
@@ -1165,7 +1169,7 @@ msgstr ""
 msgid "Failed to send chat message."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:159
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:161
 msgid "Failed to send handshake."
 msgstr ""
 
@@ -1303,7 +1307,7 @@ msgstr ""
 msgid "Global shortcuts"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:235
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:250
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Runtime\Screen\Core.cs:259
 msgid "Go back"
 msgstr ""
@@ -1346,7 +1350,7 @@ msgstr ""
 msgid "Humidity must be between 0 and 1."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:115
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:117
 msgid ""
 "I really have nothing interesting to put here not even the secret to life "
 "except this really long run on sentence that is probably the most boring "
@@ -1734,11 +1738,11 @@ msgstr ""
 msgid "Line {0}: {1}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:146
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:153
 msgid "Live streaming stopped because Opus encoding failed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:133
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:140
 msgid "Live streaming stopped because media decoding failed."
 msgstr ""
 
@@ -1940,15 +1944,15 @@ msgstr ""
 msgid "Netherlands"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:152
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:159
 msgid "Network send failed while sending live frame."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:119
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:126
 msgid "Network send failed while sending live start."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:176
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Live\Tx.cs:183
 msgid "Network send failed while sending live stop."
 msgstr ""
 
@@ -2037,7 +2041,7 @@ msgstr ""
 msgid "No players are currently in this game room."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:139
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:144
 msgid ""
 "No protocol negotiation response from server. The server may be outdated or "
 "incompatible."
@@ -2047,11 +2051,11 @@ msgstr ""
 msgid "No radio media loaded."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:140
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:145
 msgid "No response from server. The server may be offline or unreachable."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:17
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Connect.cs:22
 msgid "No server address was provided."
 msgstr ""
 
@@ -2082,7 +2086,7 @@ msgstr ""
 msgid "No, continue preparing"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:209
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:224
 msgid "No, continue racing"
 msgstr ""
 
@@ -2163,7 +2167,7 @@ msgstr ""
 msgid "Numpad Equals"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:238
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:240
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Dialogs.cs:30
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Input.cs:19
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Input.cs:39
@@ -2310,7 +2314,7 @@ msgstr ""
 msgid "Pause"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:221
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:236
 msgid "Pause the game"
 msgstr ""
 
@@ -2332,17 +2336,16 @@ msgstr ""
 msgid "Player"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\State\Rooms\Apply.cs:128
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\State\Rooms\Apply.cs:161
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Domain\Online\Map.cs:49
 msgid "Player "
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:49
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\State\Rooms\Store.cs:81
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\State\Rooms\Store.cs:96
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:179
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:58
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Runtime\Results.cs:31
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Dispatch\Room.cs:38
 #, csharp-format
 msgid "Player {0}"
 msgstr ""
@@ -2382,7 +2385,7 @@ msgid "Preparing to race"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:76
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:85
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:82
 msgid "Press ENTER to change."
 msgstr ""
 
@@ -2390,15 +2393,15 @@ msgstr ""
 msgid "Press ENTER to enter a room name."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:93
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:90
 msgid "Press ENTER to select."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:101
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:98
 msgid "Press ENTER to start."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:77
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:74
 msgid "Press ENTER to toggle."
 msgstr ""
 
@@ -2463,11 +2466,11 @@ msgstr ""
 msgid "Quit race preparation?"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:204
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:219
 msgid "Quit race?"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:226
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:241
 msgid "Quit the race"
 msgstr ""
 
@@ -2593,6 +2596,16 @@ msgstr ""
 msgid "Received media is empty."
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:36
+msgid "Reconnected to server."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Connection\Reconnector.cs:57
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Connection\Reconnector.cs:97
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:41
+msgid "Reconnection failed."
+msgstr ""
+
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:44
 msgid "Remove a bot"
 msgstr ""
@@ -2646,7 +2659,7 @@ msgstr ""
 msgid "Restore default settings"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:220
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:235
 msgid "Resume the game"
 msgstr ""
 
@@ -2654,7 +2667,7 @@ msgstr ""
 msgid "Returned to room controls."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:185
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:187
 msgid "Review these details before connecting."
 msgstr ""
 
@@ -2780,13 +2793,13 @@ msgstr ""
 msgid "Screen reader rate is not a valid number and was reset to default."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:112
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:114
 msgid ""
 "Screen-reader calibration. You'll be presented with a short piece of text on "
 "the next screen. Press ENTER when your screen-reader finishes speaking it."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:113
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Core\State.cs:115
 msgid ""
 "Screen-reader calibration. You'll be presented with a short piece of text on "
 "the next screen. Swipe up when your screen-reader finishes speaking it."
@@ -2980,7 +2993,7 @@ msgstr ""
 msgid "Server settings"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:179
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:181
 #, csharp-format
 msgid "Server supported protocol versions: {0} to {1}"
 msgstr ""
@@ -3221,7 +3234,7 @@ msgstr ""
 msgid "Stop"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:225
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:240
 msgid "Stop the game"
 msgstr ""
 
@@ -3255,7 +3268,7 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Create.cs:41
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:86
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:95
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:110
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:107
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Controls.cs:43
 msgid "Swipe left or right with two fingers to change."
 msgstr ""
@@ -3271,7 +3284,7 @@ msgid ""
 "three fingers for maximum or minimum."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:118
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:115
 msgid ""
 "Swipe up or down with two fingers to change by 10, swipe left or right with "
 "two fingers to change by 1, and swipe up or down with three fingers for "
@@ -3279,7 +3292,7 @@ msgid ""
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:77
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:86
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:83
 msgid "Swipe up to change."
 msgstr ""
 
@@ -3287,15 +3300,15 @@ msgstr ""
 msgid "Swipe up to enter a room name."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:94
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:91
 msgid "Swipe up to select."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:102
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:99
 msgid "Swipe up to start."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:78
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:75
 msgid "Swipe up to toggle."
 msgstr ""
 
@@ -3430,7 +3443,7 @@ msgstr ""
 msgid "The car was trying to race. You were trying something else."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:230
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:232
 msgid "The connection attempt failed for an unknown reason."
 msgstr ""
 
@@ -3525,7 +3538,7 @@ msgstr ""
 msgid "The selected vehicle does not support the selected transmission mode."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:173
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:175
 msgid "The server and client are compatible, but not an exact match."
 msgstr ""
 
@@ -3754,7 +3767,7 @@ msgid "Unable to open help file"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:26
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:144
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:146
 msgid "Unable to resolve server address."
 msgstr ""
 
@@ -3931,7 +3944,7 @@ msgid ""
 "by 1.0 second, HOME for maximum, END for minimum."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:117
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:114
 msgid ""
 "Use LEFT or RIGHT to change by 1, PAGE UP or PAGE DOWN to change by 10, HOME "
 "for maximum, END for minimum."
@@ -3941,7 +3954,7 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Create.cs:40
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:85
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:94
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:109
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:106
 msgid "Use LEFT or RIGHT to change."
 msgstr ""
 
@@ -3953,7 +3966,7 @@ msgstr ""
 msgid "Use motion sensors for steering"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Network\Participants.cs:112
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Network\Participants.cs:113
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:86
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Single\Session\Format.cs:35
 #: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Car.cs:38
@@ -4031,7 +4044,7 @@ msgid ""
 "language and then calibrate the screen-reader speaking rate."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:230
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:245
 msgid "What would you like to do?"
 msgstr ""
 
@@ -4163,7 +4176,7 @@ msgstr ""
 msgid "Yes, quit race preparation"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:208
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:223
 msgid "Yes, quit the race"
 msgstr ""
 
@@ -4264,14 +4277,14 @@ msgstr ""
 msgid "You were supposed to follow the road, not sample it repeatedly."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:125
+#: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Helpers.cs:127
 #, csharp-format
 msgid ""
 "Your client protocol version is {0}. This server supports protocol versions "
 "{1}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:176
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:178
 #, csharp-format
 msgid "Your client protocol version: {0}"
 msgstr ""
@@ -4330,7 +4343,7 @@ msgstr ""
 msgid "available"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:134
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:131
 msgid "both"
 msgstr ""
 
@@ -4350,7 +4363,7 @@ msgstr ""
 msgid "connections"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:133
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:130
 msgid "controller"
 msgstr ""
 
@@ -4362,7 +4375,7 @@ msgstr ""
 msgid "default"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:125
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:122
 #, csharp-format
 msgid "default ({0})"
 msgstr ""
@@ -4414,8 +4427,8 @@ msgstr ""
 msgid "imperial"
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:129
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:132
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:135
 msgid "keyboard"
 msgstr ""
 
@@ -4675,7 +4688,7 @@ msgstr ""
 msgid "{0} ({1}, {2})"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:158
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:160
 #, csharp-format
 msgid "{0} Message of the day: {1}."
 msgstr ""
@@ -4693,11 +4706,6 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:71
 #, csharp-format
 msgid "{0} game with {1} people, maximum {2} players"
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Dispatch\Room.cs:41
-#, csharp-format
-msgid "{0} has joined the game."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Controls.cs:217
@@ -4785,12 +4793,6 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Shortcuts\Mapping.cs:107
 #, csharp-format
 msgid "{0} set to {1}."
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:68
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\InteractionHints.cs:56
-#, csharp-format
-msgid "{0} {1}"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Panels\RadioPanel\Feedback.cs:35

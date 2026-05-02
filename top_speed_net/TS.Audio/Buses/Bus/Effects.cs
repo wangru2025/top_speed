@@ -9,9 +9,11 @@ namespace TS.Audio
     {
         public void SetEffectsEnabled(bool enabled)
         {
-            _effectsEnabled = enabled;
             lock (_effectLock)
-                ApplyEffectEnabledStatesUnsafe();
+            {
+                _effectsEnabled = enabled;
+                QueueEffectStateApplyUnsafe();
+            }
 
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
@@ -106,7 +108,7 @@ namespace TS.Audio
                 _effects.RemoveAt(currentIndex);
                 var clampedIndex = Math.Clamp(newIndex, 0, _effects.Count);
                 _effects.Insert(clampedIndex, effect);
-                RebuildModifierChainUnsafe();
+                QueueRebuildModifierChainUnsafe();
                 _output.Diagnostics.EmitDeferred(
                     AudioDiagnosticLevel.Debug,
                     AudioDiagnosticKind.BusEffectMoved,
@@ -135,7 +137,7 @@ namespace TS.Audio
 
                 var effect = _effects[index];
                 _effects.RemoveAt(index);
-                RebuildModifierChainUnsafe();
+                QueueRebuildModifierChainUnsafe();
                 effect.MarkDetached();
                 _output.Diagnostics.EmitDeferred(
                     AudioDiagnosticLevel.Debug,
@@ -168,7 +170,7 @@ namespace TS.Audio
             {
                 removed = _effects.ToArray();
                 _effects.Clear();
-                RebuildModifierChainUnsafe();
+                QueueRebuildModifierChainUnsafe();
             }
 
             for (var i = 0; i < removed.Length; i++)
@@ -193,7 +195,7 @@ namespace TS.Audio
                 var clampedIndex = Math.Clamp(index, 0, _effects.Count);
                 var effect = new BusEffect(this, modifier, name);
                 _effects.Insert(clampedIndex, effect);
-                RebuildModifierChainUnsafe();
+                QueueRebuildModifierChainUnsafe();
                 _output.Diagnostics.EmitDeferred(
                     AudioDiagnosticLevel.Debug,
                     AudioDiagnosticKind.BusEffectAdded,
@@ -212,7 +214,30 @@ namespace TS.Audio
             }
         }
 
-        private void RebuildModifierChainUnsafe()
+        private void QueueRebuildModifierChainUnsafe()
+        {
+            var version = ++_effectVersion;
+            _output.EnqueueControl(() => RebuildModifierChain(version), "bus-rebuild-effect-chain");
+        }
+
+        private void QueueEffectStateApplyUnsafe()
+        {
+            var version = ++_effectVersion;
+            _output.EnqueueControl(() => ApplyEffectEnabledStates(version), "bus-apply-effect-state");
+        }
+
+        private void RebuildModifierChain(int version)
+        {
+            lock (_effectLock)
+            {
+                if (version != _effectVersion)
+                    return;
+
+                RebuildModifierChainOnOutputUnsafe();
+            }
+        }
+
+        private void RebuildModifierChainOnOutputUnsafe()
         {
             for (var i = 0; i < _attachedModifiers.Count; i++)
                 _mixer.RemoveModifier(_attachedModifiers[i]);
@@ -225,6 +250,17 @@ namespace TS.Audio
                 effect.ApplyBusState(_effectsEnabled);
                 _mixer.AddModifier(effect.Modifier);
                 _attachedModifiers.Add(effect.Modifier);
+            }
+        }
+
+        private void ApplyEffectEnabledStates(int version)
+        {
+            lock (_effectLock)
+            {
+                if (version != _effectVersion)
+                    return;
+
+                ApplyEffectEnabledStatesUnsafe();
             }
         }
 

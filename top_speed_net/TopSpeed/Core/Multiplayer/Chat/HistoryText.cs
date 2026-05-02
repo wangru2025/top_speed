@@ -36,9 +36,93 @@ namespace TopSpeed.Core.Multiplayer.Chat
                 ResolvePlayerName(roomEvent));
         }
 
+        public static string BotAdded(RoomEventInfo roomEvent)
+        {
+            return LocalizationService.Format(
+                LocalizationService.Mark("{0} was added to the current room."),
+                ResolvePlayerName(roomEvent));
+        }
+
+        public static string BotRemoved(RoomEventInfo roomEvent)
+        {
+            return LocalizationService.Format(
+                LocalizationService.Mark("{0} was removed from the current room."),
+                ResolvePlayerName(roomEvent));
+        }
+
         public static string FromRoomEvent(RoomEventInfo roomEvent)
         {
-            return string.Empty;
+            switch (roomEvent.Kind)
+            {
+                case RoomEventKind.RoomCreated:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("Room created: {0}."),
+                        NormalizeRoomName(roomEvent.RoomName));
+
+                case RoomEventKind.RoomRemoved:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("Room removed: {0}."),
+                        NormalizeRoomName(roomEvent.RoomName));
+
+                case RoomEventKind.HostChanged:
+                    return LocalizationService.Mark("Room host changed.");
+
+                case RoomEventKind.TrackChanged:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("Track changed to {0}."),
+                        roomEvent.TrackName);
+
+                case RoomEventKind.LapsChanged:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("Number of laps changed to {0}."),
+                        roomEvent.Laps);
+
+                case RoomEventKind.PlayersToStartChanged:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("Maximum players changed to {0}."),
+                        roomEvent.PlayersToStart);
+
+                case RoomEventKind.ParticipantJoined:
+                    return ParticipantJoined(roomEvent);
+
+                case RoomEventKind.ParticipantLeft:
+                    return ParticipantLeft(roomEvent);
+
+                case RoomEventKind.ParticipantStateChanged:
+                    return LocalizationService.Format(
+                        LocalizationService.Mark("{0} changed ready state."),
+                        ResolvePlayerName(roomEvent));
+
+                case RoomEventKind.BotAdded:
+                    return BotAdded(roomEvent);
+
+                case RoomEventKind.BotRemoved:
+                    return BotRemoved(roomEvent);
+
+                case RoomEventKind.PrepareStarted:
+                    return LocalizationService.Mark("Race preparation started.");
+
+                case RoomEventKind.PrepareCancelled:
+                    return LocalizationService.Mark("Race preparation was cancelled.");
+
+                case RoomEventKind.RaceStarted:
+                    return LocalizationService.Mark("Race started.");
+
+                case RoomEventKind.RaceStopped:
+                    return LocalizationService.Mark("The current race was stopped.");
+
+                case RoomEventKind.GameRulesChanged:
+                    return LocalizationService.Mark("Game rules changed.");
+
+                case RoomEventKind.RacePaused:
+                    return LocalizationService.Mark("Race paused.");
+
+                case RoomEventKind.RaceResumed:
+                    return LocalizationService.Mark("Race resumed.");
+
+                default:
+                    return string.Empty;
+            }
         }
 
         private static string ResolvePlayerName(RoomEventInfo roomEvent)

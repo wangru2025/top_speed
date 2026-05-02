@@ -65,7 +65,7 @@ namespace TS.Audio
                 for (var i = 0; i < sources.Count; i++)
                 {
                     var source = sources[i];
-                    if (source == null || !source.IsSpatialized || !source.UsesSteamAudio || !source.IsPlaying)
+                    if (source == null || !source.IsActive || !source.IsSpatialized || !source.UsesSteamAudio || !source.IsPlaying)
                         continue;
 
                     _activeSources.Add(source);
@@ -89,7 +89,7 @@ namespace TS.Audio
                     for (var i = 0; i < sources.Count; i++)
                     {
                         var source = sources[i];
-                        if (source != null && source.IsSpatialized && source.UsesSteamAudio && source.IsPlaying)
+                        if (source != null && source.IsActive && source.IsSpatialized && source.UsesSteamAudio && source.IsPlaying)
                             ApplyRoomOnlyOutputs(source);
                     }
                     return;

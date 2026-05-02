@@ -1,6 +1,5 @@
 using System;
 using TopSpeed.Data;
-using TopSpeed.Localization;
 using TopSpeed.Network;
 using TopSpeed.Protocol;
 
@@ -26,23 +25,7 @@ namespace TopSpeed.Game
 
             private bool HandlePlayerJoined(IncomingPacket packet)
             {
-                var session = _owner._session;
-                if (session == null)
-                    return false;
-
-                if (ClientPacketSerializer.TryReadPlayerJoined(packet.Payload, out var joined))
-                {
-                    if (joined.PlayerNumber != session.PlayerNumber)
-                    {
-                        var name = string.IsNullOrWhiteSpace(joined.Name)
-                            ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), joined.PlayerNumber + 1)
-                            : joined.Name;
-                        _owner._speech.Speak(LocalizationService.Format(
-                            LocalizationService.Mark("{0} has joined the game."),
-                            name));
-                    }
-                }
-
+                ClientPacketSerializer.TryReadPlayerJoined(packet.Payload, out _);
                 return true;
             }
 
@@ -97,6 +80,11 @@ namespace TopSpeed.Game
                                 _owner._multiplayerRaceRuntime.Mode.SetHostPaused(roomState.RacePaused);
                                 _owner._multiplayerRaceRuntime.Mode.SyncParticipants(roomState);
                             }
+                            else if (roomState.RaceState == RoomRaceState.Completed
+                                     && !_owner._multiplayerRaceRuntime.Mode.ServerStopReceived)
+                            {
+                                _owner.RequestMultiplayerRoomResync();
+                            }
                             else if (roomState.RaceState == RoomRaceState.Aborted || roomState.RaceState == RoomRaceState.Lobby)
                                 _owner._multiplayerRaceRuntime.Mode.HandleServerRaceAborted();
                         }
@@ -117,7 +105,12 @@ namespace TopSpeed.Game
                 if (ClientPacketSerializer.TryReadRoomRaceStateChanged(packet.Payload, out var changed))
                 {
                     _owner._multiplayerCoordinator.HandleRoomRaceStateChanged(changed);
-                    _owner._multiplayerRaceRuntime.ApplyRaceState(changed);
+                    if (!_owner._multiplayerRaceRuntime.ApplyRaceState(changed))
+                    {
+                        if (_owner._multiplayerRaceRuntime.ShouldRequestResync(changed.RoomId, changed.RaceInstanceId, changed.EventSequence))
+                            _owner.RequestMultiplayerRoomResync();
+                        return true;
+                    }
 
                     if (_owner._multiplayerRaceRuntime.Mode != null
                         && _owner._multiplayerRaceRuntime.MatchesContext(changed.RoomId, changed.RaceInstanceId, allowBindRaceInstance: true)
@@ -158,10 +151,12 @@ namespace TopSpeed.Game
                 if (_owner._multiplayerRaceRuntime.Mode == null)
                     return true;
 
-                if (ClientPacketSerializer.TryReadRoomRacePlayerFinished(packet.Payload, out var finished)
-                    && _owner._multiplayerRaceRuntime.MatchesContext(finished.RoomId, finished.RaceInstanceId, allowBindRaceInstance: true))
+                if (ClientPacketSerializer.TryReadRoomRacePlayerFinished(packet.Payload, out var finished))
                 {
-                    _owner._multiplayerRaceRuntime.Mode.ApplyRemoteFinish(finished.PlayerNumber, finished.FinishOrder);
+                    if (_owner._multiplayerRaceRuntime.AcceptRaceEvent(finished.RoomId, finished.RaceInstanceId, finished.EventSequence, allowBindRaceInstance: true))
+                        _owner._multiplayerRaceRuntime.Mode.ApplyRemoteFinish(finished.PlayerNumber, finished.FinishOrder);
+                    else if (_owner._multiplayerRaceRuntime.ShouldRequestResync(finished.RoomId, finished.RaceInstanceId, finished.EventSequence))
+                        _owner.RequestMultiplayerRoomResync();
                 }
 
                 return true;
@@ -172,10 +167,12 @@ namespace TopSpeed.Game
                 if (_owner._multiplayerRaceRuntime.Mode == null)
                     return true;
 
-                if (ClientPacketSerializer.TryReadRoomRaceCompleted(packet.Payload, out var completed)
-                    && _owner._multiplayerRaceRuntime.MatchesContext(completed.RoomId, completed.RaceInstanceId, allowBindRaceInstance: true))
+                if (ClientPacketSerializer.TryReadRoomRaceCompleted(packet.Payload, out var completed))
                 {
-                    _owner._multiplayerRaceRuntime.Mode.HandleServerRaceCompleted(completed);
+                    if (_owner._multiplayerRaceRuntime.AcceptRaceEvent(completed.RoomId, completed.RaceInstanceId, completed.EventSequence, allowBindRaceInstance: true))
+                        _owner._multiplayerRaceRuntime.Mode.HandleServerRaceCompleted(completed);
+                    else if (_owner._multiplayerRaceRuntime.ShouldRequestResync(completed.RoomId, completed.RaceInstanceId, completed.EventSequence))
+                        _owner.RequestMultiplayerRoomResync();
                 }
 
                 return true;
@@ -186,10 +183,12 @@ namespace TopSpeed.Game
                 if (_owner._multiplayerRaceRuntime.Mode == null)
                     return true;
 
-                if (ClientPacketSerializer.TryReadRoomRaceAborted(packet.Payload, out var aborted)
-                    && _owner._multiplayerRaceRuntime.MatchesContext(aborted.RoomId, aborted.RaceInstanceId, allowBindRaceInstance: true))
+                if (ClientPacketSerializer.TryReadRoomRaceAborted(packet.Payload, out var aborted))
                 {
-                    _owner._multiplayerRaceRuntime.Mode.HandleServerRaceAborted();
+                    if (_owner._multiplayerRaceRuntime.AcceptRaceEvent(aborted.RoomId, aborted.RaceInstanceId, aborted.EventSequence, allowBindRaceInstance: true))
+                        _owner._multiplayerRaceRuntime.Mode.HandleServerRaceAborted();
+                    else if (_owner._multiplayerRaceRuntime.ShouldRequestResync(aborted.RoomId, aborted.RaceInstanceId, aborted.EventSequence))
+                        _owner.RequestMultiplayerRoomResync();
                 }
 
                 return true;

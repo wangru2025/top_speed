@@ -10,6 +10,7 @@ namespace TopSpeed.Network.Session
         private readonly Task _pollTask;
         private readonly Task _keepAliveTask;
         private readonly Action _drain;
+        private int _disposed;
 
         public Loop(Action poll, Action drain, Action keepAliveSend)
         {
@@ -21,10 +22,26 @@ namespace TopSpeed.Network.Session
 
         public void Dispose()
         {
-            _cts.Cancel();
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            try
+            {
+                _cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
             WaitForStop(_pollTask);
             WaitForStop(_keepAliveTask);
-            _cts.Dispose();
+            try
+            {
+                _cts.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
         }
 
         private void PollLoop(Action poll, CancellationToken token)

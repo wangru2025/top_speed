@@ -163,6 +163,8 @@ namespace TopSpeed.Drive.Single
 
             if (phaseChanged.Current == Phase.Paused)
             {
+                _soundQueue.Pause();
+                _track.PauseAudio();
                 _soundTheme?.Play(loop: true);
                 FadeInTheme();
                 _panels.Pause();
@@ -175,6 +177,8 @@ namespace TopSpeed.Drive.Single
 
             if (phaseChanged.Previous == Phase.Paused)
             {
+                _soundQueue.Resume();
+                _track.ResumeAudio();
                 _car.Unpause();
                 for (var i = 0; i < _nComputerPlayers; i++)
                     _computerPlayers[i]?.Unpause();

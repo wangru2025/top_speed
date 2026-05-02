@@ -98,6 +98,7 @@ namespace TopSpeed.Protocol
         public uint PlayerId;
         public byte PlayerNumber;
         public uint MediaId;
+        public uint TransferId;
         public uint TotalBytes;
         public string FileExtension = string.Empty;
     }
@@ -107,6 +108,7 @@ namespace TopSpeed.Protocol
         public uint PlayerId;
         public byte PlayerNumber;
         public uint MediaId;
+        public uint TransferId;
         public ushort ChunkIndex;
         public byte[] Data = Array.Empty<byte>();
     }
@@ -116,6 +118,7 @@ namespace TopSpeed.Protocol
         public uint PlayerId;
         public byte PlayerNumber;
         public uint MediaId;
+        public uint TransferId;
     }
 
     public sealed class PacketPlayerBumped
@@ -246,6 +249,7 @@ namespace TopSpeed.Protocol
     public sealed class PacketRoomState
     {
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RoomId;
         public uint RaceInstanceId;
         public uint HostPlayerId;
@@ -266,6 +270,7 @@ namespace TopSpeed.Protocol
     {
         public bool Found;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RoomId;
         public uint RaceInstanceId;
         public uint HostPlayerId;
@@ -284,6 +289,7 @@ namespace TopSpeed.Protocol
     {
         public uint RoomId;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public RoomEventKind Kind;
         public uint HostPlayerId;
@@ -291,6 +297,7 @@ namespace TopSpeed.Protocol
         public byte PlayerCount;
         public byte PlayersToStart;
         public RoomRaceState RaceState;
+        public bool RacePaused;
         public string TrackName = string.Empty;
         public byte Laps;
         public uint GameRulesFlags;
@@ -305,6 +312,7 @@ namespace TopSpeed.Protocol
     {
         public uint RoomId;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public RoomRaceState State;
     }
@@ -312,6 +320,8 @@ namespace TopSpeed.Protocol
     public sealed class PacketRoomRacePlayerFinished
     {
         public uint RoomId;
+        public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public uint PlayerId;
         public byte PlayerNumber;
@@ -323,6 +333,7 @@ namespace TopSpeed.Protocol
     {
         public uint RoomId;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public PacketRoomRaceResultEntry[] Results = Array.Empty<PacketRoomRaceResultEntry>();
     }
@@ -331,6 +342,7 @@ namespace TopSpeed.Protocol
     {
         public uint RoomId;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public RoomRaceAbortReason Reason;
     }
@@ -360,6 +372,8 @@ namespace TopSpeed.Protocol
         public ProtocolVer ClientVersion;
         public ProtocolVer MinSupported;
         public ProtocolVer MaxSupported;
+        public uint ResumePlayerId;
+        public ulong ResumeToken;
     }
 
     public sealed class PacketProtocolWelcome
@@ -368,6 +382,7 @@ namespace TopSpeed.Protocol
         public ProtocolVer NegotiatedVersion;
         public ProtocolVer ServerMinSupported;
         public ProtocolVer ServerMaxSupported;
+        public ulong ResumeToken;
         public string Message = string.Empty;
     }
 }

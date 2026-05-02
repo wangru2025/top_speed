@@ -56,19 +56,17 @@ namespace TopSpeed.Server.Network
             var serverRange = ProtocolProfile.ServerSupported;
             var compat = ProtocolCompat.Resolve(clientRange, serverRange);
 
-            var welcome = new PacketProtocolWelcome
-            {
-                Status = compat.Status,
-                NegotiatedVersion = compat.NegotiatedVersion,
-                ServerMinSupported = serverRange.MinSupported,
-                ServerMaxSupported = serverRange.MaxSupported,
-                Message = BuildHandshakeMessage(compat.Status, hello.ClientVersion, serverRange)
-            };
-
-            SendStream(player, PacketSerializer.WriteProtocolWelcome(welcome), PacketStream.Control);
-
             if (!compat.IsCompatible)
             {
+                var rejectedWelcome = new PacketProtocolWelcome
+                {
+                    Status = compat.Status,
+                    NegotiatedVersion = compat.NegotiatedVersion,
+                    ServerMinSupported = serverRange.MinSupported,
+                    ServerMaxSupported = serverRange.MaxSupported,
+                    Message = BuildHandshakeMessage(compat.Status, hello.ClientVersion, serverRange)
+                };
+                SendStream(player, PacketSerializer.WriteProtocolWelcome(rejectedWelcome), PacketStream.Control);
                 _logger.Warning(
                     LocalizationService.Format(
                         LocalizationService.Mark("Protocol rejected: player={0}, endpoint={1}, clientVersion={2}, clientSupported={3}, serverSupported={4}, status={5}."),
@@ -84,13 +82,28 @@ namespace TopSpeed.Server.Network
                     notifyRoom: false,
                     sendDisconnectPacket: true,
                     reason: "protocol_mismatch",
-                    disconnectMessage: welcome.Message);
+                    disconnectMessage: rejectedWelcome.Message);
                 return;
             }
 
+            var resolvedPlayer = _session.ResolveResume(player, hello.ResumePlayerId, hello.ResumeToken);
+            if (resolvedPlayer == null)
+                return;
+            player = resolvedPlayer;
             player.Handshake = HandshakeState.Complete;
             player.NegotiatedProtocol = compat.NegotiatedVersion;
-            SendInitialConnectionState(player);
+
+            var welcome = new PacketProtocolWelcome
+            {
+                Status = compat.Status,
+                NegotiatedVersion = compat.NegotiatedVersion,
+                ServerMinSupported = serverRange.MinSupported,
+                ServerMaxSupported = serverRange.MaxSupported,
+                ResumeToken = player.ResumeToken,
+                Message = BuildHandshakeMessage(compat.Status, hello.ClientVersion, serverRange)
+            };
+            SendStream(player, PacketSerializer.WriteProtocolWelcome(welcome), PacketStream.Control);
+            _session.SendInitialConnectionState(player);
         }
 
         private void RejectHandshake(PlayerConnection player, string message)
@@ -125,19 +138,6 @@ namespace TopSpeed.Server.Network
                 sendDisconnectPacket: true,
                 reason: "protocol_rejected",
                 disconnectMessage: welcome.Message);
-        }
-
-        private void SendInitialConnectionState(PlayerConnection player)
-        {
-            SendStream(player, PacketSerializer.WritePlayerNumber(player.Id, 0), PacketStream.Control);
-            if (!string.IsNullOrWhiteSpace(_config.Motd))
-                SendStream(player, PacketSerializer.WriteServerInfo(new PacketServerInfo { Motd = _config.Motd }), PacketStream.Control);
-            _room.HandleStateRequest(player);
-            _logger.Info(LocalizationService.Format(
-                LocalizationService.Mark("Connection established: playerId={0}, endpoint={1}, protocol={2}."),
-                player.Id,
-                player.EndPoint,
-                player.NegotiatedProtocol));
         }
 
         private static string BuildHandshakeMessage(ProtocolCompatStatus status, ProtocolVer clientVersion, ProtocolRange serverRange)

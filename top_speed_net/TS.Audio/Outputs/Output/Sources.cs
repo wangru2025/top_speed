@@ -100,13 +100,22 @@ namespace TS.Audio
 
         public void Update(double deltaTime)
         {
+            DrainLifecycle();
+            DrainControl();
             SyncSteamAudioRuntime();
+            DrainLifecycle();
+            DrainControl();
 
             _sourceUpdateSnapshot.Clear();
             _streamUpdateSnapshot.Clear();
             lock (_sourceLock)
             {
-                _sourceUpdateSnapshot.AddRange(_sources);
+                for (var i = 0; i < _sources.Count; i++)
+                {
+                    if (_sources[i].IsActive)
+                        _sourceUpdateSnapshot.Add(_sources[i]);
+                }
+
                 _streamUpdateSnapshot.AddRange(_streams);
             }
 
@@ -119,6 +128,8 @@ namespace TS.Audio
             _steamAudioRuntime?.UpdateSimulation(_sourceUpdateSnapshot);
             _sourceUpdateSnapshot.Clear();
             _streamUpdateSnapshot.Clear();
+            DrainControl();
+            DrainLifecycle();
         }
     }
 }

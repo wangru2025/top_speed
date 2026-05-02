@@ -28,6 +28,7 @@ namespace TopSpeed.Vehicles
             var incomingSpeed = Math.Max(0f, speed);
             _trackLength = trackLength;
             var preserveCrashState = _state == ComputerState.Crashing && !engineRunning;
+            var preserveFinishStoppingState = _finished && _state == ComputerState.Stopping && !engineRunning;
             var snapToIncoming = !_remoteNetInit;
 
             if (!_remoteNetInit)
@@ -99,7 +100,7 @@ namespace TopSpeed.Vehicles
             {
                 _remoteEngineStartPending = false;
                 _remoteEngineStartRemaining = 0f;
-                if (_soundEngine.IsPlaying)
+                if (!preserveFinishStoppingState && _soundEngine.IsPlaying)
                     _soundEngine.Stop();
             }
 
@@ -141,6 +142,8 @@ namespace TopSpeed.Vehicles
 
             if (preserveCrashState)
                 _state = ComputerState.Crashing;
+            else if (preserveFinishStoppingState)
+                _state = ComputerState.Stopping;
             else if (_remoteEngineStartPending)
                 _state = ComputerState.Starting;
             else if (engineRunning)

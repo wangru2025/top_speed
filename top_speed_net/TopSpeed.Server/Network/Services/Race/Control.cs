@@ -32,7 +32,7 @@ namespace TopSpeed.Server.Network
                     bot.State = PlayerState.NotReady;
 
                 TransitionState(room, RoomRaceState.Lobby);
-                _owner.SendProtocolMessageToRoomExcept(
+                _owner._notify.ProtocolToRoomExcept(
                     room,
                     host.Id,
                     LocalizationService.Format(
@@ -53,13 +53,14 @@ namespace TopSpeed.Server.Network
                 room.RaceStopDelaySeconds = 0f;
 
                 _owner._room.TouchVersion(room);
-                _owner.SendProtocolMessageToRoom(
+                _owner._notify.ProtocolToRoom(
                     room,
                     LocalizationService.Format(
                         paused
                             ? LocalizationService.Mark("{0} paused the current game.")
                             : LocalizationService.Mark("{0} resumed the current game."),
                         RaceServer.DescribePlayer(host)));
+                _owner._notify.RoomLifecycle(room, paused ? RoomEventKind.RacePaused : RoomEventKind.RaceResumed);
                 _owner._notify.BroadcastRoomState(room);
             }
 
@@ -119,7 +120,7 @@ namespace TopSpeed.Server.Network
                 }
 
                 TransitionState(room, RoomRaceState.Lobby);
-                _owner.SendProtocolMessageToRoomExcept(
+                _owner._notify.ProtocolToRoomExcept(
                     room,
                     host.Id,
                     LocalizationService.Format(

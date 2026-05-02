@@ -22,6 +22,8 @@ namespace TS.Audio
 
         SourceCreated,
         SourceDisposed,
+        SourceLifecycleChanged,
+        SourceAudioThreadException,
         SourcePlayRequested,
         SourceStarted,
         SourceStopped,

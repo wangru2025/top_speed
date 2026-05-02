@@ -50,6 +50,7 @@ namespace TopSpeed.Core.Multiplayer
         private readonly Action _resetPendingState;
         private readonly Action<int, bool> _setLocalMultiplayerLoadout;
         private readonly RuntimeLifetime _lifetime;
+        private readonly RoomPacketReducer _roomReducer;
         private readonly ConnectionFlow _connectionFlow;
         private readonly RoomsFlow _roomsFlow;
         private readonly SavedServersFlow _savedServersFlow;
@@ -89,6 +90,7 @@ namespace TopSpeed.Core.Multiplayer
             _resetPendingState = resetPendingState ?? throw new ArgumentNullException(nameof(resetPendingState));
             _setLocalMultiplayerLoadout = setLocalMultiplayerLoadout ?? throw new ArgumentNullException(nameof(setLocalMultiplayerLoadout));
             _lifetime = new RuntimeLifetime(_state);
+            _roomReducer = new RoomPacketReducer(_state);
             _connectionFlow = new ConnectionFlow(this);
             _roomsFlow = new RoomsFlow(this);
             _savedServersFlow = new SavedServersFlow(this);

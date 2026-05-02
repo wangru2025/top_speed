@@ -133,7 +133,7 @@ namespace TopSpeed.Drive.Multiplayer.Session.Systems
             var position = 1;
             foreach (var remote in _remotePlayers.Values)
             {
-                if (remote.Player.PositionY > _car.PositionY)
+                if (remote.Finished || remote.Player.PositionY > _car.PositionY)
                     position++;
             }
 

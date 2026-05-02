@@ -84,6 +84,7 @@ public sealed class ProtocolBehaviorTests
         {
             RoomId = 12,
             RoomVersion = 5,
+            EventSequence = 9,
             RaceInstanceId = 6,
             Kind = RoomEventKind.RoomSummaryUpdated,
             HostPlayerId = 44,
@@ -91,6 +92,7 @@ public sealed class ProtocolBehaviorTests
             PlayerCount = 2,
             PlayersToStart = 2,
             RaceState = RoomRaceState.Preparing,
+            RacePaused = true,
             TrackName = "desert",
             Laps = 3,
             GameRulesFlags = 17,
@@ -103,14 +105,16 @@ public sealed class ProtocolBehaviorTests
 
         var payload = ClientPacketSerializer.WriteRoomEvent(roomEvent);
         var expectedPayload =
-            4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
+            4 + 4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
             ProtocolConstants.MaxRoomNameLength + 4 + 1 + 1 + ProtocolConstants.MaxPlayerNameLength;
         payload.Length.Should().Be(2 + expectedPayload);
 
         ClientPacketSerializer.TryReadRoomEvent(payload, out var parsed).Should().BeTrue();
         parsed.RoomId.Should().Be(roomEvent.RoomId);
+        parsed.EventSequence.Should().Be(roomEvent.EventSequence);
         parsed.RaceInstanceId.Should().Be(roomEvent.RaceInstanceId);
         parsed.RaceState.Should().Be(roomEvent.RaceState);
+        parsed.RacePaused.Should().Be(roomEvent.RacePaused);
         parsed.TrackName.Should().Be(roomEvent.TrackName);
         parsed.SubjectPlayerId.Should().Be(roomEvent.SubjectPlayerId);
         parsed.SubjectPlayerNumber.Should().Be(roomEvent.SubjectPlayerNumber);

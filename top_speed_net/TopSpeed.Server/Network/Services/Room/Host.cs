@@ -101,6 +101,7 @@ namespace TopSpeed.Server.Network
                 _owner._race.TransitionState(room, RoomRaceState.Preparing);
                 room.PendingLoadouts.Clear();
                 room.PrepareSkips.Clear();
+                _owner._notify.RoomLifecycle(room, RoomEventKind.PrepareStarted);
                 _owner._race.AssignRandomBotLoadouts(room);
                 _owner._race.AnnounceBotsReady(room);
                 _owner._logger.Info(LocalizationService.Format(
@@ -113,7 +114,7 @@ namespace TopSpeed.Server.Network
                     room.PlayersToStart,
                     minimumParticipants));
 
-                _owner.SendProtocolMessageToRoom(
+                _owner._notify.ProtocolToRoom(
                     room,
                     LocalizationService.Format(
                         LocalizationService.Mark("{0} is about to start the game. Choose your vehicle and transmission mode."),
@@ -151,6 +152,7 @@ namespace TopSpeed.Server.Network
                     return;
                 }
 
+                value = RoomRules.NormalizePlayersToStart(room.RoomType, value);
                 if (GetRoomParticipantCount(room) > value)
                 {
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.InvalidPlayersToStart, LocalizationService.Mark("Cannot set lower than current players in room."));

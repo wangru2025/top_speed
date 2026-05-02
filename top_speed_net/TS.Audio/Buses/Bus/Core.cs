@@ -15,6 +15,7 @@ namespace TS.Audio
         private readonly List<SoundModifier> _attachedModifiers;
         private readonly object _effectLock;
         private readonly SfMixer _mixer;
+        private int _effectVersion;
         private float _localVolume = 1f;
         private float _effectiveVolume = 1f;
         private bool _muted;
@@ -36,10 +37,7 @@ namespace TS.Audio
                 Name = $"{Name} Bus"
             };
 
-            if (_parent == null)
-                _output.PlaybackDevice.MasterMixer.AddComponent(_mixer);
-            else
-                _parent.Mixer.AddComponent(_mixer);
+            _output.AttachBusToGraph(_parent, _mixer);
 
             _parent?._children.Add(this);
             RecalculateMix();
@@ -208,7 +206,7 @@ namespace TS.Audio
                 if (!_effects.Remove(effect))
                     return;
 
-                RebuildModifierChainUnsafe();
+                QueueRebuildModifierChainUnsafe();
             }
 
             effect.MarkDetached();
@@ -224,7 +222,7 @@ namespace TS.Audio
                 if (!_effects.Contains(effect))
                     return;
 
-                effect.ApplyBusState(_effectsEnabled);
+                QueueEffectStateApplyUnsafe();
             }
         }
 
@@ -266,17 +264,28 @@ namespace TS.Audio
             ClearEffects();
             _parent?._children.Remove(this);
             _output.UnregisterBus(this);
-            _mixer.Dispose();
-            _output.Diagnostics.Emit(
-                AudioDiagnosticLevel.Info,
-                AudioDiagnosticKind.BusDisposed,
-                AudioDiagnosticEntityType.Bus,
-                _output.Name,
-                Name,
-                null,
-                "Audio bus disposed.",
-                null,
-                new AudioDiagnosticSnapshot(bus: snapshot));
+            _output.EnqueueLifecycle(() => DisposeGraph(snapshot), "bus-dispose-from-graph");
+        }
+
+        private void DisposeGraph(AudioBusSnapshot snapshot)
+        {
+            _output.DetachBusFromGraph(_parent, _mixer);
+            _output.EnqueueDeferredLifecycle(
+                () =>
+                {
+                    _mixer.Dispose();
+                    _output.Diagnostics.Emit(
+                        AudioDiagnosticLevel.Info,
+                        AudioDiagnosticKind.BusDisposed,
+                        AudioDiagnosticEntityType.Bus,
+                        _output.Name,
+                        Name,
+                        null,
+                        "Audio bus disposed.",
+                        null,
+                        new AudioDiagnosticSnapshot(bus: snapshot));
+                },
+                "bus-dispose-native");
         }
 
         private ResolvedSourceOptions ResolveOptions(PlaybackPolicy? overrides)

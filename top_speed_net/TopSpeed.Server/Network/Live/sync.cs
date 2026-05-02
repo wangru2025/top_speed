@@ -15,7 +15,7 @@ namespace TopSpeed.Server.Network
             if (!notifyRoom)
                 return;
 
-            SendToRoomExceptOnStream(
+            _notify.ToRoomExcept(
                 room,
                 player.Id,
                 PacketSerializer.WritePlayerLiveStop(new PacketPlayerLiveStop
@@ -41,7 +41,7 @@ namespace TopSpeed.Server.Network
                 if (live == null || live.StreamId == 0)
                     continue;
 
-                SendStream(
+                _notify.ToPlayer(
                     receiver,
                     PacketSerializer.WritePlayerLiveStart(new PacketPlayerLiveStart
                     {

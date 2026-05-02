@@ -102,13 +102,15 @@ namespace TopSpeed.Network
             return buffer;
         }
 
-        private static byte[] BuildProtocolHelloPacket()
+        private static byte[] BuildProtocolHelloPacket(uint resumePlayerId, ulong resumeToken)
         {
             var packet = new PacketProtocolHello
             {
                 ClientVersion = ProtocolProfile.Current,
                 MinSupported = ProtocolProfile.ClientSupported.MinSupported,
-                MaxSupported = ProtocolProfile.ClientSupported.MaxSupported
+                MaxSupported = ProtocolProfile.ClientSupported.MaxSupported,
+                ResumePlayerId = resumePlayerId,
+                ResumeToken = resumeToken
             };
             return ClientPacketSerializer.WriteProtocolHello(packet);
         }

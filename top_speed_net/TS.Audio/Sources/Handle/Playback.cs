@@ -13,41 +13,32 @@ namespace TS.Audio
 
         public void Play(bool loop, float fadeInSeconds)
         {
-            ThrowIfDisposed();
+            if (!IsActive)
+                return;
+
             lock (_stateSync)
             {
-                _looping = loop;
-                _player.IsLooping = loop;
-                _pendingStartDiagnostic = true;
-                if (ShouldCullOneShotForDistanceUnsafe(loop))
-                {
-                    StopImmediatelyUnsafe();
-                    _pendingStartDiagnostic = false;
+                if (!IsActive)
                     return;
-                }
 
-                if (ShouldRestartForPlayUnsafe(loop) && _player.Seek(0))
-                {
-                    PrimeForImmediatePlayback();
-                    _reachedEnd = false;
-                }
-
+                _looping = loop;
+                _pendingStartDiagnostic = true;
                 if (fadeInSeconds > 0f)
                 {
                     CancelFadeUnsafe();
                     _currentVolume = 0f;
-                    ApplyPan();
-                    _player.Play();
                     BeginFadeUnsafe(_userVolume, fadeInSeconds, stopAfter: false);
                 }
                 else
                 {
                     CancelFadeUnsafe();
                     _currentVolume = _userVolume;
-                    ApplyPan();
-                    _player.Play();
                 }
+
+                _logicalPlaybackState = PlaybackState.Playing;
             }
+
+            _output.EnqueueControl(() => PlayCore(loop, fadeInSeconds), "source-play");
 
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
@@ -79,15 +70,11 @@ namespace TS.Audio
             lock (_stateSync)
             {
                 _pendingStartDiagnostic = false;
-                if (fadeOutSeconds > 0f && _player.State == PlaybackState.Playing)
-                {
-                    BeginFadeUnsafe(0f, fadeOutSeconds, stopAfter: true);
-                }
-                else
-                {
-                    StopImmediatelyUnsafe();
-                }
+                if (fadeOutSeconds <= 0f)
+                    _logicalPlaybackState = PlaybackState.Stopped;
             }
+
+            _output.EnqueueControl(() => StopCore(fadeOutSeconds), "source-stop");
 
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
@@ -107,14 +94,24 @@ namespace TS.Audio
 
         public void Pause()
         {
-            ThrowIfDisposed();
-            _player.Pause();
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+                _logicalPlaybackState = PlaybackState.Paused;
+
+            _output.EnqueueControl(PauseCore, "source-pause");
         }
 
         public void Resume()
         {
-            ThrowIfDisposed();
-            _player.Play();
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+                _logicalPlaybackState = PlaybackState.Playing;
+
+            _output.EnqueueControl(ResumeCore, "source-resume");
         }
 
         public void FadeIn(float seconds)
@@ -129,42 +126,24 @@ namespace TS.Audio
 
         public void SeekToStart()
         {
-            ThrowIfDisposed();
-            _pendingStartDiagnostic = false;
+            if (!IsActive)
+                return;
+
             lock (_stateSync)
-            {
-                if (_provider.CanSeek && _player.Seek(0))
-                {
-                    CancelFadeUnsafe();
-                    _currentVolume = _userVolume;
-                    ApplyPan();
-                    PrimeForImmediatePlayback();
-                    _steamAudioSpatial?.ClearSimulationState();
-                    _steamAudioSpatial?.Reset();
-                    _reachedEnd = false;
-                    _output.Diagnostics.EmitDeferred(
-                        AudioDiagnosticLevel.Debug,
-                        AudioDiagnosticKind.SourceSeeked,
-                        AudioDiagnosticEntityType.Source,
-                        _output.Name,
-                        _bus.Name,
-                        null,
-                        "Audio source seeked.",
-                        new Dictionary<string, object?>
-                        {
-                            ["sourceId"] = SourceId,
-                            ["timeSeconds"] = 0f
-                        },
-                        () => new AudioDiagnosticSnapshot(source: CaptureSnapshot()));
-                }
-            }
+                _pendingStartDiagnostic = false;
+
+            _output.EnqueueControl(SeekToStartCore, "source-seek-start");
         }
 
         public void SetLooping(bool looping)
         {
-            ThrowIfDisposed();
-            _looping = looping;
-            _player.IsLooping = looping;
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+                _looping = looping;
+
+            _output.EnqueueControl(() => SetLoopingCore(looping), "source-looping");
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
                 AudioDiagnosticKind.SourceLoopingChanged,
@@ -183,18 +162,26 @@ namespace TS.Audio
 
         public void SetOnEnd(Action onEnd)
         {
-            ThrowIfDisposed();
-            _onEnd = onEnd;
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+                _onEnd = onEnd;
         }
 
         internal void AddEndObserver(Action onEnd)
         {
-            ThrowIfDisposed();
             if (onEnd == null)
                 throw new ArgumentNullException(nameof(onEnd));
 
-            if (!_endObservers.Contains(onEnd))
-                _endObservers.Add(onEnd);
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+            {
+                if (!_endObservers.Contains(onEnd))
+                    _endObservers.Add(onEnd);
+            }
         }
 
         internal void RemoveEndObserver(Action onEnd)
@@ -202,7 +189,8 @@ namespace TS.Audio
             if (_disposed || onEnd == null)
                 return;
 
-            _endObservers.Remove(onEnd);
+            lock (_stateSync)
+                _endObservers.Remove(onEnd);
         }
 
         private void ApplyPan()
@@ -219,6 +207,111 @@ namespace TS.Audio
         {
             _player.PlaybackSpeed = 1f;
             _provider.SetRate(Math.Max(0.001f, _pitch * _spatialPitch));
+        }
+
+        private void PlayCore(bool loop, float fadeInSeconds)
+        {
+            lock (_stateSync)
+            {
+                if (!IsActive)
+                    return;
+
+                _player.IsLooping = loop;
+                if (ShouldCullOneShotForDistanceUnsafe(loop))
+                {
+                    StopImmediatelyUnsafe();
+                    _pendingStartDiagnostic = false;
+                    _logicalPlaybackState = PlaybackState.Stopped;
+                    return;
+                }
+
+                if (ShouldRestartForPlayUnsafe(loop) && _player.Seek(0))
+                {
+                    PrimeForImmediatePlayback();
+                    _reachedEnd = false;
+                }
+
+                ApplyPan();
+                ApplyPlaybackSpeed();
+                _player.Play();
+                _logicalPlaybackState = PlaybackState.Playing;
+            }
+        }
+
+        private void StopCore(float fadeOutSeconds)
+        {
+            lock (_stateSync)
+            {
+                if (!IsActive)
+                    return;
+
+                _pendingStartDiagnostic = false;
+                if (fadeOutSeconds > 0f && _player.State == PlaybackState.Playing)
+                    BeginFadeUnsafe(0f, fadeOutSeconds, stopAfter: true);
+                else
+                    StopImmediatelyUnsafe();
+
+                if (fadeOutSeconds <= 0f || _player.State != PlaybackState.Playing)
+                    _logicalPlaybackState = PlaybackState.Stopped;
+            }
+        }
+
+        private void PauseCore()
+        {
+            if (IsActive)
+            {
+                _player.Pause();
+                _logicalPlaybackState = PlaybackState.Paused;
+            }
+        }
+
+        private void ResumeCore()
+        {
+            if (IsActive)
+            {
+                _player.Play();
+                _logicalPlaybackState = PlaybackState.Playing;
+            }
+        }
+
+        private void SeekToStartCore()
+        {
+            lock (_stateSync)
+            {
+                if (!IsActive || !_provider.CanSeek || !_player.Seek(0))
+                    return;
+
+                CancelFadeUnsafe();
+                _currentVolume = _userVolume;
+                ApplyPan();
+                ApplyPlaybackSpeed();
+                PrimeForImmediatePlayback();
+                _steamAudioSpatial?.ClearSimulationState();
+                _steamAudioSpatial?.Reset();
+                _reachedEnd = false;
+                _logicalPlaybackState = PlaybackState.Stopped;
+            }
+
+            _output.Diagnostics.EmitDeferred(
+                AudioDiagnosticLevel.Debug,
+                AudioDiagnosticKind.SourceSeeked,
+                AudioDiagnosticEntityType.Source,
+                _output.Name,
+                _bus.Name,
+                null,
+                "Audio source seeked.",
+                new Dictionary<string, object?>
+                {
+                    ["sourceId"] = SourceId,
+                    ["timeSeconds"] = 0f
+                },
+                () => new AudioDiagnosticSnapshot(source: CaptureSnapshot()));
+        }
+
+        private void SetLoopingCore(bool looping)
+        {
+            if (IsActive)
+                _player.IsLooping = looping;
         }
 
         private void PrimeForImmediatePlayback()
@@ -238,6 +331,7 @@ namespace TS.Audio
             _steamAudioSpatial?.Reset();
             _reachedEnd = false;
             _currentVolume = _userVolume;
+            _logicalPlaybackState = PlaybackState.Stopped;
             ApplyPan();
         }
 

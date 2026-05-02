@@ -77,8 +77,6 @@ namespace TopSpeed.Drive.Multiplayer
 
         private bool AreVehiclesSettledForExit()
         {
-            if (_serverStopReceived)
-                return true;
             if (_car.Speed > PostFinishStopSpeedKph)
                 return false;
 
@@ -93,7 +91,7 @@ namespace TopSpeed.Drive.Multiplayer
             return true;
         }
 
-        private void FinalizeServerRace(DriveResultSummary? summary)
+        private void FinalizeServerRace(DriveResultSummary? summary, bool completed)
         {
             if (_serverStopReceived)
                 return;
@@ -102,12 +100,23 @@ namespace TopSpeed.Drive.Multiplayer
             _snapshotFrames.Clear();
             _hasSnapshotTickNow = false;
             _missingSnapshotPlayers.Clear();
-            foreach (var number in _remotePlayers.Keys)
-                _missingSnapshotPlayers.Add(number);
-            for (var i = 0; i < _missingSnapshotPlayers.Count; i++)
-                RemoveRemotePlayer(_missingSnapshotPlayers[i]);
-            _remoteLiveStates.Clear();
-            if (!_sentFinish)
+            if (!completed)
+            {
+                foreach (var number in _remotePlayers.Keys)
+                    _missingSnapshotPlayers.Add(number);
+                for (var i = 0; i < _missingSnapshotPlayers.Count; i++)
+                    RemoveRemotePlayer(_missingSnapshotPlayers[i]);
+                _remoteLiveStates.Clear();
+            }
+            if (completed && !_finished)
+                ApplyPlayerFinishState();
+            else if (!completed)
+                ApplyServerStopState();
+
+            if (completed)
+                PrepareRemoteVehiclesForRaceEnd();
+
+            if (completed && !_sentFinish)
             {
                 _sentFinish = true;
                 _currentState = PlayerState.Finished;
@@ -119,6 +128,26 @@ namespace TopSpeed.Drive.Multiplayer
 
             _session.SetPhase(Phase.Finishing);
             _exitWhenQueueIdle = true;
+        }
+
+        private void PrepareRemoteVehiclesForRaceEnd()
+        {
+            foreach (var remote in _remotePlayers.Values)
+            {
+                if (remote.Finished || remote.State == PlayerState.Finished)
+                    remote.Player.StopAtFinish();
+                else
+                    remote.Player.Stop();
+            }
+        }
+
+        private void ApplyServerStopState()
+        {
+            _car.SetOverrideController(_finishLockController);
+            _car.Quiet();
+            _car.ShutdownEngine();
+            _car.StopMotionImmediately();
+            _requirePostFinishStopBeforeExit = false;
         }
     }
 }

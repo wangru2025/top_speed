@@ -18,6 +18,7 @@ namespace TopSpeed.Game
                  || _choices.HasActiveChoiceDialog));
 
             UpdateTextInputPrompt();
+            UpdateSessionReconnect();
             _stateMachine.Update(deltaSeconds);
 
             if (_pendingDriveStart)

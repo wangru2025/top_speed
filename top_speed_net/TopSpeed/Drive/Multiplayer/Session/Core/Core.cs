@@ -87,5 +87,11 @@ namespace TopSpeed.Drive.Multiplayer
 
             _session = CreateSession();
         }
+
+        public void ReplaceNetwork(NetworkSession network)
+        {
+            _network = network ?? throw new ArgumentNullException(nameof(network));
+            _liveTx.ReplaceSession(network);
+        }
     }
 }

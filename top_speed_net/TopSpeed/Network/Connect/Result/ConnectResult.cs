@@ -65,7 +65,7 @@ namespace TopSpeed.Network
                 return CreateFail(LocalizationService.Mark("Connection lost before session initialization."));
             }
 
-            var session = new MultiplayerSession(manager, peer, endPoint, playerId, playerNumber, motd, playerName, incoming);
+            var session = new MultiplayerSession(manager, peer, endPoint, playerId, playerNumber, protocolWelcome?.ResumeToken ?? 0, motd, playerName, incoming);
             return new ConnectResult(true, LocalizationService.Mark("Connected."), session, motd, BuildCompatibilityNotice(protocolWelcome));
         }
 

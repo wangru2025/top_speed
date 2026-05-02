@@ -101,11 +101,22 @@ Networking handles server connection, multiplayer race synchronization, and othe
 
 Localization handles translated menu text and spoken strings.
 
+### 4.2. System Requirements
+#### 4.2.1. Desktop Requirements
+On Windows, the game runs on 64bit versions only.
+
+If you are having issues or getting errors when trying to open the game, please download the [Visual C++ Redistributable bundle](https://blindhelp.net/software/vc-dx). This link will open a third-party website where you can download it from there.
+
+On Mac OS, the game works on Mac OS 12.1 or later.
+
+On Linux, for the speech to work correctly you need to have Orca version 49 or later.
+
+#### 4.2.2. Mobile Requirements
+On Android, the game works on Android 11 or later and works only on 64bit architectures for now. It is recommended to have a relatively good processor for the game to work properly especially for HRTF audio without stuttering.
+
 ## 5. Install, Update, and Remove
 ### Install on Desktop
 Desktop builds are portable. Extract the package into one folder and keep all bundled folders beside the executable.
-
-If you are having issues or getting errors when trying to open the game, please download the [Visual C++ Redistributable bundle](https://blindhelp.net/software/vc-dx). This link will open a third-party website where you can download it from there.
 
 Do not move only the executable into another location. The game expects its content folders to stay together. If you need a quick way of accessing the game, you may wish to create a shortcut to the executable and placing it on the desktop (for example) on Windows.
 
@@ -478,11 +489,26 @@ The following is the list of the servers. If you wish yours to be included, cont
 The port is omitted when the server uses the default port which is 28630.
 
 1. Muhammad Gagah:
+
 Address: tt.mgagah.my.id
 
 2. Adriano:
 
 Address: adriano.mlbfan.org
+
+Port: 25255
+
+3. Valiant8086:
+
+Address: valiant8086.redirectme.net
+
+4. Christopher Wright:
+
+Address: christopherw.me
+
+5. Boris Churkin:
+
+Address: iks2101.keenetic.pro
 
 Port: 25255
 

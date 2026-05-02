@@ -7,7 +7,13 @@ namespace TopSpeed.Vehicles.Live
             if (buffer == null || frames <= 0 || channels <= 0)
                 return;
 
-            lock (_lock)
+            if (!System.Threading.Monitor.TryEnter(_lock))
+            {
+                System.Array.Clear(buffer, 0, buffer.Length);
+                return;
+            }
+
+            try
             {
                 var sampleCount = frames * channels;
                 if (sampleCount <= 0 || sampleCount > buffer.Length)
@@ -43,9 +49,13 @@ namespace TopSpeed.Vehicles.Live
 
                 if (cursor < sampleCount)
                 {
-                    for (var i = cursor; i < sampleCount; i++)
-                        buffer[i] = 0f;
+                        for (var i = cursor; i < sampleCount; i++)
+                            buffer[i] = 0f;
                 }
+            }
+            finally
+            {
+                System.Threading.Monitor.Exit(_lock);
             }
         }
     }

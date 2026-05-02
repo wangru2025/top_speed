@@ -14,7 +14,7 @@ namespace TopSpeed.Server.Network
                 return;
             if (start.PlayerId != player.Id || start.PlayerNumber != player.PlayerNumber)
                 return;
-            if (!IsValidLiveStart(start))
+            if (!PacketValidation.IsValidLiveStart(start))
                 return;
 
             if (player.Live != null)
@@ -32,7 +32,7 @@ namespace TopSpeed.Server.Network
                 LastFrameUtc = DateTime.UtcNow
             };
 
-            SendToRoomExceptOnStream(
+            _notify.ToRoomExcept(
                 room,
                 player.Id,
                 PacketSerializer.WritePlayerLiveStart(new PacketPlayerLiveStart
@@ -55,13 +55,13 @@ namespace TopSpeed.Server.Network
                 return;
             if (frame.PlayerId != player.Id || frame.PlayerNumber != player.PlayerNumber)
                 return;
+            if (!PacketValidation.IsValidLiveFrame(frame))
+                return;
 
             var live = player.Live;
             if (live == null)
                 return;
             if (live.StreamId != frame.StreamId)
-                return;
-            if (frame.Data == null || frame.Data.Length == 0 || frame.Data.Length > ProtocolConstants.MaxLiveFrameBytes)
                 return;
 
             if (live.HasSequence && frame.Sequence != live.NextSequence)
@@ -74,7 +74,7 @@ namespace TopSpeed.Server.Network
             live.NextSequence = unchecked((ushort)(frame.Sequence + 1));
             live.LastFrameUtc = DateTime.UtcNow;
 
-            SendToRoomExceptOnStream(
+            _notify.ToRoomExcept(
                 room,
                 player.Id,
                 PacketSerializer.WritePlayerLiveFrame(new PacketPlayerLiveFrame
@@ -95,6 +95,8 @@ namespace TopSpeed.Server.Network
                 return;
             if (stop.PlayerId != player.Id || stop.PlayerNumber != player.PlayerNumber)
                 return;
+            if (!PacketValidation.IsValidLiveStop(stop))
+                return;
 
             var live = player.Live;
             if (live == null)
@@ -103,21 +105,6 @@ namespace TopSpeed.Server.Network
                 return;
 
             StopLive(player, room, notifyRoom: true);
-        }
-
-        private static bool IsValidLiveStart(PacketPlayerLiveStart start)
-        {
-            if (start.StreamId == 0)
-                return false;
-            if (start.Codec != LiveCodec.Opus)
-                return false;
-            if (start.SampleRate != ProtocolConstants.LiveSampleRate)
-                return false;
-            if (start.FrameMs != ProtocolConstants.LiveFrameMs)
-                return false;
-            if (start.Channels < ProtocolConstants.LiveChannelsMin || start.Channels > ProtocolConstants.LiveChannelsMax)
-                return false;
-            return true;
         }
 
         private static bool IsNewerSequence(ushort sequence, ushort expected)

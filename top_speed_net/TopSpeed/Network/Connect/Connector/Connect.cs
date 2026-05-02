@@ -11,7 +11,12 @@ namespace TopSpeed.Network
 {
     internal sealed partial class MultiplayerConnector
     {
-        public async Task<ConnectResult> ConnectAsync(string host, int port, string callSign, TimeSpan timeout, CancellationToken token)
+        public Task<ConnectResult> ConnectAsync(string host, int port, string callSign, TimeSpan timeout, CancellationToken token)
+        {
+            return ConnectAsync(host, port, callSign, timeout, token, resumePlayerId: 0, resumeToken: 0);
+        }
+
+        public async Task<ConnectResult> ConnectAsync(string host, int port, string callSign, TimeSpan timeout, CancellationToken token, uint resumePlayerId, ulong resumeToken)
         {
             if (string.IsNullOrWhiteSpace(host))
                 return ConnectResult.CreateFail(LocalizationService.Mark("No server address was provided."));
@@ -62,7 +67,7 @@ namespace TopSpeed.Network
 
             manager.Connect(endpoint.Address.ToString(), endpoint.Port, ProtocolConstants.ConnectionKey);
 
-            var protocolHello = BuildProtocolHelloPacket();
+            var protocolHello = BuildProtocolHelloPacket(resumePlayerId, resumeToken);
             var hello = BuildPlayerHelloPacket(sanitizedCallSign);
             var keepAlive = new[] { ProtocolConstants.Version, (byte)Command.KeepAlive };
             var protocolHelloSent = false;

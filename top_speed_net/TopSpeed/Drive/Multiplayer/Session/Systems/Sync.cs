@@ -68,7 +68,11 @@ namespace TopSpeed.Drive.Multiplayer.Session.Systems
             if (_isServerStopReceived())
             {
                 foreach (var remote in _remotePlayers.Values)
+                {
+                    if (!remote.Finished && remote.State != PlayerState.Finished)
+                        remote.Player.Stop();
                     remote.Player.Run(elapsed, _getLocalPositionX(), _getLocalPositionY());
+                }
             }
 
             DrainRemoteLiveFrames();

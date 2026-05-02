@@ -25,6 +25,7 @@ namespace TopSpeed.Network
             IPEndPoint serverEndPoint,
             uint playerId,
             byte playerNumber,
+            ulong resumeToken,
             string? motd,
             string? playerName,
             ConcurrentQueue<IncomingPacket> incoming)
@@ -36,6 +37,7 @@ namespace TopSpeed.Network
             _media = new Media(_sender);
             _live = new LiveSend(_sender);
             PlayerId = playerId;
+            ResumeToken = resumeToken;
             _playerNumber = playerNumber;
             Motd = motd ?? string.Empty;
             PlayerName = playerName ?? string.Empty;
@@ -45,6 +47,7 @@ namespace TopSpeed.Network
         public IPAddress Address => _serverEndPoint.Address;
         public int Port => _serverEndPoint.Port;
         public uint PlayerId { get; }
+        public ulong ResumeToken { get; }
         public byte PlayerNumber => _playerNumber;
         public string Motd { get; }
         public string PlayerName { get; }

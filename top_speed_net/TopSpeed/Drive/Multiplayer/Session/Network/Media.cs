@@ -11,12 +11,14 @@ namespace TopSpeed.Drive.Multiplayer
                 return;
             if (media.PlayerNumber < _disconnectedPlayerSlots.Length && _disconnectedPlayerSlots[media.PlayerNumber])
                 return;
-            if (media.TotalBytes == 0 || media.TotalBytes > ProtocolConstants.MaxMediaBytes)
+            if (!PacketValidation.IsValidMediaBegin(media))
                 return;
 
             _remoteMediaTransfers[media.PlayerNumber] = new MediaTransfer
             {
                 MediaId = media.MediaId,
+                TransferId = media.TransferId,
+                State = MediaTransferState.Receiving,
                 Extension = media.FileExtension,
                 Data = new byte[media.TotalBytes],
                 Offset = 0,
@@ -30,9 +32,11 @@ namespace TopSpeed.Drive.Multiplayer
                 return;
             if (media.PlayerNumber < _disconnectedPlayerSlots.Length && _disconnectedPlayerSlots[media.PlayerNumber])
                 return;
+            if (!PacketValidation.IsValidMediaChunk(media))
+                return;
             if (!_remoteMediaTransfers.TryGetValue(media.PlayerNumber, out var transfer))
                 return;
-            if (transfer.MediaId != media.MediaId)
+            if (transfer.MediaId != media.MediaId || transfer.TransferId != media.TransferId)
                 return;
             if (transfer.NextChunkIndex != media.ChunkIndex)
                 return;
@@ -42,6 +46,7 @@ namespace TopSpeed.Drive.Multiplayer
             var remaining = transfer.Data.Length - transfer.Offset;
             if (media.Data.Length > remaining)
             {
+                transfer.State = MediaTransferState.Cancelled;
                 _remoteMediaTransfers.Remove(media.PlayerNumber);
                 return;
             }
@@ -49,6 +54,8 @@ namespace TopSpeed.Drive.Multiplayer
             Buffer.BlockCopy(media.Data, 0, transfer.Data, transfer.Offset, media.Data.Length);
             transfer.Offset += media.Data.Length;
             transfer.NextChunkIndex++;
+            if (transfer.IsComplete)
+                transfer.State = MediaTransferState.Complete;
         }
 
         private void ApplyRemoteMediaEndCore(PacketPlayerMediaEnd media)
@@ -57,12 +64,15 @@ namespace TopSpeed.Drive.Multiplayer
                 return;
             if (media.PlayerNumber < _disconnectedPlayerSlots.Length && _disconnectedPlayerSlots[media.PlayerNumber])
                 return;
+            if (!PacketValidation.IsValidMediaEnd(media))
+                return;
             if (!_remoteMediaTransfers.TryGetValue(media.PlayerNumber, out var transfer))
                 return;
-            if (transfer.MediaId != media.MediaId)
+            if (transfer.MediaId != media.MediaId || transfer.TransferId != media.TransferId)
                 return;
             if (!transfer.IsComplete)
                 return;
+            transfer.State = MediaTransferState.Complete;
             if (_remoteLiveStates.TryGetValue(media.PlayerNumber, out var live) && live.StreamId != 0)
                 return;
             if (!_remotePlayers.TryGetValue(media.PlayerNumber, out var remote))

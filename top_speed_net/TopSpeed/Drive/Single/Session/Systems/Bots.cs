@@ -60,8 +60,7 @@ namespace TopSpeed.Drive.Single.Session.Systems
                 if (_track.Lap(bot.PositionY) <= _lapLimit || bot.Finished)
                     continue;
 
-                bot.Stop();
-                bot.SetFinished(true);
+                bot.StopAtFinish();
                 _recordFinish(bot.PlayerNumber, _readRaceTimeMs());
                 _announceFinishOrder(bot.PlayerNumber);
                 if (_checkFinish())

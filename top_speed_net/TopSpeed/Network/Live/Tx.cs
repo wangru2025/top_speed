@@ -8,9 +8,9 @@ namespace TopSpeed.Network.Live
     {
         private const float FrameSeconds = ProtocolConstants.LiveFrameMs / 1000f;
 
-        private readonly MultiplayerSession _session;
         private readonly Opus _encoder;
         private Source? _source;
+        private MultiplayerSession _session;
 
         private uint _streamId;
         private string _mediaPath;
@@ -26,6 +26,13 @@ namespace TopSpeed.Network.Live
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _encoder = new Opus((byte)ProtocolConstants.LiveChannelsMax);
             _mediaPath = string.Empty;
+        }
+
+        public void ReplaceSession(MultiplayerSession session)
+        {
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+            _started = false;
+            _frameClock = 0f;
         }
 
         public bool SetMedia(uint mediaId, string mediaPath, out string error)

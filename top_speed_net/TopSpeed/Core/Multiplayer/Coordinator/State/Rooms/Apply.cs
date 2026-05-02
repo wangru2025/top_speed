@@ -29,18 +29,29 @@ namespace TopSpeed.Core.Multiplayer
                 case RoomEventKind.BotAdded:
                 case RoomEventKind.BotRemoved:
                 case RoomEventKind.PlayersToStartChanged:
+                case RoomEventKind.PrepareStarted:
+                case RoomEventKind.PrepareCancelled:
+                case RoomEventKind.RaceStarted:
+                case RoomEventKind.RaceStopped:
+                case RoomEventKind.RacePaused:
+                case RoomEventKind.RaceResumed:
                     var summary = new RoomSummaryInfo
                     {
                         RoomId = roomEvent.RoomId,
+                        RoomVersion = roomEvent.RoomVersion,
                         RoomName = roomEvent.RoomName ?? string.Empty,
-                        RoomType = roomEvent.RoomType,
+                        RoomType = RoomRules.NormalizeType(roomEvent.RoomType),
                         PlayerCount = roomEvent.PlayerCount,
-                        PlayersToStart = roomEvent.PlayersToStart,
-                        RaceState = roomEvent.RaceState,
+                        PlayersToStart = RoomRules.NormalizePlayersToStart(roomEvent.RoomType, roomEvent.PlayersToStart),
+                        RaceState = RoomRules.NormalizeRaceState(roomEvent.RaceState),
                         TrackName = roomEvent.TrackName ?? string.Empty
                     };
                     if (index >= 0)
+                    {
+                        if (roomEvent.RoomVersion != 0 && rooms[index].RoomVersion > roomEvent.RoomVersion)
+                            break;
                         rooms[index] = summary;
+                    }
                     else if (roomEvent.Kind != RoomEventKind.RoomSummaryUpdated || roomEvent.RoomId != 0)
                         rooms.Add(summary);
                     break;
@@ -59,21 +70,34 @@ namespace TopSpeed.Core.Multiplayer
 
             if (!CurrentRoom.InRoom || CurrentRoom.RoomId != roomEvent.RoomId)
                 return false;
+            if (IsStaleEvent(roomEvent.EventSequence))
+                return false;
+            if (roomEvent.RoomVersion != 0 && CurrentRoom.RoomVersion > roomEvent.RoomVersion)
+                return false;
 
             var previousIsHost = CurrentRoom.IsHost;
 
             CurrentRoom.RoomVersion = roomEvent.RoomVersion;
+            if (roomEvent.EventSequence != 0)
+                AdvanceEventSequence(roomEvent.EventSequence);
             if (!string.IsNullOrWhiteSpace(roomEvent.RoomName))
                 CurrentRoom.RoomName = roomEvent.RoomName;
-            CurrentRoom.HostPlayerId = roomEvent.HostPlayerId;
-            CurrentRoom.RoomType = roomEvent.RoomType;
-            CurrentRoom.PlayersToStart = roomEvent.PlayersToStart;
-            CurrentRoom.RaceInstanceId = roomEvent.RaceInstanceId;
-            CurrentRoom.RaceState = roomEvent.RaceState;
-            CurrentRoom.TrackName = roomEvent.TrackName ?? string.Empty;
-            CurrentRoom.Laps = roomEvent.Laps;
+            if (roomEvent.HostPlayerId != 0)
+                CurrentRoom.HostPlayerId = roomEvent.HostPlayerId;
+            CurrentRoom.RoomType = RoomRules.NormalizeType(roomEvent.RoomType);
+            if (roomEvent.PlayersToStart > 0)
+                CurrentRoom.PlayersToStart = RoomRules.NormalizePlayersToStart(roomEvent.RoomType, roomEvent.PlayersToStart);
+            var nextRaceState = RoomRules.NormalizeRaceState(roomEvent.RaceState);
+            if (roomEvent.RaceInstanceId != 0 || nextRaceState == RoomRaceState.Lobby)
+                CurrentRoom.RaceInstanceId = roomEvent.RaceInstanceId;
+            CurrentRoom.RaceState = nextRaceState;
+            CurrentRoom.RacePaused = roomEvent.RacePaused;
+            if (!string.IsNullOrWhiteSpace(roomEvent.TrackName))
+                CurrentRoom.TrackName = roomEvent.TrackName;
+            if (roomEvent.Laps > 0)
+                CurrentRoom.Laps = roomEvent.Laps;
             CurrentRoom.GameRulesFlags = roomEvent.GameRulesFlags;
-            CurrentRoom.IsHost = localPlayerId != 0 && roomEvent.HostPlayerId == localPlayerId;
+            CurrentRoom.IsHost = localPlayerId != 0 && CurrentRoom.HostPlayerId == localPlayerId;
 
             switch (roomEvent.Kind)
             {
@@ -91,10 +115,11 @@ namespace TopSpeed.Core.Multiplayer
 
             localHostChanged = previousIsHost != CurrentRoom.IsHost;
             WasHost = CurrentRoom.IsHost;
+            UpdateClientStateFromRoom();
             return true;
         }
 
-        private void UpdateRoomListRaceState(uint roomId, RoomRaceState state)
+        private void UpdateRoomListRaceState(uint roomId, uint roomVersion, RoomRaceState state)
         {
             var rooms = RoomList.Rooms ?? Array.Empty<RoomSummaryInfo>();
             if (rooms.Length == 0)
@@ -107,6 +132,14 @@ namespace TopSpeed.Core.Multiplayer
                 var source = rooms[i];
                 if (source.RoomId == roomId)
                 {
+                    if (roomVersion != 0 && source.RoomVersion > roomVersion)
+                    {
+                        copy[i] = source;
+                        continue;
+                    }
+
+                    if (roomVersion != 0)
+                        source.RoomVersion = roomVersion;
                     source.RaceState = state;
                     updated = true;
                 }
@@ -131,7 +164,7 @@ namespace TopSpeed.Core.Multiplayer
             {
                 PlayerId = roomEvent.SubjectPlayerId,
                 PlayerNumber = roomEvent.SubjectPlayerNumber,
-                State = roomEvent.SubjectPlayerState,
+                State = RoomRules.NormalizeParticipantState(roomEvent.SubjectPlayerState),
                 Name = name
             };
 

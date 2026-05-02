@@ -32,12 +32,7 @@ namespace TopSpeed.Drive.Single
         private void ApplyPlayerFinishState()
         {
             _finished = true;
-            _car.ManualTransmission = false;
-            _car.SetOverrideController(_finishLockController);
-            _car.SetNeutralGear();
-            _car.Quiet();
-            _car.ShutdownEngine();
-            _car.StopMotionImmediately();
+            TopSpeed.Drive.Session.FinishVehicle.Apply(_car, _finishLockController);
             _raceTime = _session.Context.ProgressMilliseconds;
             _requirePostFinishStopBeforeExit = true;
         }

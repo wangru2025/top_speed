@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 
 namespace TS.Audio
 {
@@ -13,7 +14,7 @@ namespace TS.Audio
                 NormalizeOrFallback(forward, new Vector3(0f, 0f, 1f)),
                 NormalizeOrFallback(up, new Vector3(0f, 1f, 0f)));
             _listenerState = snapshot;
-            _steamAudioRuntime?.UpdateListener(snapshot.Position, snapshot.Forward, snapshot.Up);
+            QueueApplyListenerState();
         }
 
         public void SetRoomAcoustics(RoomAcoustics acoustics)
@@ -21,7 +22,7 @@ namespace TS.Audio
             _roomAcoustics = acoustics;
             AudioSourceHandle[] snapshot;
             lock (_sourceLock)
-                snapshot = _sources.ToArray();
+                snapshot = CaptureSourceSnapshotUnsafe();
 
             for (var i = 0; i < snapshot.Length; i++)
                 snapshot[i].SetRoomAcoustics(_roomAcoustics);
@@ -40,6 +41,22 @@ namespace TS.Audio
                     ["reverbTimeSeconds"] = acoustics.ReverbTimeSeconds,
                     ["reverbGain"] = acoustics.ReverbGain
                 });
+        }
+
+        private void QueueApplyListenerState()
+        {
+            if (Interlocked.Exchange(ref _listenerApplyQueued, 1) != 0)
+                return;
+
+            if (!EnqueueControl(ApplyListenerState, "output-apply-listener"))
+                Interlocked.Exchange(ref _listenerApplyQueued, 0);
+        }
+
+        private void ApplyListenerState()
+        {
+            Interlocked.Exchange(ref _listenerApplyQueued, 0);
+            var snapshot = _listenerState;
+            _steamAudioRuntime?.UpdateListener(snapshot.Position, snapshot.Forward, snapshot.Up);
         }
     }
 }

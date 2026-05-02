@@ -27,7 +27,7 @@ namespace TopSpeed.Server.Network
             {
                 foreach (var bot in room.Bots.OrderBy(candidate => candidate.PlayerNumber))
                 {
-                    _owner.SendProtocolMessageToRoom(
+                    _owner._notify.ProtocolToRoom(
                         room,
                         LocalizationService.Format(
                             LocalizationService.Mark("{0} is ready."),
@@ -55,7 +55,7 @@ namespace TopSpeed.Server.Network
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
                     room.PrepareSkips.Clear();
-                    _owner.SendProtocolMessageToRoom(room, LocalizationService.Mark("Race start cancelled because there are not enough players."));
+                    _owner._notify.ProtocolToRoom(room, LocalizationService.Mark("Race start cancelled because there are not enough players."));
                     _owner._logger.Info(LocalizationService.Format(
                         LocalizationService.Mark("Race prepare cancelled: room={0} \"{1}\", participants={2}, minStart={3}, capacity={4}."),
                         room.Id,
@@ -87,7 +87,7 @@ namespace TopSpeed.Server.Network
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
                     room.PrepareSkips.Clear();
-                    _owner.SendProtocolMessageToRoom(room, LocalizationService.Mark("Race start cancelled because there are not enough ready players."));
+                    _owner._notify.ProtocolToRoom(room, LocalizationService.Mark("Race start cancelled because there are not enough ready players."));
                     _owner._logger.Info(LocalizationService.Format(
                         LocalizationService.Mark("Race prepare cancelled after loadout: room={0} \"{1}\", active={2}, minStart={3}."),
                         room.Id,
@@ -97,7 +97,7 @@ namespace TopSpeed.Server.Network
                     return;
                 }
 
-                _owner.SendProtocolMessageToRoom(room, RoomTexts.AllPlayersReadyStartingGame);
+                _owner._notify.ProtocolToRoom(room, RoomTexts.AllPlayersReadyStartingGame);
                 _owner._logger.Info(LocalizationService.Format(
                     LocalizationService.Mark("All loadouts ready: room={0} \"{1}\", starting race."),
                     room.Id,
@@ -152,10 +152,12 @@ namespace TopSpeed.Server.Network
                 if (room.RaceStarted)
                     return;
 
+                _owner._room.ShuffleNumbersForRaceStart(room);
                 var activePlayerIds = room.PlayerIds.Where(id => room.PendingLoadouts.ContainsKey(id)).ToList();
                 if (!room.TrackSelected || room.TrackData == null)
                     _owner._room.SetTrackData(room, room.TrackName);
 
+                RoomEventJournal.ClearForRaceStart(room);
                 room.RaceInstanceId++;
                 TransitionState(room, RoomRaceState.Racing);
                 room.RacePaused = false;
@@ -232,7 +234,9 @@ namespace TopSpeed.Server.Network
                 }
                 _owner.SendRaceSnapshot(room, DeliveryMethod.ReliableOrdered);
                 _owner._room.TouchVersion(room);
+                _owner._notify.RoomLifecycle(room, RoomEventKind.RaceStarted);
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
+                _owner._notify.BroadcastRoomState(room);
                 _owner._logger.Info(LocalizationService.Format(
                     LocalizationService.Mark("Race started: room={0} \"{1}\", track={2}, laps={3}, humans={4}, bots={5}."),
                     room.Id,
@@ -253,6 +257,13 @@ namespace TopSpeed.Server.Network
                     room.ActiveRaceParticipantIds.Count,
                     room.RaceParticipantResults.Count));
                 FinalizeUnresolvedParticipantsAsDnf(room);
+                if (!RaceCompletionInvariants.TryValidateTerminalResults(room, out var invariantReason))
+                {
+                    _owner._logger.Debug(LocalizationService.Format(
+                        LocalizationService.Mark("Race completion invariant failed before emit: room={0}, reason={1}."),
+                        room.Id,
+                        invariantReason));
+                }
                 TransitionState(room, RoomRaceState.Completed);
                 room.RacePaused = false;
                 room.PendingLoadouts.Clear();

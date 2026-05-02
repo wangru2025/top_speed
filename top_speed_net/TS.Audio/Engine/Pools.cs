@@ -92,9 +92,15 @@ namespace TS.Audio
             {
                 if (_pooledOneShots.TryGetValue(key, out var pool) && pool.Count > 0)
                 {
-                    var pooled = pool.Pop();
-                    _activePooledOneShots[pooled] = key;
-                    return pooled;
+                    while (pool.Count > 0)
+                    {
+                        var pooled = pool.Pop();
+                        if (pooled.IsDisposed)
+                            continue;
+
+                        _activePooledOneShots[pooled] = key;
+                        return pooled;
+                    }
                 }
             }
 
@@ -136,6 +142,9 @@ namespace TS.Audio
         {
             try
             {
+                if (entry.Source.IsDisposed)
+                    return;
+
                 ResetOneShotSource(entry.Source);
             }
             catch

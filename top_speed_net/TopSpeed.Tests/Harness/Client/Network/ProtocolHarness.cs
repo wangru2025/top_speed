@@ -41,6 +41,7 @@ internal static class ProtocolHarness
         {
             RoomId = 12,
             RoomVersion = 5,
+            EventSequence = 9,
             RaceInstanceId = 6,
             Kind = RoomEventKind.RoomSummaryUpdated,
             HostPlayerId = 44,
@@ -48,6 +49,7 @@ internal static class ProtocolHarness
             PlayerCount = 2,
             PlayersToStart = 2,
             RaceState = RoomRaceState.Preparing,
+            RacePaused = true,
             TrackName = "desert",
             Laps = 3,
             GameRulesFlags = 17,
@@ -78,6 +80,7 @@ internal static class ProtocolHarness
                 {
                     parsedRoomEvent.RoomId,
                     parsedRoomEvent.RoomVersion,
+                    parsedRoomEvent.EventSequence,
                     parsedRoomEvent.RaceInstanceId,
                     parsedRoomEvent.Kind,
                     parsedRoomEvent.HostPlayerId,
@@ -85,6 +88,7 @@ internal static class ProtocolHarness
                     parsedRoomEvent.PlayerCount,
                     parsedRoomEvent.PlayersToStart,
                     parsedRoomEvent.RaceState,
+                    parsedRoomEvent.RacePaused,
                     parsedRoomEvent.TrackName,
                     parsedRoomEvent.Laps,
                     parsedRoomEvent.GameRulesFlags,

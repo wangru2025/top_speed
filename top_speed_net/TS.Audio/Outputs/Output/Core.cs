@@ -38,6 +38,7 @@ namespace TS.Audio
         private volatile float _lastPreLimiterPeak;
         private volatile float _lastPostLimiterPeak;
         private volatile float _lastLimiterGain = 1f;
+        private int _listenerApplyQueued;
         private bool _disposed;
 
         public AudioOutput(SfAudioEngine backendEngine, AudioOutputConfig config, AudioSystemConfig systemConfig, AudioDiagnostics diagnostics)
@@ -50,6 +51,9 @@ namespace TS.Audio
             _streams = new List<TrackStream>();
             _sourceUpdateSnapshot = new List<AudioSourceHandle>();
             _streamUpdateSnapshot = new List<TrackStream>();
+            _lifecycleQueue = new System.Collections.Concurrent.ConcurrentQueue<AudioLifecycleWork>();
+            _deferredLifecycle = new List<AudioLifecycleWork>();
+            _controlQueue = new System.Collections.Concurrent.ConcurrentQueue<AudioControlWork>();
             _buses = new Dictionary<string, AudioBus>(StringComparer.OrdinalIgnoreCase);
             _sourceLock = new object();
             _busLock = new object();
@@ -169,7 +173,7 @@ namespace TS.Audio
 
             lock (_sourceLock)
             {
-                sourceSnapshot = _sources.ToArray();
+                sourceSnapshot = CaptureSourceSnapshotUnsafe();
                 streamSnapshot = _streams.ToArray();
             }
 
@@ -183,7 +187,12 @@ namespace TS.Audio
 
             var sources = new List<AudioSourceSnapshot>(sourceSnapshot.Length);
             for (var i = 0; i < sourceSnapshot.Length; i++)
+            {
+                if (sourceSnapshot[i].IsDisposed)
+                    continue;
+
                 sources.Add(sourceSnapshot[i].CaptureSnapshot());
+            }
 
             var master = GetMasterVolume();
             return new AudioOutputSnapshot(
@@ -235,10 +244,8 @@ namespace TS.Audio
             for (var i = 0; i < sourceSnapshot.Length; i++)
                 sourceSnapshot[i].Dispose();
 
-            for (var i = 0; i < busSnapshot.Length; i++)
-                busSnapshot[i].Dispose();
-
-            _mainBus.Dispose();
+            DrainControl();
+            DrainLifecycle();
 
             try
             {
@@ -247,6 +254,13 @@ namespace TS.Audio
             catch
             {
             }
+
+            DrainLifecycle(force: true);
+
+            for (var i = 0; i < busSnapshot.Length; i++)
+                busSnapshot[i].Dispose();
+
+            _mainBus.Dispose();
 
             _playbackDevice.Dispose();
             _backendEngine.AudioFramesRendered -= OnAudioFramesRendered;
@@ -278,11 +292,14 @@ namespace TS.Audio
         {
             AudioSourceHandle[] sourceSnapshot;
             lock (_sourceLock)
-                sourceSnapshot = _sources.ToArray();
+                sourceSnapshot = CaptureSourceSnapshotUnsafe();
 
             var activeSources = new List<AudioSourceSnapshot>(sourceSnapshot.Length);
             for (var i = 0; i < sourceSnapshot.Length; i++)
             {
+                if (sourceSnapshot[i].IsDisposed)
+                    continue;
+
                 var snapshot = sourceSnapshot[i].CaptureSnapshot();
                 if (snapshot.IsPlaying)
                     activeSources.Add(snapshot);
@@ -320,12 +337,31 @@ namespace TS.Audio
 
             AudioSourceHandle[] sourceSnapshot;
             lock (_sourceLock)
-                sourceSnapshot = _sources.ToArray();
+                sourceSnapshot = CaptureSourceSnapshotUnsafe();
 
             for (var i = 0; i < sourceSnapshot.Length; i++)
-                sourceSnapshot[i].RefreshSteamAudioSpatial();
+                sourceSnapshot[i].QueueRefreshSteamAudioSpatial();
 
-            previous?.Dispose();
+            DrainLifecycle();
+
+            if (previous != null)
+                EnqueueDeferredLifecycle(previous.Dispose, "output-dispose-replaced-steam-runtime");
+        }
+
+        private AudioSourceHandle[] CaptureSourceSnapshotUnsafe()
+        {
+            if (_sources.Count == 0)
+                return Array.Empty<AudioSourceHandle>();
+
+            var active = new List<AudioSourceHandle>(_sources.Count);
+            for (var i = 0; i < _sources.Count; i++)
+            {
+                var source = _sources[i];
+                if (source != null && !source.IsDisposed)
+                    active.Add(source);
+            }
+
+            return active.ToArray();
         }
 
         internal void RemoveSource(AudioSourceHandle source)

@@ -21,48 +21,6 @@ namespace TopSpeed.Server.Network
             }), PacketStream.Direct);
         }
 
-        private void SendProtocolMessageToRoom(RaceRoom room, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return;
-
-            var payload = PacketSerializer.WriteProtocolMessage(new PacketProtocolMessage
-            {
-                Code = ProtocolMessageCode.Ok,
-                Message = text
-            });
-
-            SendToRoomOnStream(room, payload, PacketStream.Chat);
-        }
-
-        private void SendProtocolMessageToRoomExcept(RaceRoom room, uint exceptPlayerId, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return;
-
-            var payload = PacketSerializer.WriteProtocolMessage(new PacketProtocolMessage
-            {
-                Code = ProtocolMessageCode.Ok,
-                Message = text
-            });
-
-            SendToRoomExceptOnStream(room, exceptPlayerId, payload, PacketStream.Chat);
-        }
-
-        private void BroadcastLobbyAnnouncement(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return;
-
-            foreach (var player in _players.Values)
-            {
-                if (player.RoomId.HasValue)
-                    continue;
-
-                SendProtocolMessage(player, ProtocolMessageCode.Ok, text);
-            }
-        }
-
         private void BroadcastGlobalChat(PlayerConnection sender, string message)
         {
             var trimmed = (message ?? string.Empty).Trim();

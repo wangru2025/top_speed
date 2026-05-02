@@ -6,6 +6,7 @@ namespace TopSpeed.Core.Multiplayer
     {
         public uint RoomId;
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RaceInstanceId;
         public RoomEventKind Kind;
         public uint HostPlayerId;
@@ -13,6 +14,7 @@ namespace TopSpeed.Core.Multiplayer
         public byte PlayerCount;
         public byte PlayersToStart;
         public RoomRaceState RaceState;
+        public bool RacePaused;
         public string TrackName = string.Empty;
         public byte Laps;
         public uint GameRulesFlags;

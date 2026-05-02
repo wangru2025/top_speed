@@ -29,7 +29,9 @@ namespace TS.Audio
 
         public void Play(bool loop)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             _loopSingle = loop;
             EnsureCurrentSource();
             if (_source == null)
@@ -54,6 +56,9 @@ namespace TS.Audio
 
         public void Stop()
         {
+            if (_disposed)
+                return;
+
             _source?.Stop();
             _output.Diagnostics.Emit(
                 AudioDiagnosticLevel.Debug,
@@ -71,16 +76,25 @@ namespace TS.Audio
 
         public void SetVolume(float volume)
         {
+            if (_disposed)
+                return;
+
             _source?.SetVolume(volume);
         }
 
         public void SetPitch(float pitch)
         {
+            if (_disposed)
+                return;
+
             _source?.SetPitch(pitch);
         }
 
         public void SetPan(float pan)
         {
+            if (_disposed)
+                return;
+
             _source?.SetPan(pan);
         }
 
@@ -97,13 +111,16 @@ namespace TS.Audio
             _source?.Dispose();
             _source = null;
 
-            if (_ownsAssets)
+            _output.EnqueueDeferredLifecycle(() =>
             {
-                for (var i = 0; i < _assets.Length; i++)
-                    _assets[i].Dispose();
-            }
+                if (_ownsAssets)
+                {
+                    for (var i = 0; i < _assets.Length; i++)
+                        _assets[i].Dispose();
+                }
 
-            _output.RemoveStream(this);
+                _output.RemoveStream(this);
+            }, "stream-dispose-assets");
         }
 
         private void EnsureCurrentSource()
@@ -111,11 +128,17 @@ namespace TS.Audio
             if (_source != null)
                 return;
 
+            if (_disposed)
+                return;
+
             CreateSourceForIndex(_currentIndex);
         }
 
         private void CreateSourceForIndex(int index)
         {
+            if (_disposed)
+                return;
+
             _source?.Dispose();
             _source = _output.CreateSource(_assets[index].Asset, spatialize: false, useHrtf: false, bus: _bus, ownsAsset: false);
         }
@@ -153,10 +176,5 @@ namespace TS.Audio
             return index == _assets.Length - 1;
         }
 
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(TrackStream));
-        }
     }
 }

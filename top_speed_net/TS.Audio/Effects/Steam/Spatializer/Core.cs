@@ -12,6 +12,7 @@ namespace TS.Audio
         private readonly bool _useBinaural;
         private readonly HrtfDownmixMode _downmixMode;
         private readonly int _outputChannels;
+        private readonly Action<Exception>? _onProcessingException;
 
         private IPL.DirectEffect _directEffect;
         private IPL.BinauralEffect _binauralEffect;
@@ -45,12 +46,13 @@ namespace TS.Audio
         private float _reverbWetTarget;
         private float _reverbWetCurrent;
 
-        public SteamAudioSpatialModifier(SteamAudioRuntime runtime, int outputChannels, bool useBinaural, HrtfDownmixMode downmixMode)
+        public SteamAudioSpatialModifier(SteamAudioRuntime runtime, int outputChannels, bool useBinaural, HrtfDownmixMode downmixMode, Action<Exception>? onProcessingException = null)
         {
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
             _outputChannels = outputChannels > 0 ? outputChannels : 2;
             _useBinaural = useBinaural && _runtime.HrtfAvailable && _outputChannels == 2;
             _downmixMode = downmixMode;
+            _onProcessingException = onProcessingException;
             _sync = new object();
             Initialize();
         }
@@ -68,23 +70,16 @@ namespace TS.Audio
             if (_disposed)
                 return;
 
-            _disposed = true;
-            if (_reflectionInputBuffer.Data != IntPtr.Zero)
-                IPL.AudioBufferFree(_runtime.Context, ref _reflectionInputBuffer);
-            if (_reflectionOutputBuffer.Data != IntPtr.Zero)
-                IPL.AudioBufferFree(_runtime.Context, ref _reflectionOutputBuffer);
-            if (_inputBuffer.Data != IntPtr.Zero)
-                IPL.AudioBufferFree(_runtime.Context, ref _inputBuffer);
-            if (_directBuffer.Data != IntPtr.Zero)
-                IPL.AudioBufferFree(_runtime.Context, ref _directBuffer);
-            if (_outputBuffer.Data != IntPtr.Zero)
-                IPL.AudioBufferFree(_runtime.Context, ref _outputBuffer);
-            if (_reflectionEffect.Handle != IntPtr.Zero)
-                IPL.ReflectionEffectRelease(ref _reflectionEffect);
-            if (_binauralEffect.Handle != IntPtr.Zero)
-                IPL.BinauralEffectRelease(ref _binauralEffect);
-            if (_directEffect.Handle != IntPtr.Zero)
-                IPL.DirectEffectRelease(ref _directEffect);
+            lock (_sync)
+            {
+                if (_disposed)
+                    return;
+
+                _disposed = true;
+                _initialized = false;
+                ReleaseNativeResources();
+                _processingScratch = Array.Empty<float>();
+            }
         }
 
         public void Reset()
@@ -94,6 +89,9 @@ namespace TS.Audio
 
             lock (_sync)
             {
+                if (_disposed || !_initialized)
+                    return;
+
                 IPL.DirectEffectReset(_directEffect);
                 if (_binauralEffect.Handle != IntPtr.Zero)
                     IPL.BinauralEffectReset(_binauralEffect);
@@ -105,6 +103,7 @@ namespace TS.Audio
 
         private void Initialize()
         {
+            var initialized = false;
             try
             {
                 var audioSettings = _runtime.AudioSettings;
@@ -160,11 +159,51 @@ namespace TS.Audio
                 _initialized = _inputBuffer.Data != IntPtr.Zero
                     && _directBuffer.Data != IntPtr.Zero
                     && _outputBuffer.Data != IntPtr.Zero;
+                initialized = _initialized;
             }
             catch
             {
                 _initialized = false;
             }
+            finally
+            {
+                if (!initialized)
+                {
+                    _initialized = false;
+                    ReleaseNativeResources();
+                }
+            }
+        }
+
+        private void ReleaseNativeResources()
+        {
+            if (_reflectionInputBuffer.Data != IntPtr.Zero)
+                IPL.AudioBufferFree(_runtime.Context, ref _reflectionInputBuffer);
+            if (_reflectionOutputBuffer.Data != IntPtr.Zero)
+                IPL.AudioBufferFree(_runtime.Context, ref _reflectionOutputBuffer);
+            if (_inputBuffer.Data != IntPtr.Zero)
+                IPL.AudioBufferFree(_runtime.Context, ref _inputBuffer);
+            if (_directBuffer.Data != IntPtr.Zero)
+                IPL.AudioBufferFree(_runtime.Context, ref _directBuffer);
+            if (_outputBuffer.Data != IntPtr.Zero)
+                IPL.AudioBufferFree(_runtime.Context, ref _outputBuffer);
+            if (_reflectionEffect.Handle != IntPtr.Zero)
+                IPL.ReflectionEffectRelease(ref _reflectionEffect);
+            if (_binauralEffect.Handle != IntPtr.Zero)
+                IPL.BinauralEffectRelease(ref _binauralEffect);
+            if (_directEffect.Handle != IntPtr.Zero)
+                IPL.DirectEffectRelease(ref _directEffect);
+        }
+
+        private void HandleProcessingException(Exception exception)
+        {
+            lock (_sync)
+            {
+                _initialized = false;
+                Enabled = false;
+            }
+
+            _onProcessingException?.Invoke(exception);
         }
 
         private static IPL.Vector3 ToDirection(Vector3 localPosition)

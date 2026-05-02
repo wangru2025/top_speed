@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using SoundFlow.Enums;
 
 namespace TS.Audio
@@ -45,6 +46,10 @@ namespace TS.Audio
         private float _dopplerFactor = 1f;
         private RoomAcoustics _roomAcoustics;
         private bool _disposed;
+        private AudioLifecycleState _lifecycleState;
+        private AudioSourceSnapshot? _lastSnapshot;
+        private int _controlApplyQueued;
+        private PlaybackState _logicalPlaybackState;
         private bool _reachedEnd;
         private bool _pendingStartDiagnostic;
 
@@ -60,7 +65,8 @@ namespace TS.Audio
             _endObservers = new List<Action>();
             _stateSync = new object();
             _provider = new VariableRateDataProvider(_asset.CreateProvider(output.BackendEngine, output.SoundFlowFormat), output.SoundFlowFormat.Channels);
-            _player = new SourcePlayer(output.BackendEngine, output.SoundFlowFormat, _provider)
+            _lifecycleState = AudioLifecycleState.Active;
+            _player = new SourcePlayer(output.BackendEngine, output.SoundFlowFormat, _provider, HandleAudioThreadException)
             {
                 Name = $"Source {SourceId}"
             };
@@ -75,11 +81,9 @@ namespace TS.Audio
                 : null;
             _dopplerFactor = output.SystemConfig.DopplerFactor;
             _steamAudioSpatial = CreateSpatialModifier();
-            if (_steamAudioSpatial != null)
-                _player.AddModifier(_steamAudioSpatial);
-            _bus.Mixer.AddComponent(_player);
             ApplyPan();
             ApplyPlaybackSpeed();
+            _output.AttachSourceToGraph(_bus, _player, _steamAudioSpatial);
 
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
@@ -101,8 +105,11 @@ namespace TS.Audio
         }
 
         public int SourceId { get; }
-        public bool IsPlaying => !_disposed && _player.State == PlaybackState.Playing;
-        public bool IsPaused => !_disposed && _player.State == PlaybackState.Paused;
+        public bool IsPlaying => !_disposed && (_logicalPlaybackState == PlaybackState.Playing || _player.State == PlaybackState.Playing);
+        public bool IsPaused => !_disposed && (_logicalPlaybackState == PlaybackState.Paused || _player.State == PlaybackState.Paused);
+        internal bool IsDisposed => _disposed;
+        internal bool IsActive => !_disposed && _lifecycleState == AudioLifecycleState.Active;
+        internal AudioLifecycleState LifecycleState => _lifecycleState;
         public int InputChannels => _asset.InputChannels;
         public int InputSampleRate => _asset.InputSampleRate;
         internal bool UsesSteamAudio => _steamAudioSpatial?.UsesSteamAudio == true;
@@ -118,11 +125,30 @@ namespace TS.Audio
 
         internal AudioSourceSnapshot CaptureSnapshot()
         {
+            if (_lifecycleState == AudioLifecycleState.Disposed && _lastSnapshot != null)
+                return _lastSnapshot;
+
+            try
+            {
+                return CaptureSnapshotCore();
+            }
+            catch (ObjectDisposedException)
+            {
+                return _lastSnapshot ?? CaptureFallbackSnapshot();
+            }
+            catch (InvalidOperationException)
+            {
+                return _lastSnapshot ?? CaptureFallbackSnapshot();
+            }
+        }
+
+        private AudioSourceSnapshot CaptureSnapshotCore()
+        {
             var busVolume = _bus.GetEffectiveVolume();
             var effectiveVolume = _currentVolume * _spatialGain;
             var estimatedMix = effectiveVolume * busVolume * _output.GetMasterVolume();
             _provider.CaptureCursorState(out var providerPositionSamples, out var innerPositionSamples, out var bufferedFrames);
-            return new AudioSourceSnapshot(
+            var snapshot = new AudioSourceSnapshot(
                 SourceId,
                 _bus.Name,
                 IsPlaying,
@@ -150,35 +176,64 @@ namespace TS.Audio
                 innerPositionSamples,
                 bufferedFrames,
                 _player.Time);
+            _lastSnapshot = snapshot;
+            return snapshot;
+        }
+
+        private AudioSourceSnapshot CaptureFallbackSnapshot()
+        {
+            var busVolume = 1f;
+            try
+            {
+                busVolume = _bus.GetEffectiveVolume();
+            }
+            catch
+            {
+            }
+
+            var effectiveVolume = _currentVolume * _spatialGain;
+            var estimatedMix = effectiveVolume * busVolume * _output.GetMasterVolume();
+            var snapshot = new AudioSourceSnapshot(
+                SourceId,
+                _bus.Name,
+                false,
+                _spatialize,
+                false,
+                InputChannels,
+                InputSampleRate,
+                _looping,
+                _currentVolume,
+                AudioMath.GainToDecibels(_currentVolume),
+                _spatialGain,
+                _distanceAttenuation,
+                _pitch,
+                _pan,
+                busVolume,
+                AudioMath.GainToDecibels(busVolume),
+                estimatedMix,
+                AudioMath.GainToDecibels(estimatedMix),
+                Array.Empty<AudioGainStageSnapshot>(),
+                GetLengthSecondsSafe(),
+                _asset.DebugName,
+                _output.SampleRate);
+            _lastSnapshot = snapshot;
+            return snapshot;
         }
 
         public void Dispose()
         {
-            if (_disposed)
-                return;
-
-            _disposed = true;
-            var snapshot = CaptureSnapshot();
-            if (_steamAudioSpatial != null)
+            lock (_stateSync)
             {
-                _player.RemoveModifier(_steamAudioSpatial);
-                _steamAudioSpatial.Dispose();
+                if (_disposed)
+                    return;
+
+                SetLifecycleStateUnsafe(AudioLifecycleState.Stopping, "Audio source disposal requested.");
+                CancelFadeUnsafe();
+                _pendingStartDiagnostic = false;
+                _player.Silence();
             }
-            _output.RemoveSource(this);
-            _player.Dispose();
-            _provider.Dispose();
-            if (_ownsAsset)
-                _asset.Dispose();
-            _output.Diagnostics.Emit(
-                AudioDiagnosticLevel.Debug,
-                AudioDiagnosticKind.SourceDisposed,
-                AudioDiagnosticEntityType.Source,
-                _output.Name,
-                _bus.Name,
-                null,
-                "Audio source disposed.",
-                null,
-                new AudioDiagnosticSnapshot(source: snapshot));
+
+            _output.EnqueueLifecycle(DisposeFromGraph, "source-dispose-from-graph");
         }
 
         private void DispatchPlaybackEndedIfNeeded()
@@ -196,6 +251,16 @@ namespace TS.Audio
 
             _pendingStartDiagnostic = false;
             _reachedEnd = true;
+            _logicalPlaybackState = PlaybackState.Stopped;
+            Action? onEnd;
+            Action[]? observers = null;
+            lock (_stateSync)
+            {
+                onEnd = _onEnd;
+                if (_endObservers.Count > 0)
+                    observers = _endObservers.ToArray();
+            }
+
             _output.Diagnostics.EmitDeferred(
                 AudioDiagnosticLevel.Debug,
                 AudioDiagnosticKind.SourceEnded,
@@ -206,14 +271,13 @@ namespace TS.Audio
                 "Audio source reached the end of playback.",
                 new Dictionary<string, object?> { ["sourceId"] = SourceId },
                 () => new AudioDiagnosticSnapshot(source: CaptureSnapshot()));
-            _onEnd?.Invoke();
+            onEnd?.Invoke();
 
-            if (_endObservers.Count == 0)
+            if (observers == null)
                 return;
 
-            var snapshot = _endObservers.ToArray();
-            for (var i = 0; i < snapshot.Length; i++)
-                snapshot[i]();
+            for (var i = 0; i < observers.Length; i++)
+                observers[i]();
         }
 
         private void EmitStartedDiagnosticIfNeeded()
@@ -249,15 +313,37 @@ namespace TS.Audio
                 () => new AudioDiagnosticSnapshot(source: CaptureSnapshot()));
         }
 
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(AudioSourceHandle));
-        }
-
         private bool ShouldEmitSourceDiagnostic(AudioDiagnosticKind kind, AudioDiagnosticLevel level = AudioDiagnosticLevel.Debug)
         {
             return _output.Diagnostics.ShouldEmit(level, kind, AudioDiagnosticEntityType.Source, _output.Name, _bus.Name, SourceId);
+        }
+
+        private void QueueApplyControlState()
+        {
+            if (!IsActive)
+                return;
+
+            if (Interlocked.Exchange(ref _controlApplyQueued, 1) != 0)
+                return;
+
+            if (!_output.EnqueueControl(ApplyQueuedControlState, "source-apply-control-state"))
+                Interlocked.Exchange(ref _controlApplyQueued, 0);
+        }
+
+        private void ApplyQueuedControlState()
+        {
+            Interlocked.Exchange(ref _controlApplyQueued, 0);
+            if (!IsActive)
+                return;
+
+            lock (_stateSync)
+            {
+                if (!IsActive)
+                    return;
+
+                ApplyPan();
+                ApplyPlaybackSpeed();
+            }
         }
 
         private void InitializeVolumeState()
@@ -280,49 +366,176 @@ namespace TS.Audio
             if (runtime == null || !runtime.IsAvailable)
                 return null;
 
-            return new SteamAudioSpatialModifier(runtime, _output.Channels, _allowHrtf && _output.IsHrtfActive, _output.SystemConfig.HrtfDownmixMode);
+            return new SteamAudioSpatialModifier(runtime, _output.Channels, _allowHrtf && _output.IsHrtfActive, _output.SystemConfig.HrtfDownmixMode, HandleAudioThreadException);
         }
 
-        internal void RefreshSteamAudioSpatial()
+        internal void QueueRefreshSteamAudioSpatial()
         {
-            if (_disposed || !_spatialize)
+            _output.EnqueueLifecycle(RefreshSteamAudioSpatialCore, "source-refresh-steam-audio");
+        }
+
+        private void RefreshSteamAudioSpatialCore()
+        {
+            if (!IsActive || !_spatialize)
                 return;
 
             var replacement = CreateSpatialModifier();
             if (ReferenceEquals(replacement, _steamAudioSpatial))
                 return;
 
-            if (_steamAudioSpatial != null)
-            {
-                _player.RemoveModifier(_steamAudioSpatial);
-                _steamAudioSpatial.Dispose();
-            }
+            var oldSpatializer = _steamAudioSpatial;
 
             _steamAudioSpatial = replacement;
-            if (_steamAudioSpatial != null)
-                _player.AddModifier(_steamAudioSpatial);
+            _output.ReplaceSourceSpatializer(_player, oldSpatializer, _steamAudioSpatial);
+            if (oldSpatializer != null)
+                _output.EnqueueDeferredLifecycle(oldSpatializer.Dispose, "source-dispose-replaced-spatializer");
 
             lock (_stateSync)
                 ApplyPan();
         }
 
+        private void DisposeFromGraph()
+        {
+            var snapshot = CaptureSnapshot();
+            SetLifecycleState(AudioLifecycleState.QueuedForDispose, "Audio source queued for graph detach.");
+            var spatializer = _steamAudioSpatial;
+            _steamAudioSpatial = null;
+
+            _output.DetachSourceFromGraph(_bus, _player, spatializer);
+            _output.RemoveSource(this);
+            SetLifecycleState(AudioLifecycleState.Disposing, "Audio source detached from graph.");
+            _output.EnqueueDeferredLifecycle(() => DisposeNativeCore(snapshot, spatializer), "source-dispose-native");
+        }
+
+        private void DisposeNativeCore(AudioSourceSnapshot snapshot, SteamAudioSpatialModifier? spatializer)
+        {
+            spatializer?.Dispose();
+            _player.Dispose();
+            _provider.Dispose();
+            if (_ownsAsset)
+                _asset.Dispose();
+            _lastSnapshot = snapshot;
+            SetLifecycleState(AudioLifecycleState.Disposed, "Audio source native resources disposed.");
+            _output.Diagnostics.Emit(
+                AudioDiagnosticLevel.Debug,
+                AudioDiagnosticKind.SourceDisposed,
+                AudioDiagnosticEntityType.Source,
+                _output.Name,
+                _bus.Name,
+                null,
+                "Audio source disposed.",
+                null,
+                new AudioDiagnosticSnapshot(source: snapshot));
+        }
+
+        private void SetLifecycleState(AudioLifecycleState state, string message)
+        {
+            lock (_stateSync)
+                SetLifecycleStateUnsafe(state, message);
+        }
+
+        private void SetLifecycleStateUnsafe(AudioLifecycleState state, string message)
+        {
+            if (_lifecycleState == state)
+                return;
+
+            var previous = _lifecycleState;
+            _lifecycleState = state;
+            _disposed = state != AudioLifecycleState.Active;
+            _output.Diagnostics.EmitDeferred(
+                AudioDiagnosticLevel.Debug,
+                AudioDiagnosticKind.SourceLifecycleChanged,
+                AudioDiagnosticEntityType.Source,
+                _output.Name,
+                _bus.Name,
+                SourceId,
+                message,
+                new Dictionary<string, object?>
+                {
+                    ["sourceId"] = SourceId,
+                    ["previousState"] = previous.ToString(),
+                    ["state"] = state.ToString()
+                },
+                () => new AudioDiagnosticSnapshot(source: CaptureSnapshot()));
+        }
+
+        private void HandleAudioThreadException(Exception exception)
+        {
+            if (exception == null)
+                return;
+
+            var exceptionType = exception.GetType().FullName;
+            var message = exception.Message;
+            lock (_stateSync)
+            {
+                if (_lifecycleState != AudioLifecycleState.Active)
+                    return;
+
+                CancelFadeUnsafe();
+                _pendingStartDiagnostic = false;
+                _player.Silence();
+            }
+
+            _output.EnqueueLifecycle(
+                () => _output.Diagnostics.Emit(
+                    AudioDiagnosticLevel.Error,
+                    AudioDiagnosticKind.SourceAudioThreadException,
+                    AudioDiagnosticEntityType.Source,
+                    _output.Name,
+                    _bus.Name,
+                    SourceId,
+                    "Audio source processing failed on the audio thread and was silenced.",
+                    new Dictionary<string, object?>
+                    {
+                        ["sourceId"] = SourceId,
+                        ["exceptionType"] = exceptionType,
+                        ["message"] = message
+                    },
+                    new AudioDiagnosticSnapshot(source: CaptureSnapshot())),
+                "source-audio-thread-exception");
+        }
+
+        private float GetLengthSecondsSafe()
+        {
+            try
+            {
+                return GetLengthSeconds();
+            }
+            catch
+            {
+                return 0f;
+            }
+        }
+
         internal void ApplyDirectSimulation(float occlusion, float airLow, float airMid, float airHigh, float transmissionLow, float transmissionMid, float transmissionHigh)
         {
+            if (!IsActive)
+                return;
+
             _steamAudioSpatial?.ApplyDirectSimulation(occlusion, airLow, airMid, airHigh, transmissionLow, transmissionMid, transmissionHigh);
         }
 
         internal void ClearDirectSimulation()
         {
+            if (!IsActive)
+                return;
+
             _steamAudioSpatial?.ClearDirectSimulation();
         }
 
         internal void ApplyReverbSimulation(float timeLow, float timeMid, float timeHigh, float eqLow, float eqMid, float eqHigh, int delay, float wetScale)
         {
+            if (!IsActive)
+                return;
+
             _steamAudioSpatial?.ApplyReverbSimulation(timeLow, timeMid, timeHigh, eqLow, eqMid, eqHigh, delay, wetScale);
         }
 
         internal void ClearReverbSimulation()
         {
+            if (!IsActive)
+                return;
+
             _steamAudioSpatial?.ClearReverbSimulation();
         }
 

@@ -31,8 +31,6 @@ namespace TopSpeed.Server.Network
                     _owner._authorityDropsPlayerState++;
                     player.State = PlayerState.AwaitingStart;
                 }
-                if (player.State == PlayerState.Finished && raceDistance > 0f && player.PositionY < raceDistance)
-                    player.PositionY = raceDistance;
                 if (previousState == PlayerState.Finished && player.State != PlayerState.Finished)
                 {
                     _owner._authorityDropsPlayerState++;
@@ -62,7 +60,7 @@ namespace TopSpeed.Server.Network
                 }
 
                 if (room.RaceState == RoomRaceState.Racing && previousState != PlayerState.Finished && player.State == PlayerState.Finished)
-                    MarkFinished(room, player);
+                    ResolveHumanFinish(room, player, out _);
             }
 
             public void HandlePlayerData(PlayerConnection player, PacketRacePlayerData data)
@@ -77,10 +75,18 @@ namespace TopSpeed.Server.Network
 
                 var previousState = player.State;
                 var raceDistance = room.RaceState == RoomRaceState.Racing ? RaceServer.GetRaceDistance(room) : 0f;
+                var incomingPositionX = data.RaceData.PositionX;
+                var incomingPositionY = data.RaceData.PositionY;
+                if (!PacketValidation.IsFinitePosition(incomingPositionX, incomingPositionY))
+                {
+                    _owner._authorityDropsPlayerData++;
+                    return;
+                }
+
                 player.Car = RaceServer.NormalizeNetworkCar(data.Car);
                 RaceServer.ApplyVehicleDimensions(player, player.Car);
-                player.PositionX = data.RaceData.PositionX;
-                player.PositionY = data.RaceData.PositionY;
+                player.PositionX = incomingPositionX;
+                player.PositionY = incomingPositionY;
                 player.Speed = data.RaceData.Speed;
                 player.Frequency = data.RaceData.Frequency;
                 player.EngineRunning = data.EngineRunning;
@@ -115,12 +121,16 @@ namespace TopSpeed.Server.Network
                     _owner._authorityDropsPlayerData++;
                     nextState = PlayerState.Finished;
                 }
+                if (room.RaceState == RoomRaceState.Racing
+                    && previousState != PlayerState.Finished
+                    && RaceDistanceRules.HasCrossedFinish(player.PositionY, raceDistance))
+                {
+                    nextState = PlayerState.Finished;
+                }
 
                 player.State = nextState;
-                if (player.State == PlayerState.Finished && raceDistance > 0f && player.PositionY < raceDistance)
-                    player.PositionY = raceDistance;
                 if (room.RaceState == RoomRaceState.Racing && previousState != PlayerState.Finished && nextState == PlayerState.Finished)
-                    MarkFinished(room, player);
+                    ResolveHumanFinish(room, player, out _);
                 if (previousState != nextState)
                     _owner._logger.Debug(LocalizationService.Format(
                         LocalizationService.Mark("Player state transition from data: room={0}, player={1}, {2} -> {3}."),
@@ -177,48 +187,12 @@ namespace TopSpeed.Server.Network
                     return;
                 }
 
-                _owner.SendToRoomExceptOnStream(room, player.Id, PacketSerializer.WritePlayer(Command.PlayerCrashed, player.Id, player.PlayerNumber), PacketStream.RaceEvent);
+                _owner._notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayer(Command.PlayerCrashed, player.Id, player.PlayerNumber), PacketStream.RaceEvent);
             }
 
             public void MarkFinished(RaceRoom room, PlayerConnection player)
             {
-                var finishTimeMs = CaptureFinishTimeMs(room);
-                if (TryMarkParticipantFinished(room, player.Id, player.PlayerNumber, finishTimeMs, out var finishOrder))
-                {
-                    var finishedCount = 0;
-                    foreach (var result in room.RaceParticipantResults.Values)
-                    {
-                        if (result.Status == RoomRaceResultStatus.Finished)
-                            finishedCount++;
-                    }
-
-                    _owner._logger.Debug(LocalizationService.Format(
-                        LocalizationService.Mark("Finish recorded: room={0}, player={1}, number={2}, place={3}, timeMs={4}."),
-                        room.Id,
-                        player.Id,
-                        player.PlayerNumber,
-                        finishOrder,
-                        finishTimeMs));
-                    _owner._notify.RacePlayerFinished(room, player.Id, player.PlayerNumber, finishOrder, finishTimeMs);
-                    if (finishedCount < room.ActiveRaceParticipantIds.Count)
-                    {
-                        _owner._logger.Debug(LocalizationService.Format(
-                            LocalizationService.Mark("Race completion pending: room={0}, finished={1}/{2}."),
-                            room.Id,
-                            finishedCount,
-                            room.ActiveRaceParticipantIds.Count));
-                    }
-                }
-                else
-                {
-                    _owner._logger.Debug(LocalizationService.Format(
-                        LocalizationService.Mark("Finish ignored: room={0}, player={1}, number={2}, state={3}."),
-                        room.Id,
-                        player.Id,
-                        player.PlayerNumber,
-                        player.State));
-                }
-                UpdateStopState(room, 0f);
+                ResolveHumanFinish(room, player, out _);
             }
 
             private bool TryGetPlayerRoom(PlayerConnection player, out RaceRoom room)
@@ -235,6 +209,14 @@ namespace TopSpeed.Server.Network
 
             private bool ValidatePacket(RaceRoom room, PlayerConnection player, uint raceInstanceId, uint payloadPlayerId, byte payloadPlayerNumber, ref int dropCounter, string commandName)
             {
+                if (!PacketValidation.IsValidPlayerId(payloadPlayerId)
+                    || !PacketValidation.IsValidPlayerNumber(payloadPlayerNumber)
+                    || !PacketValidation.IsValidRaceInstance(raceInstanceId))
+                {
+                    dropCounter++;
+                    return false;
+                }
+
                 if (room.RaceState != RoomRaceState.Preparing && room.RaceState != RoomRaceState.Racing)
                 {
                     dropCounter++;

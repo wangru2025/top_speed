@@ -1,5 +1,4 @@
 using System;
-using LiteNetLib;
 using TopSpeed.Protocol;
 using TopSpeed.Server.Protocol;
 
@@ -18,13 +17,22 @@ namespace TopSpeed.Server.Network
             }
         }
 
+        private void ResetMediaState(PlayerConnection player, RaceRoom room)
+        {
+            player.IncomingMedia = null;
+            player.MediaLoaded = false;
+            player.MediaPlaying = false;
+            player.MediaId = 0;
+            room.MediaMap.Remove(player.Id);
+        }
+
         private void OnMediaBegin(PlayerConnection player, PacketPlayerMediaBegin begin)
         {
             if (!player.RoomId.HasValue || !_rooms.TryGetValue(player.RoomId.Value, out var room))
                 return;
             if (begin.PlayerId != player.Id || begin.PlayerNumber != player.PlayerNumber)
                 return;
-            if (begin.MediaId == 0 || begin.TotalBytes == 0 || begin.TotalBytes > ProtocolConstants.MaxMediaBytes)
+            if (!PacketValidation.IsValidMediaBegin(begin))
                 return;
 
             var extension = (begin.FileExtension ?? string.Empty).Trim();
@@ -34,6 +42,8 @@ namespace TopSpeed.Server.Network
             player.IncomingMedia = new InMedia
             {
                 MediaId = begin.MediaId,
+                TransferId = begin.TransferId,
+                State = MediaTransferState.Receiving,
                 Extension = extension,
                 TotalBytes = begin.TotalBytes,
                 NextChunk = 0,
@@ -43,11 +53,12 @@ namespace TopSpeed.Server.Network
                 Offset = 0
             };
 
-            SendToRoomExceptOnStream(room, player.Id, PacketSerializer.WritePlayerMediaBegin(new PacketPlayerMediaBegin
+            _notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayerMediaBegin(new PacketPlayerMediaBegin
             {
                 PlayerId = player.Id,
                 PlayerNumber = player.PlayerNumber,
                 MediaId = begin.MediaId,
+                TransferId = begin.TransferId,
                 TotalBytes = begin.TotalBytes,
                 FileExtension = extension
             }), PacketStream.Media);
@@ -59,10 +70,12 @@ namespace TopSpeed.Server.Network
                 return;
             if (chunk.PlayerId != player.Id || chunk.PlayerNumber != player.PlayerNumber)
                 return;
+            if (!PacketValidation.IsValidMediaChunk(chunk))
+                return;
             var transfer = player.IncomingMedia;
             if (transfer == null)
                 return;
-            if (transfer.MediaId != chunk.MediaId)
+            if (transfer.MediaId != chunk.MediaId || transfer.TransferId != chunk.TransferId)
                 return;
             if (transfer.NextChunk != chunk.ChunkIndex)
                 return;
@@ -72,6 +85,7 @@ namespace TopSpeed.Server.Network
             var remaining = (int)transfer.TotalBytes - transfer.Offset;
             if (chunk.Data.Length > remaining)
             {
+                transfer.State = MediaTransferState.Cancelled;
                 player.IncomingMedia = null;
                 return;
             }
@@ -80,6 +94,7 @@ namespace TopSpeed.Server.Network
             {
                 if (transfer.Buffer == null || transfer.Buffer.Length < transfer.Offset + chunk.Data.Length)
                 {
+                    transfer.State = MediaTransferState.Cancelled;
                     player.IncomingMedia = null;
                     return;
                 }
@@ -88,12 +103,15 @@ namespace TopSpeed.Server.Network
             }
             transfer.Offset += chunk.Data.Length;
             transfer.NextChunk++;
+            if (transfer.IsComplete)
+                transfer.State = MediaTransferState.Complete;
 
-            SendToRoomExceptOnStream(room, player.Id, PacketSerializer.WritePlayerMediaChunk(new PacketPlayerMediaChunk
+            _notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayerMediaChunk(new PacketPlayerMediaChunk
             {
                 PlayerId = player.Id,
                 PlayerNumber = player.PlayerNumber,
                 MediaId = transfer.MediaId,
+                TransferId = transfer.TransferId,
                 ChunkIndex = chunk.ChunkIndex,
                 Data = chunk.Data
             }), PacketStream.Media);
@@ -105,11 +123,14 @@ namespace TopSpeed.Server.Network
                 return;
             if (end.PlayerId != player.Id || end.PlayerNumber != player.PlayerNumber)
                 return;
+            if (!PacketValidation.IsValidMediaEnd(end))
+                return;
             var transfer = player.IncomingMedia;
             if (transfer == null)
                 return;
-            if (transfer.MediaId != end.MediaId || !transfer.IsComplete)
+            if (transfer.MediaId != end.MediaId || transfer.TransferId != end.TransferId || !transfer.IsComplete)
             {
+                transfer.State = MediaTransferState.Cancelled;
                 player.IncomingMedia = null;
                 return;
             }
@@ -119,6 +140,8 @@ namespace TopSpeed.Server.Network
                 room.MediaMap[player.Id] = new MediaBlob
                 {
                     MediaId = transfer.MediaId,
+                    TransferId = transfer.TransferId,
+                    State = MediaTransferState.Complete,
                     Extension = transfer.Extension,
                     Data = transfer.Buffer
                 };
@@ -129,11 +152,12 @@ namespace TopSpeed.Server.Network
             }
             player.IncomingMedia = null;
 
-            SendToRoomExceptOnStream(room, player.Id, PacketSerializer.WritePlayerMediaEnd(new PacketPlayerMediaEnd
+            _notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayerMediaEnd(new PacketPlayerMediaEnd
             {
                 PlayerId = player.Id,
                 PlayerNumber = player.PlayerNumber,
-                MediaId = transfer.MediaId
+                MediaId = transfer.MediaId,
+                TransferId = transfer.TransferId
             }), PacketStream.Media);
         }
 
@@ -150,11 +174,12 @@ namespace TopSpeed.Server.Network
                 if (media.MediaId == 0 || media.Data == null || media.Data.Length == 0)
                     continue;
 
-                SendStream(receiver, PacketSerializer.WritePlayerMediaBegin(new PacketPlayerMediaBegin
+                _notify.ToPlayer(receiver, PacketSerializer.WritePlayerMediaBegin(new PacketPlayerMediaBegin
                 {
                     PlayerId = owner.Id,
                     PlayerNumber = owner.PlayerNumber,
                     MediaId = media.MediaId,
+                    TransferId = media.TransferId,
                     TotalBytes = (uint)media.Data.Length,
                     FileExtension = media.Extension
                 }), PacketStream.Media);
@@ -166,11 +191,12 @@ namespace TopSpeed.Server.Network
                     var length = Math.Min(ProtocolConstants.MaxMediaChunkBytes, media.Data.Length - offset);
                     var chunk = new byte[length];
                     Buffer.BlockCopy(media.Data, offset, chunk, 0, length);
-                    SendStream(receiver, PacketSerializer.WritePlayerMediaChunk(new PacketPlayerMediaChunk
+                    _notify.ToPlayer(receiver, PacketSerializer.WritePlayerMediaChunk(new PacketPlayerMediaChunk
                     {
                         PlayerId = owner.Id,
                         PlayerNumber = owner.PlayerNumber,
                         MediaId = media.MediaId,
+                        TransferId = media.TransferId,
                         ChunkIndex = (ushort)chunkIndex,
                         Data = chunk
                     }), PacketStream.Media);
@@ -178,11 +204,12 @@ namespace TopSpeed.Server.Network
                     chunkIndex++;
                 }
 
-                SendStream(receiver, PacketSerializer.WritePlayerMediaEnd(new PacketPlayerMediaEnd
+                _notify.ToPlayer(receiver, PacketSerializer.WritePlayerMediaEnd(new PacketPlayerMediaEnd
                 {
                     PlayerId = owner.Id,
                     PlayerNumber = owner.PlayerNumber,
-                    MediaId = media.MediaId
+                    MediaId = media.MediaId,
+                    TransferId = media.TransferId
                 }), PacketStream.Media);
             }
         }

@@ -10,18 +10,33 @@ namespace TopSpeed.Core.Multiplayer
             if (packet == null || packet.Rooms == null || packet.Rooms.Length == 0)
                 return new RoomListInfo();
 
-            var rooms = new RoomSummaryInfo[packet.Rooms.Length];
+            var valid = 0;
             for (var i = 0; i < packet.Rooms.Length; i++)
             {
-                var src = packet.Rooms[i] ?? new PacketRoomSummary();
-                rooms[i] = new RoomSummaryInfo
+                var src = packet.Rooms[i];
+                if (src != null && src.RoomId != 0)
+                    valid++;
+            }
+
+            if (valid == 0)
+                return new RoomListInfo();
+
+            var rooms = new RoomSummaryInfo[valid];
+            var index = 0;
+            for (var i = 0; i < packet.Rooms.Length; i++)
+            {
+                var src = packet.Rooms[i];
+                if (src == null || src.RoomId == 0)
+                    continue;
+
+                rooms[index++] = new RoomSummaryInfo
                 {
                     RoomId = src.RoomId,
                     RoomName = src.RoomName ?? string.Empty,
-                    RoomType = src.RoomType,
+                    RoomType = RoomRules.NormalizeType(src.RoomType),
                     PlayerCount = src.PlayerCount,
-                    PlayersToStart = src.PlayersToStart,
-                    RaceState = src.RaceState,
+                    PlayersToStart = RoomRules.NormalizePlayersToStart(src.RoomType, src.PlayersToStart),
+                    RaceState = RoomRules.NormalizeRaceState(src.RaceState),
                     TrackName = src.TrackName ?? string.Empty
                 };
             }
@@ -37,13 +52,14 @@ namespace TopSpeed.Core.Multiplayer
             return new RoomSnapshot
             {
                 RoomVersion = packet.RoomVersion,
+                EventSequence = packet.EventSequence,
                 RoomId = packet.RoomId,
                 RaceInstanceId = packet.RaceInstanceId,
                 HostPlayerId = packet.HostPlayerId,
                 RoomName = packet.RoomName ?? string.Empty,
-                RoomType = packet.RoomType,
-                PlayersToStart = packet.PlayersToStart,
-                RaceState = packet.RaceState,
+                RoomType = RoomRules.NormalizeType(packet.RoomType),
+                PlayersToStart = RoomRules.NormalizePlayersToStart(packet.RoomType, packet.PlayersToStart),
+                RaceState = RoomRules.NormalizeRaceState(packet.RaceState),
                 RacePaused = packet.RacePaused,
                 InRoom = packet.InRoom,
                 IsHost = packet.IsHost,
@@ -58,18 +74,22 @@ namespace TopSpeed.Core.Multiplayer
         {
             if (packet == null)
                 return null;
+            if (packet.RoomId == 0 || packet.Kind == RoomEventKind.None)
+                return null;
 
             return new RoomEventInfo
             {
                 RoomId = packet.RoomId,
                 RoomVersion = packet.RoomVersion,
+                EventSequence = packet.EventSequence,
                 RaceInstanceId = packet.RaceInstanceId,
                 Kind = packet.Kind,
                 HostPlayerId = packet.HostPlayerId,
-                RoomType = packet.RoomType,
+                RoomType = RoomRules.NormalizeType(packet.RoomType),
                 PlayerCount = packet.PlayerCount,
-                PlayersToStart = packet.PlayersToStart,
-                RaceState = packet.RaceState,
+                PlayersToStart = RoomRules.NormalizePlayersToStart(packet.RoomType, packet.PlayersToStart),
+                RaceState = RoomRules.NormalizeRaceState(packet.RaceState),
+                RacePaused = packet.RacePaused,
                 TrackName = packet.TrackName ?? string.Empty,
                 Laps = packet.Laps,
                 GameRulesFlags = packet.GameRulesFlags,
@@ -86,15 +106,30 @@ namespace TopSpeed.Core.Multiplayer
             if (packetPlayers == null || packetPlayers.Length == 0)
                 return Array.Empty<RoomParticipant>();
 
-            var players = new RoomParticipant[packetPlayers.Length];
+            var valid = 0;
             for (var i = 0; i < packetPlayers.Length; i++)
             {
-                var src = packetPlayers[i] ?? new PacketRoomPlayer();
-                players[i] = new RoomParticipant
+                var src = packetPlayers[i];
+                if (src != null && src.PlayerId != 0)
+                    valid++;
+            }
+
+            if (valid == 0)
+                return Array.Empty<RoomParticipant>();
+
+            var players = new RoomParticipant[valid];
+            var index = 0;
+            for (var i = 0; i < packetPlayers.Length; i++)
+            {
+                var src = packetPlayers[i];
+                if (src == null || src.PlayerId == 0)
+                    continue;
+
+                players[index++] = new RoomParticipant
                 {
                     PlayerId = src.PlayerId,
                     PlayerNumber = src.PlayerNumber,
-                    State = src.State,
+                    State = RoomRules.NormalizeParticipantState(src.State),
                     Name = src.Name ?? string.Empty
                 };
             }

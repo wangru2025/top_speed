@@ -17,19 +17,15 @@ namespace TopSpeed.Server.Network
                 if (roomName.Length > ProtocolConstants.MaxRoomNameLength)
                     roomName = roomName.Substring(0, ProtocolConstants.MaxRoomNameLength);
 
-                var roomType = packet.RoomType;
-                var playersToStart = packet.PlayersToStart;
-                if (playersToStart < 2 || playersToStart > ProtocolConstants.MaxRoomPlayersToStart)
-                    playersToStart = 2;
-                if (roomType == GameRoomType.OneOnOne)
-                    playersToStart = 2;
+                var roomType = RoomRules.NormalizeType(packet.RoomType);
+                var playersToStart = RoomRules.NormalizePlayersToStart(roomType, packet.PlayersToStart);
 
                 var room = new RaceRoom(_owner._nextRoomId++, roomName, roomType, playersToStart);
                 _owner._rooms[room.Id] = room;
                 SetTrackData(room, room.TrackName);
                 JoinPlayer(player, room);
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomCreated);
-                _owner.BroadcastLobbyAnnouncement(LocalizationService.Format(
+                _owner._notify.ProtocolToLobby(LocalizationService.Format(
                     LocalizationService.Mark("{0} created game room {1}."),
                     RaceServer.DescribePlayer(player),
                     room.Name));
@@ -47,6 +43,12 @@ namespace TopSpeed.Server.Network
                 if (!_owner._rooms.TryGetValue(packet.RoomId, out var room))
                 {
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.RoomNotFound, LocalizationService.Mark("Game room not found."));
+                    return;
+                }
+
+                if (player.RoomId == room.Id && room.PlayerIds.Contains(player.Id))
+                {
+                    _owner._notify.SendRoomState(player, room);
                     return;
                 }
 
@@ -102,7 +104,6 @@ namespace TopSpeed.Server.Network
                 room.PlayerIds.Remove(player.Id);
                 if (room.RaceStarted)
                 {
-                    room.ActiveRaceParticipantIds.Remove(player.Id);
                     _owner._race.MarkParticipantDnf(room, player.Id, oldNumber);
                 }
 
@@ -123,9 +124,9 @@ namespace TopSpeed.Server.Network
                 if (notify)
                 {
                     var disconnectPayload = PacketSerializer.WritePlayer(Command.PlayerDisconnected, player.Id, oldNumber);
-                    _owner.SendToRoomOnStream(room, disconnectPayload, PacketStream.RaceEvent);
-                    _owner.SendToRoomOnStream(room, disconnectPayload, PacketStream.Room);
-                    _owner.SendProtocolMessageToRoom(
+                    _owner._notify.ToRoom(room, disconnectPayload, PacketStream.RaceEvent);
+                    _owner._notify.ToRoom(room, disconnectPayload, PacketStream.Room);
+                    _owner._notify.ProtocolToRoom(
                         room,
                         LocalizationService.Format(
                             LocalizationService.Mark("{0} has left the game."),
@@ -145,7 +146,7 @@ namespace TopSpeed.Server.Network
                     if (room.HostId == player.Id)
                         room.HostId = room.PlayerIds.OrderBy(id => id).First();
                     if (room.RaceStarted)
-                        _owner._race.UpdateStopState(room, 0f);
+                        _owner._race.UpdateStopState(room);
                     if (room.PreparingRace)
                         _owner._race.TryStartAfterLoadout(room);
                     CompactNumbers(room);
@@ -171,6 +172,16 @@ namespace TopSpeed.Server.Network
 
             public void JoinPlayer(PlayerConnection player, RaceRoom room)
             {
+                if (player.RoomId == room.Id && room.PlayerIds.Contains(player.Id))
+                {
+                    _owner.SendStream(player, PacketSerializer.WritePlayerNumber(player.Id, player.PlayerNumber), PacketStream.Control);
+                    _owner.SendTrack(room, player);
+                    _owner.SyncMediaTo(room, player);
+                    _owner.SyncLiveTo(room, player);
+                    _owner._notify.SendRoomState(player, room);
+                    return;
+                }
+
                 if (player.RoomId.HasValue)
                     Leave(player, true);
 
@@ -204,7 +215,7 @@ namespace TopSpeed.Server.Network
                     ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), player.PlayerNumber + 1)
                     : player.Name;
                 var joined = new PacketPlayerJoined { PlayerId = player.Id, PlayerNumber = player.PlayerNumber, Name = joinedName };
-                _owner.SendToRoomExceptOnStream(room, player.Id, PacketSerializer.WritePlayerJoined(joined), PacketStream.Room);
+                _owner._notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayerJoined(joined), PacketStream.Room);
                 _owner._logger.Debug(LocalizationService.Format(
                     LocalizationService.Mark("Join room assignment: room={0}, player={1}, playerNumber={2}, host={3}."),
                     room.Id,

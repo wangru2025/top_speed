@@ -1,5 +1,5 @@
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using TopSpeed.Vehicles;
 using Xunit;
 
@@ -21,7 +21,7 @@ public sealed class ManualThrottleDriveBehaviorTests
         float drivelineCouplingFactor,
         bool expected)
     {
-        var car = (Car)FormatterServices.GetUninitializedObject(typeof(Car));
+        var car = (Car)RuntimeHelpers.GetUninitializedObject(typeof(Car));
         SetField(car, "_thrust", thrust);
         SetField(car, "_manualTransmission", manualTransmission);
         SetField(car, "_gear", neutralGear ? 0 : 1);

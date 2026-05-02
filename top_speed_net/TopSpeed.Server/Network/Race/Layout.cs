@@ -14,13 +14,7 @@ namespace TopSpeed.Server.Network
     {
         private static float GetLapDistance(RaceRoom room)
         {
-            if (room.TrackData == null || room.TrackData.Definitions == null || room.TrackData.Definitions.Length == 0)
-                return 0f;
-
-            var lapDistance = 0f;
-            foreach (var definition in room.TrackData.Definitions)
-                lapDistance += Math.Max(1f, definition.Length);
-            return lapDistance;
+            return RaceDistanceRules.CalculateLapDistance(room.TrackData?.Definitions);
         }
 
         private float GetLaneHalfWidth(RaceRoom room)
@@ -89,15 +83,10 @@ namespace TopSpeed.Server.Network
 
         private static float GetRaceDistance(RaceRoom room)
         {
-            var lapDistance = GetLapDistance(room);
-            if (lapDistance <= 0f)
-                return 0f;
-
-            var trackLaps = room.TrackData?.Laps ?? 0;
-            var laps = trackLaps > 0
-                ? trackLaps
-                : room.Laps > 0 ? room.Laps : 1;
-            return lapDistance * laps;
+            return RaceDistanceRules.CalculateRaceDistance(
+                room.TrackData?.Definitions,
+                room.Laps,
+                room.TrackData?.Laps ?? 0);
         }
 
     }

@@ -20,6 +20,9 @@ namespace TopSpeed.Server.Network
 
                 if (!_owner._rooms.TryGetValue(player.RoomId.Value, out var foundRoom) || foundRoom == null)
                 {
+                    player.RoomId = null;
+                    player.Live = null;
+                    _owner._notify.SendRoomState(player, null);
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.NotInRoom, LocalizationService.Mark("You are not in a game room."));
                     return false;
                 }

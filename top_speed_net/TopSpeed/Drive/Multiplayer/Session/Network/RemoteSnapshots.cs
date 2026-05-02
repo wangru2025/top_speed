@@ -47,11 +47,14 @@ namespace TopSpeed.Drive.Multiplayer
             if (playerNumber < _disconnectedPlayerSlots.Length && _disconnectedPlayerSlots[playerNumber])
                 return;
 
+            var raceDistance = GetSpatialTrackLength();
+
             var remote = GetOrCreateRemotePlayer(playerNumber, car, positionX, positionY);
             remote.State = state;
             if (state == PlayerState.Finished && !remote.Finished)
             {
                 remote.Finished = true;
+                remote.Player.MarkFinished(raceDistance);
                 _progress.AnnounceRemoteFinish(playerNumber);
             }
 

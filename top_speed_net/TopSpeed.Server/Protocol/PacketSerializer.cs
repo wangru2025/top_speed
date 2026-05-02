@@ -99,7 +99,7 @@ namespace TopSpeed.Server.Protocol
             reader.ReadByte();
             packet.Code = (ProtocolMessageCode)reader.ReadByte();
             packet.Message = reader.ReadFixedString(ProtocolConstants.MaxProtocolMessageLength);
-            return true;
+            return PacketValidation.IsValidProtocolMessage(packet);
         }
 
         public static byte[] WritePacketHeader(Command command, int payloadSize)

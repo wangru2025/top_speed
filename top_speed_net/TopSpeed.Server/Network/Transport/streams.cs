@@ -56,44 +56,5 @@ namespace TopSpeed.Server.Network
             _transport.Send(endpoint, payload, ToDelivery(deliveryOverride), spec.Channel);
         }
 
-        private void SendToRoomOnStream(RaceRoom room, byte[] payload, PacketStream stream)
-        {
-            foreach (var id in room.PlayerIds)
-            {
-                if (_players.TryGetValue(id, out var player))
-                    SendStream(player, payload, stream);
-            }
-        }
-
-        private void SendToRoomOnStream(RaceRoom room, byte[] payload, PacketStream stream, PacketDeliveryKind deliveryOverride)
-        {
-            foreach (var id in room.PlayerIds)
-            {
-                if (_players.TryGetValue(id, out var player))
-                    SendStream(player, payload, stream, deliveryOverride);
-            }
-        }
-
-        private void SendToRoomExceptOnStream(RaceRoom room, uint exceptId, byte[] payload, PacketStream stream)
-        {
-            foreach (var id in room.PlayerIds)
-            {
-                if (id == exceptId)
-                    continue;
-                if (_players.TryGetValue(id, out var player))
-                    SendStream(player, payload, stream);
-            }
-        }
-
-        private void SendToRoomExceptOnStream(RaceRoom room, uint exceptId, byte[] payload, PacketStream stream, PacketDeliveryKind deliveryOverride)
-        {
-            foreach (var id in room.PlayerIds)
-            {
-                if (id == exceptId)
-                    continue;
-                if (_players.TryGetValue(id, out var player))
-                    SendStream(player, payload, stream, deliveryOverride);
-            }
-        }
     }
 }

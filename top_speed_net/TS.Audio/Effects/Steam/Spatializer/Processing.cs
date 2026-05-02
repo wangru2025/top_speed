@@ -7,40 +7,51 @@ namespace TS.Audio
     {
         public override void Process(Span<float> buffer, int channels)
         {
-            if (!Enabled || _disposed || !_initialized || buffer.IsEmpty)
-                return;
-
-            var frames = buffer.Length / Math.Max(1, channels);
-            if (frames <= 0 || channels != _outputChannels)
-                return;
-
-            var frameSize = _runtime.AudioSettings.FrameSize;
-            if (frameSize <= 0)
-                return;
-
-            EnsureProcessingScratch(frameSize * channels);
-            var frameOffset = 0;
-            while (frameOffset < frames)
+            try
             {
-                var chunkFrames = Math.Min(frameSize, frames - frameOffset);
-                var chunkSamples = chunkFrames * channels;
-                var scratchSamples = frameSize * channels;
-                var sourceSlice = buffer.Slice(frameOffset * channels, chunkSamples);
-                var scratch = _processingScratch.AsSpan(0, scratchSamples);
-                sourceSlice.CopyTo(scratch);
-                if (chunkSamples < scratchSamples)
-                    scratch.Slice(chunkSamples).Clear();
+                if (!Enabled || _disposed || !_initialized || buffer.IsEmpty)
+                    return;
 
-                lock (_sync)
+                var frames = buffer.Length / Math.Max(1, channels);
+                if (frames <= 0 || channels != _outputChannels)
+                    return;
+
+                var frameSize = _runtime.AudioSettings.FrameSize;
+                if (frameSize <= 0)
+                    return;
+
+                EnsureProcessingScratch(frameSize * channels);
+                var frameOffset = 0;
+                while (frameOffset < frames)
                 {
-                    if (_useBinaural)
-                        ProcessBinaural(scratch, channels, frameSize);
-                    else
-                        ProcessDirect(scratch, channels, frameSize);
-                }
+                    var chunkFrames = Math.Min(frameSize, frames - frameOffset);
+                    var chunkSamples = chunkFrames * channels;
+                    var scratchSamples = frameSize * channels;
+                    var sourceSlice = buffer.Slice(frameOffset * channels, chunkSamples);
+                    var scratch = _processingScratch.AsSpan(0, scratchSamples);
+                    sourceSlice.CopyTo(scratch);
+                    if (chunkSamples < scratchSamples)
+                        scratch.Slice(chunkSamples).Clear();
 
-                scratch.Slice(0, chunkSamples).CopyTo(sourceSlice);
-                frameOffset += chunkFrames;
+                    lock (_sync)
+                    {
+                        if (_disposed || !_initialized || !HasRequiredBuffers())
+                            return;
+
+                        if (_useBinaural)
+                            ProcessBinaural(scratch, channels, frameSize);
+                        else
+                            ProcessDirect(scratch, channels, frameSize);
+                    }
+
+                    scratch.Slice(0, chunkSamples).CopyTo(sourceSlice);
+                    frameOffset += chunkFrames;
+                }
+            }
+            catch (Exception ex)
+            {
+                buffer.Clear();
+                HandleProcessingException(ex);
             }
         }
 
@@ -52,6 +63,9 @@ namespace TS.Audio
 
         private void ProcessDirect(Span<float> buffer, int channels, int frames)
         {
+            if (_directEffect.Handle == IntPtr.Zero || _inputBuffer.Data == IntPtr.Zero || _outputBuffer.Data == IntPtr.Zero)
+                return;
+
             if (ShouldRenderReverb())
                 WriteDownmixedMono(buffer, channels, frames, _reflectionInputBuffer);
 
@@ -66,6 +80,17 @@ namespace TS.Audio
 
         private void ProcessBinaural(Span<float> buffer, int channels, int frames)
         {
+            if (_directEffect.Handle == IntPtr.Zero
+                || _binauralEffect.Handle == IntPtr.Zero
+                || _inputBuffer.Data == IntPtr.Zero
+                || _directBuffer.Data == IntPtr.Zero
+                || _outputBuffer.Data == IntPtr.Zero
+                || !_runtime.HrtfAvailable
+                || _runtime.Hrtf.Handle == IntPtr.Zero)
+            {
+                return;
+            }
+
             WriteDownmixedMono(buffer, channels, frames, _inputBuffer);
             if (ShouldRenderReverb())
                 CopyBuffer(_inputBuffer, _reflectionInputBuffer, frames);
@@ -180,7 +205,18 @@ namespace TS.Audio
 
         private bool ShouldRenderReverb()
         {
-            return _reflectionEffect.Handle != IntPtr.Zero && (_hasReverbSimulation || _reverbWetCurrent > 0.0001f);
+            return _reflectionEffect.Handle != IntPtr.Zero
+                && _reflectionInputBuffer.Data != IntPtr.Zero
+                && _reflectionOutputBuffer.Data != IntPtr.Zero
+                && (_hasReverbSimulation || _reverbWetCurrent > 0.0001f);
+        }
+
+        private bool HasRequiredBuffers()
+        {
+            return _directEffect.Handle != IntPtr.Zero
+                && _inputBuffer.Data != IntPtr.Zero
+                && _outputBuffer.Data != IntPtr.Zero
+                && (!_useBinaural || (_binauralEffect.Handle != IntPtr.Zero && _directBuffer.Data != IntPtr.Zero));
         }
 
         private float DownmixFrame(Span<float> source, int offset, int channels)

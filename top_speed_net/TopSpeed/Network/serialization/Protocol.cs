@@ -22,6 +22,8 @@ namespace TopSpeed.Network
                 packet.ServerMinSupported = ReadProtocolVer(ref reader);
                 packet.ServerMaxSupported = ReadProtocolVer(ref reader);
                 packet.Message = reader.ReadFixedString(ProtocolConstants.MaxProtocolDetailsLength);
+                if (data.Length >= 2 + 1 + 5 + 5 + 5 + ProtocolConstants.MaxProtocolDetailsLength + 8)
+                    packet.ResumeToken = reader.ReadUInt64();
                 return true;
             }
             catch (System.ArgumentOutOfRangeException)
@@ -33,13 +35,15 @@ namespace TopSpeed.Network
 
         public static byte[] WriteProtocolHello(PacketProtocolHello packet)
         {
-            var buffer = WritePacketHeader(Command.ProtocolHello, 5 + 5 + 5);
+            var buffer = WritePacketHeader(Command.ProtocolHello, 5 + 5 + 5 + 4 + 8);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.ProtocolHello);
             WriteProtocolVer(ref writer, packet.ClientVersion);
             WriteProtocolVer(ref writer, packet.MinSupported);
             WriteProtocolVer(ref writer, packet.MaxSupported);
+            writer.WriteUInt32(packet.ResumePlayerId);
+            writer.WriteUInt64(packet.ResumeToken);
             return buffer;
         }
 

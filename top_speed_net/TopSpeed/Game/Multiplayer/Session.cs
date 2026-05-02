@@ -20,6 +20,7 @@ namespace TopSpeed.Game
 
         private void ClearSession()
         {
+            CancelSessionReconnect();
             var session = _session;
             if (session != null)
                 session.SetPacketSink(null);
@@ -42,6 +43,7 @@ namespace TopSpeed.Game
 
         private void DisconnectFromServer()
         {
+            CancelSessionReconnect();
             _multiplayerRaceRuntime.Disconnect();
             ClearSession();
             _state = AppState.Menu;

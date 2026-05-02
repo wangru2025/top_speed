@@ -31,6 +31,7 @@ namespace TopSpeed.Server.Network
                     _owner.SendStream(player, PacketSerializer.WriteRoomState(new PacketRoomState
                     {
                         RoomVersion = 0,
+                        EventSequence = 0,
                         RaceInstanceId = 0,
                         InRoom = false,
                         HostPlayerId = 0,
@@ -47,6 +48,7 @@ namespace TopSpeed.Server.Network
                 _owner.SendStream(player, PacketSerializer.WriteRoomState(new PacketRoomState
                 {
                     RoomVersion = room.Version,
+                    EventSequence = CurrentEventSequence(room),
                     RoomId = room.Id,
                     RaceInstanceId = room.RaceInstanceId,
                     HostPlayerId = room.HostId,
@@ -71,6 +73,7 @@ namespace TopSpeed.Server.Network
                     _owner.SendStream(player, PacketSerializer.WriteRoomGet(new PacketRoomGet
                     {
                         Found = false,
+                        EventSequence = 0,
                         RaceInstanceId = 0,
                         RaceState = RoomRaceState.Lobby,
                         Players = Array.Empty<PacketRoomPlayer>()
@@ -82,6 +85,7 @@ namespace TopSpeed.Server.Network
                 {
                     Found = true,
                     RoomVersion = room.Version,
+                    EventSequence = CurrentEventSequence(room),
                     RoomId = room.Id,
                     RaceInstanceId = room.RaceInstanceId,
                     HostPlayerId = room.HostId,
@@ -103,36 +107,31 @@ namespace TopSpeed.Server.Network
                     return;
 
                 foreach (var id in room.PlayerIds)
-                {
                     if (_owner._players.TryGetValue(id, out var player))
                         SendRoomState(player, room);
-                }
             }
 
             public void RoomLifecycle(RaceRoom room, RoomEventKind kind)
             {
                 var evt = CreateRoomEvent(room, kind);
                 var payload = PacketSerializer.WriteRoomEvent(evt);
+                RoomEventJournal.Record(room, Command.RoomEvent, evt.EventSequence, payload, PacketStream.Room);
                 var roomOnly =
                     kind == RoomEventKind.HostChanged ||
                     kind == RoomEventKind.TrackChanged ||
                     kind == RoomEventKind.LapsChanged ||
                     kind == RoomEventKind.PlayersToStartChanged ||
-                    kind == RoomEventKind.GameRulesChanged;
+                    kind == RoomEventKind.GameRulesChanged ||
+                    kind == RoomEventKind.RacePaused ||
+                    kind == RoomEventKind.RaceResumed;
 
                 if (roomOnly)
                 {
-                    foreach (var id in room.PlayerIds)
-                    {
-                        if (_owner._players.TryGetValue(id, out var player))
-                            _owner.SendStream(player, payload, PacketStream.Room);
-                    }
-
+                    ToRoom(room, payload, PacketStream.Room);
                     return;
                 }
 
-                foreach (var player in _owner._players.Values)
-                    _owner.SendStream(player, payload, PacketStream.Room);
+                ToAll(payload, PacketStream.Room);
             }
 
             public void RoomParticipant(RaceRoom room, RoomEventKind kind, uint playerId, byte playerNumber, PlayerState state, string name)
@@ -143,12 +142,9 @@ namespace TopSpeed.Server.Network
                 evt.SubjectPlayerState = state;
                 evt.SubjectPlayerName = name ?? string.Empty;
                 var payload = PacketSerializer.WriteRoomEvent(evt);
+                RoomEventJournal.Record(room, Command.RoomEvent, evt.EventSequence, payload, PacketStream.Room);
 
-                foreach (var id in room.PlayerIds)
-                {
-                    if (_owner._players.TryGetValue(id, out var player))
-                        _owner.SendStream(player, payload, PacketStream.Room);
-                }
+                ToRoom(room, payload, PacketStream.Room);
             }
 
             public void RoomRemoved(uint roomId, string roomName)
@@ -162,8 +158,7 @@ namespace TopSpeed.Server.Network
                 };
 
                 var payload = PacketSerializer.WriteRoomEvent(evt);
-                foreach (var player in _owner._players.Values)
-                    _owner.SendStream(player, payload, PacketStream.Room);
+                ToAll(payload, PacketStream.Room);
             }
 
             private PacketRoomSummary BuildRoomSummary(RaceRoom room)
@@ -211,6 +206,7 @@ namespace TopSpeed.Server.Network
                 {
                     RoomId = room.Id,
                     RoomVersion = room.Version,
+                    EventSequence = NextEventSequence(room),
                     RaceInstanceId = room.RaceInstanceId,
                     Kind = kind,
                     HostPlayerId = room.HostId,
@@ -218,6 +214,7 @@ namespace TopSpeed.Server.Network
                     PlayerCount = (byte)Math.Min(ProtocolConstants.MaxPlayers, RaceServer.GetRoomParticipantCount(room)),
                     PlayersToStart = room.PlayersToStart,
                     RaceState = room.RaceState,
+                    RacePaused = room.RacePaused,
                     TrackName = room.TrackName,
                     Laps = room.Laps,
                     GameRulesFlags = room.GameRulesFlags,

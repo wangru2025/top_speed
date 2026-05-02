@@ -44,7 +44,7 @@ namespace TopSpeed.Server.Network
                 TouchVersion(room);
                 _owner._notify.RoomParticipant(room, RoomEventKind.BotAdded, bot.Id, bot.PlayerNumber, bot.State, FormatBotDisplayName(bot));
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
-                _owner.SendToRoomOnStream(room, PacketSerializer.WritePlayerJoined(new PacketPlayerJoined
+                _owner._notify.ToRoom(room, PacketSerializer.WritePlayerJoined(new PacketPlayerJoined
                 {
                     PlayerId = bot.Id,
                     PlayerNumber = bot.PlayerNumber,
@@ -86,7 +86,7 @@ namespace TopSpeed.Server.Network
                 var bot = room.Bots.OrderByDescending(candidate => candidate.AddedOrder).First();
                 room.Bots.Remove(bot);
                 CompactNumbers(room);
-                _owner.SendToRoomOnStream(room, PacketSerializer.WritePlayer(Command.PlayerDisconnected, bot.Id, bot.PlayerNumber), PacketStream.Room);
+                _owner._notify.ToRoom(room, PacketSerializer.WritePlayer(Command.PlayerDisconnected, bot.Id, bot.PlayerNumber), PacketStream.Room);
                 TouchVersion(room);
                 _owner._notify.RoomParticipant(room, RoomEventKind.BotRemoved, bot.Id, bot.PlayerNumber, bot.State, FormatBotDisplayName(bot));
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
@@ -97,7 +97,7 @@ namespace TopSpeed.Server.Network
                         LocalizationService.Mark("Removed bot {0}."),
                         bot.Name));
                 if (room.RaceStarted)
-                    _owner._race.UpdateStopState(room, 0f);
+                    _owner._race.UpdateStopState(room);
                 if (room.PreparingRace)
                     _owner._race.TryStartAfterLoadout(room);
             }

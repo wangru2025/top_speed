@@ -19,14 +19,13 @@ namespace TopSpeed.Game
             private bool HandleDisconnect(IncomingPacket packet)
             {
                 var message = LocalizationService.Mark("Disconnected from server.");
-                if (ClientPacketSerializer.TryReadDisconnect(packet.Payload, out var disconnectMessage) &&
-                    !string.IsNullOrWhiteSpace(disconnectMessage))
+                var explicitDisconnect = ClientPacketSerializer.TryReadDisconnect(packet.Payload, out var disconnectMessage);
+                if (explicitDisconnect && !string.IsNullOrWhiteSpace(disconnectMessage))
                 {
                     message = disconnectMessage;
                 }
 
-                _owner._speech.Speak(message);
-                _owner.DisconnectFromServer();
+                _owner.HandleMultiplayerDisconnect(message, explicitDisconnect);
                 return true;
             }
 

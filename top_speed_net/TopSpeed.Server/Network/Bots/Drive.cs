@@ -86,7 +86,7 @@ namespace TopSpeed.Server.Network
                         bot.Id,
                         bot.PlayerNumber,
                         bot.PositionY));
-                    SendToRoomOnStream(room, PacketSerializer.WritePlayer(Command.PlayerCrashed, bot.Id, bot.PlayerNumber), PacketStream.RaceEvent);
+                    _notify.ToRoom(room, PacketSerializer.WritePlayer(Command.PlayerCrashed, bot.Id, bot.PlayerNumber), PacketStream.RaceEvent);
                     return;
                 }
 
@@ -100,17 +100,7 @@ namespace TopSpeed.Server.Network
             if (bot.PositionY < raceDistance)
                 return;
 
-            bot.PositionY = raceDistance;
-            bot.SpeedKph = 0f;
-            bot.State = PlayerState.Finished;
-            bot.EngineFrequency = bot.AudioProfile.IdleFrequency;
-            bot.Horning = false;
-            bot.HornSecondsRemaining = 0f;
-            bot.BackfirePulseSeconds = 0f;
-            bot.BackfireArmed = true;
-            var finishTimeMs = _race.CaptureFinishTimeMs(room);
-            if (_race.TryMarkParticipantFinished(room, bot.Id, bot.PlayerNumber, finishTimeMs, out var finishOrder))
-                _notify.RacePlayerFinished(room, bot.Id, bot.PlayerNumber, finishOrder, finishTimeMs);
+            _race.ResolveBotFinish(room, bot, raceDistance, out _);
             _botFinishEvents++;
             _logger.Debug(LocalizationService.Format(
                 LocalizationService.Mark("Bot finished: room={0}, bot={1}, number={2}, place={3}."),
@@ -118,7 +108,7 @@ namespace TopSpeed.Server.Network
                 bot.Id,
                 bot.PlayerNumber,
                 room.RaceResults.Count));
-            _race.UpdateStopState(room, 0f);
+            _race.UpdateStopState(room);
         }
     }
 }

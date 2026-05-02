@@ -13,6 +13,7 @@ namespace TopSpeed.Server.Network
         public uint PlayerId { get; set; }
         public byte PlayerNumber { get; set; }
         public RoomRaceResultStatus Status { get; set; } = RoomRaceResultStatus.Pending;
+        public RaceParticipantLifecycleState Lifecycle { get; set; } = RaceParticipantLifecycleState.Joined;
         public int TimeMs { get; set; }
         public byte FinishOrder { get; set; }
     }
@@ -31,6 +32,7 @@ namespace TopSpeed.Server.Network
 
         public uint Id { get; }
         public uint Version { get; set; }
+        public uint EventSequence { get; set; }
         public uint RaceInstanceId { get; set; }
         public string Name { get; set; }
         public GameRoomType RoomType { get; set; }
@@ -50,6 +52,7 @@ namespace TopSpeed.Server.Network
         public byte Laps { get; set; }
         public uint GameRulesFlags { get; set; }
         public HashSet<uint> ActiveRaceParticipantIds { get; } = new HashSet<uint>();
+        public List<RoomEventJournalEntry> EventJournal { get; } = new List<RoomEventJournalEntry>();
         public List<byte> RaceResults { get; } = new List<byte>();
         public Dictionary<byte, int> RaceFinishTimesMs { get; } = new Dictionary<byte, int>();
         public Dictionary<uint, RoomRaceParticipantResult> RaceParticipantResults { get; } = new Dictionary<uint, RoomRaceParticipantResult>();

@@ -89,9 +89,12 @@ namespace TopSpeed.Drive.Multiplayer
             else if (externalEvent.Id == Incoming.RoomRacePlayerFinished && externalEvent.Data is ValueTuple<byte, byte> finished)
                 ApplyRemoteFinishCore(finished.Item1, finished.Item2);
             else if (externalEvent.Id == Incoming.RoomRaceCompleted && externalEvent.Data is PacketRoomRaceCompleted completed)
-                FinalizeServerRace(BuildResultSummary(completed));
+            {
+                ApplyCompletedRemoteFinishes(completed);
+                FinalizeServerRace(BuildResultSummary(completed), completed: true);
+            }
             else if (externalEvent.Id == Incoming.RoomRaceAborted)
-                FinalizeServerRace(null);
+                FinalizeServerRace(null, completed: false);
             else if (externalEvent.Id == Incoming.RoomParticipantSync && externalEvent.Data is PacketRoomState roomState)
                 SyncParticipantsCore(roomState);
             else if (externalEvent.Id == Incoming.LiveStart && externalEvent.Data is ValueTuple<PacketPlayerLiveStart, long> liveStart)

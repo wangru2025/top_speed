@@ -68,7 +68,9 @@ internal sealed class AndroidUpdatePackageInstaller : Java.Lang.Object, IUpdateP
                 return false;
             }
 
+            #pragma warning disable CA1422
             var installIntent = new Intent(Intent.ActionInstallPackage);
+            #pragma warning restore CA1422
             installIntent.SetData(apkUri);
             installIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.GrantReadUriPermission);
             installIntent.PutExtra(Intent.ExtraReturnResult, false);

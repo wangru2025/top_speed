@@ -40,7 +40,7 @@ namespace TopSpeed.Server.Network
                 : deliveryMethod == DeliveryMethod.Sequenced
                     ? PacketDeliveryKind.Sequenced
                     : PacketDeliveryKind.Unreliable;
-            SendToRoomOnStream(room, payload, PacketStream.RaceState, delivery);
+            _notify.ToRoom(room, payload, PacketStream.RaceState, delivery);
         }
 
         private void BroadcastPlayerData()
@@ -52,7 +52,7 @@ namespace TopSpeed.Server.Network
                 var payload = BuildRaceSnapshotPayload(room);
                 if (payload == null)
                     continue;
-                SendToRoomOnStream(room, payload, PacketStream.RaceState, PacketDeliveryKind.Unreliable);
+                _notify.ToRoom(room, payload, PacketStream.RaceState, PacketDeliveryKind.Unreliable);
             }
         }
 

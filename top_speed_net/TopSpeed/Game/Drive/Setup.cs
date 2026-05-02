@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using TopSpeed.Audio;
 using TopSpeed.Common;
 using TopSpeed.Core;
@@ -100,7 +101,7 @@ namespace TopSpeed.Game
                             vehicleIndex,
                             vehicleFile,
                             _input.VibrationDevice);
-                        singleRace.Initialize(Algorithm.RandomInt(_settings.NrOfComputers + 1));
+                        singleRace.Initialize(SelectSingleRacePlayerNumber());
                         _singleRace = singleRace;
                         _state = AppState.SingleRace;
                         _speech.Speak(mode == CoreRaceMode.QuickStart
@@ -113,6 +114,52 @@ namespace TopSpeed.Game
             {
                 HandleTrackLoadFailure(ex);
             }
+        }
+
+        private int SelectSingleRacePlayerNumber()
+        {
+            var slots = Math.Max(1, Math.Min(8, _settings.NrOfComputers + 1));
+            if (slots == 1)
+            {
+                _singleRacePlayerNumberBag.Clear();
+                _singleRacePlayerNumberSlots = 1;
+                _lastSingleRacePlayerNumber = 0;
+                return 0;
+            }
+
+            if (_singleRacePlayerNumberSlots != slots || _singleRacePlayerNumberBag.Count == 0)
+                RefillSingleRacePlayerNumberBag(slots);
+
+            var selected = _singleRacePlayerNumberBag.Dequeue();
+            _lastSingleRacePlayerNumber = selected;
+            return selected;
+        }
+
+        private void RefillSingleRacePlayerNumberBag(int slots)
+        {
+            _singleRacePlayerNumberBag.Clear();
+            _singleRacePlayerNumberSlots = slots;
+
+            var values = new int[slots];
+            for (var i = 0; i < slots; i++)
+                values[i] = i;
+
+            for (var i = slots - 1; i > 0; i--)
+            {
+                var j = RandomNumberGenerator.GetInt32(i + 1);
+                (values[i], values[j]) = (values[j], values[i]);
+            }
+
+            if (slots > 1
+                && _lastSingleRacePlayerNumber >= 0
+                && values[0] == _lastSingleRacePlayerNumber)
+            {
+                var swapIndex = 1 + RandomNumberGenerator.GetInt32(slots - 1);
+                (values[0], values[swapIndex]) = (values[swapIndex], values[0]);
+            }
+
+            for (var i = 0; i < slots; i++)
+                _singleRacePlayerNumberBag.Enqueue(values[i]);
         }
 
         private static bool TryResolveTransmissionChoice(

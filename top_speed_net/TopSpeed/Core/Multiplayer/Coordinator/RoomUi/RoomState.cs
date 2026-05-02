@@ -9,6 +9,9 @@ namespace TopSpeed.Core.Multiplayer
         {
             public void HandleRoomState(RoomStateChange change)
             {
+                if (!change.Applied)
+                    return;
+
                 var effects = new List<PacketEffect>();
 
                 AddRoomJoinLeaveEffects(effects, change.WasInRoom, change.PreviousRoomId);

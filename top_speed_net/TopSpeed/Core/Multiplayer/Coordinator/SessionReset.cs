@@ -31,6 +31,7 @@ namespace TopSpeed.Core.Multiplayer
             _state.SavedServers.PendingDeleteIndex = -1;
             _state.Connection.HasPendingCompatibilityResult = false;
             _state.Connection.PendingCompatibilityResult = default;
+            SetClientState(MultiplayerClientState.Disconnected);
             _state.Chat.History.Clear();
             RebuildLobbyMenu();
             RebuildCreateRoomMenu();

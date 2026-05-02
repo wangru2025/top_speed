@@ -9,18 +9,18 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Race
         {
-            public void UpdateCompletions(float deltaSeconds)
+            public void UpdateCompletions()
             {
                 foreach (var room in _owner._rooms.Values)
                 {
                     if (!room.RaceStarted)
                         continue;
 
-                    UpdateStopState(room, deltaSeconds);
+                    UpdateStopState(room);
                 }
             }
 
-            public void UpdateStopState(RaceRoom room, float deltaSeconds)
+            public void UpdateStopState(RaceRoom room)
             {
                 if (room == null || room.RaceState != RoomRaceState.Racing)
                     return;
@@ -40,11 +40,19 @@ namespace TopSpeed.Server.Network
                     return;
                 }
 
+                var allTerminal = true;
                 foreach (var id in room.ActiveRaceParticipantIds)
                 {
-                    if (!room.RaceParticipantResults.TryGetValue(id, out var result) || result.Status != RoomRaceResultStatus.Finished)
-                        return;
+                    var result = GetOrCreateParticipantResult(room, id);
+                    if (RaceResultRules.IsTerminal(result.Status))
+                        continue;
+
+                    allTerminal = false;
+                    break;
                 }
+
+                if (!allTerminal)
+                    return;
 
                 _owner._logger.Debug(LocalizationService.Format(
                     LocalizationService.Mark("Race completion ready: room={0}, all active participants finished."),
@@ -67,50 +75,18 @@ namespace TopSpeed.Server.Network
 
             public bool TryMarkParticipantFinished(RaceRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
             {
-                finishOrder = 0;
-                if (room == null || room.RaceState != RoomRaceState.Racing)
-                    return false;
-
-                if (!room.RaceParticipantResults.TryGetValue(playerId, out var result))
+                if (!RaceParticipantFinisher.TryMarkFinished(room, playerId, playerNumber, finishTimeMs, out finishOrder))
                 {
-                    result = new RoomRaceParticipantResult
+                    if (room != null)
                     {
-                        PlayerId = playerId,
-                        PlayerNumber = playerNumber,
-                        Status = RoomRaceResultStatus.Pending,
-                        TimeMs = 0,
-                        FinishOrder = 0
-                    };
-                    room.RaceParticipantResults[playerId] = result;
-                }
-
-                if (result.Status == RoomRaceResultStatus.Finished)
-                {
-                    _owner._logger.Debug(LocalizationService.Format(
-                        LocalizationService.Mark("Duplicate finish ignored: room={0}, player={1}, number={2}."),
-                        room.Id,
-                        playerId,
-                        playerNumber));
+                        _owner._logger.Debug(LocalizationService.Format(
+                            LocalizationService.Mark("Duplicate finish ignored: room={0}, player={1}, number={2}."),
+                            room.Id,
+                            playerId,
+                            playerNumber));
+                    }
                     return false;
                 }
-
-                var order = 1;
-                foreach (var entry in room.RaceParticipantResults.Values)
-                {
-                    if (entry.Status == RoomRaceResultStatus.Finished)
-                        order++;
-                }
-
-                result.PlayerNumber = playerNumber;
-                result.Status = RoomRaceResultStatus.Finished;
-                result.TimeMs = Math.Max(0, finishTimeMs);
-                result.FinishOrder = (byte)Math.Min(order, byte.MaxValue);
-                finishOrder = result.FinishOrder;
-
-                if (!room.RaceResults.Contains(playerNumber))
-                    room.RaceResults.Add(playerNumber);
-
-                room.RaceFinishTimesMs[playerNumber] = Math.Max(0, finishTimeMs);
                 return true;
             }
 
@@ -119,23 +95,34 @@ namespace TopSpeed.Server.Network
                 if (room == null)
                     return;
                 if (!room.RaceParticipantResults.TryGetValue(playerId, out var result))
-                    return;
-                if (result.Status == RoomRaceResultStatus.Finished)
-                    return;
-
-                result.PlayerNumber = playerNumber;
-                result.Status = RoomRaceResultStatus.Dnf;
-                result.TimeMs = 0;
-                result.FinishOrder = 0;
+                {
+                    result = new RoomRaceParticipantResult
+                    {
+                        PlayerId = playerId,
+                        PlayerNumber = playerNumber,
+                        Status = RoomRaceResultStatus.Pending,
+                        Lifecycle = RaceParticipantLifecycleState.Racing
+                    };
+                    room.RaceParticipantResults[playerId] = result;
+                }
+                RaceParticipantFinisher.TryMarkDnf(room, playerId, playerNumber, RaceParticipantLifecycleState.Dnf);
             }
 
             public void FinalizeUnresolvedParticipantsAsDnf(RaceRoom room)
             {
+                foreach (var id in room.ActiveRaceParticipantIds)
+                {
+                    GetOrCreateParticipantResult(room, id);
+                }
+
                 foreach (var result in room.RaceParticipantResults.Values)
                 {
-                    if (result.Status == RoomRaceResultStatus.Pending || result.Status == RoomRaceResultStatus.None)
+                    var nextStatus = RaceResultRules.NormalizeCompletionStatus(result.Status);
+                    if (nextStatus != result.Status)
                     {
-                        result.Status = RoomRaceResultStatus.Dnf;
+                        result.Status = nextStatus;
+                        if (result.Lifecycle != RaceParticipantLifecycleState.Finished)
+                            result.Lifecycle = RaceParticipantLifecycleState.Dnf;
                         result.TimeMs = 0;
                         result.FinishOrder = 0;
                     }
@@ -150,27 +137,43 @@ namespace TopSpeed.Server.Network
 
                 foreach (var id in room.ActiveRaceParticipantIds)
                 {
-                    if (_owner._players.TryGetValue(id, out var player))
-                    {
-                        room.RaceParticipantResults[id] = new RoomRaceParticipantResult
-                        {
-                            PlayerId = id,
-                            PlayerNumber = player.PlayerNumber,
-                            Status = RoomRaceResultStatus.Pending
-                        };
-                        continue;
-                    }
-
-                    if (TryGetActiveBot(room, id, out var bot))
-                    {
-                        room.RaceParticipantResults[id] = new RoomRaceParticipantResult
-                        {
-                            PlayerId = id,
-                            PlayerNumber = bot.PlayerNumber,
-                            Status = RoomRaceResultStatus.Pending
-                        };
-                    }
+                    GetOrCreateParticipantResult(room, id);
                 }
+            }
+
+            private RoomRaceParticipantResult GetOrCreateParticipantResult(RaceRoom room, uint participantId)
+            {
+                if (!room.RaceParticipantResults.TryGetValue(participantId, out var result))
+                {
+                    result = new RoomRaceParticipantResult
+                    {
+                        PlayerId = participantId,
+                        PlayerNumber = ResolveParticipantNumber(room, participantId),
+                        Status = RoomRaceResultStatus.Pending,
+                        Lifecycle = RaceParticipantLifecycleState.Racing
+                    };
+                    room.RaceParticipantResults[participantId] = result;
+                }
+                else if (result.PlayerNumber == 0)
+                {
+                    result.PlayerNumber = ResolveParticipantNumber(room, participantId);
+                }
+
+                return result;
+            }
+
+            private byte ResolveParticipantNumber(RaceRoom room, uint participantId)
+            {
+                if (_owner._players.TryGetValue(participantId, out var player))
+                    return player.PlayerNumber;
+
+                if (TryGetActiveBot(room, participantId, out var bot))
+                    return bot.PlayerNumber;
+
+                if (room.RaceParticipantResults.TryGetValue(participantId, out var result))
+                    return result.PlayerNumber;
+
+                return 0;
             }
 
             private static bool TryGetActiveBot(RaceRoom room, uint botId, out RoomBot bot)

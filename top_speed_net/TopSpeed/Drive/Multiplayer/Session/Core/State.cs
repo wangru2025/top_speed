@@ -60,7 +60,6 @@ namespace TopSpeed.Drive.Multiplayer
         private readonly VehicleRadioController _localRadio;
         private readonly TopSpeed.Drive.Panels.RadioVehiclePanel _radioPanel;
         private readonly TopSpeed.Drive.Panels.VehiclePanelManager _panelManager;
-        private readonly NetworkSession _network;
         private readonly uint _raceInstanceId;
         private readonly Func<byte, string> _resolvePlayerName;
         private readonly int _lapLimit;
@@ -88,6 +87,7 @@ namespace TopSpeed.Drive.Multiplayer
         private readonly PlayerInfoSubsystem _playerInfo;
         private readonly ExitSubsystem _exit;
         private readonly bool _manualTransmission;
+        private NetworkSession _network;
 
         private AudioSource _soundStart;
         private AudioSource? _soundPause;
@@ -103,5 +103,6 @@ namespace TopSpeed.Drive.Multiplayer
         private byte LocalRadioVolumePercent => (byte)Math.Max(0, Math.Min(100, _localRadio.VolumePercent));
         public bool WantsExit => _session.Context.WantsExit;
         public bool WantsPause => _session.Context.WantsPause;
+        public bool ServerStopReceived => _serverStopReceived;
     }
 }

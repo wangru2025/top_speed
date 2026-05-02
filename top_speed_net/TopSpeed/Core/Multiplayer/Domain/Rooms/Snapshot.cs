@@ -6,6 +6,7 @@ namespace TopSpeed.Core.Multiplayer
     internal sealed class RoomSnapshot
     {
         public uint RoomVersion;
+        public uint EventSequence;
         public uint RoomId;
         public uint RaceInstanceId;
         public uint HostPlayerId;

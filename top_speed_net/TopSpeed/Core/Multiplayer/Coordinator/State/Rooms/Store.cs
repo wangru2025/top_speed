@@ -6,8 +6,12 @@ namespace TopSpeed.Core.Multiplayer
 {
     internal sealed partial class RoomStore
     {
+        private uint _latestRoomEventSequence;
+        private uint _latestRoomStateSequence;
+
         public RoomListInfo RoomList = new RoomListInfo();
         public RoomSnapshot CurrentRoom = new RoomSnapshot { InRoom = false, Players = Array.Empty<RoomParticipant>() };
+        public MultiplayerClientState ClientState = MultiplayerClientState.Disconnected;
         public bool WasInRoom;
         public uint LastRoomId;
         public bool WasHost;
@@ -17,20 +21,30 @@ namespace TopSpeed.Core.Multiplayer
         {
             RoomList = new RoomListInfo();
             CurrentRoom = new RoomSnapshot { InRoom = false, Players = Array.Empty<RoomParticipant>() };
+            ClientState = MultiplayerClientState.Disconnected;
             WasInRoom = false;
             LastRoomId = 0;
             WasHost = false;
             OnlinePlayers = new OnlineListInfo();
+            _latestRoomEventSequence = 0;
+            _latestRoomStateSequence = 0;
         }
 
         public RoomStateChange ApplyRoomState(PacketRoomState roomState)
         {
             var change = new RoomStateChange(WasInRoom, LastRoomId, WasHost, CurrentRoom.RoomType);
+            if (IsStaleRoomState(roomState))
+                return change.WithApplied(false);
+
             CurrentRoom = RoomMap.ToSnapshot(roomState);
+            if (roomState != null && roomState.EventSequence != 0)
+                _latestRoomStateSequence = roomState.EventSequence;
+            CurrentRoom.EventSequence = Math.Max(_latestRoomEventSequence, CurrentRoom.EventSequence);
             WasInRoom = CurrentRoom.InRoom;
             LastRoomId = CurrentRoom.RoomId;
             WasHost = CurrentRoom.IsHost;
-            return change;
+            UpdateClientStateFromRoom();
+            return change.WithApplied(true);
         }
 
         public RoomRaceChange ApplyRaceState(PacketRoomRaceStateChanged roomRaceStateChanged)
@@ -43,16 +57,25 @@ namespace TopSpeed.Core.Multiplayer
 
             if (CurrentRoom.InRoom && CurrentRoom.RoomId == roomRaceStateChanged.RoomId)
             {
+                if (IsStaleEvent(roomRaceStateChanged.EventSequence))
+                    return new RoomRaceChange(beginLoadout, leaveLoadout, applied: false);
+                if (roomRaceStateChanged.RoomVersion != 0 && CurrentRoom.RoomVersion > roomRaceStateChanged.RoomVersion)
+                    return new RoomRaceChange(beginLoadout, leaveLoadout, applied: false);
+
                 var previousRaceState = CurrentRoom.RaceState;
+                if (roomRaceStateChanged.EventSequence != 0)
+                    AdvanceEventSequence(roomRaceStateChanged.EventSequence);
                 CurrentRoom.RoomVersion = roomRaceStateChanged.RoomVersion;
                 CurrentRoom.RaceInstanceId = roomRaceStateChanged.RaceInstanceId;
-                CurrentRoom.RaceState = roomRaceStateChanged.State;
-                beginLoadout = roomRaceStateChanged.State == RoomRaceState.Preparing && previousRaceState != RoomRaceState.Preparing;
-                leaveLoadout = previousRaceState == RoomRaceState.Preparing && roomRaceStateChanged.State != RoomRaceState.Preparing;
+                var nextState = RoomRules.NormalizeRaceState(roomRaceStateChanged.State);
+                CurrentRoom.RaceState = nextState;
+                UpdateClientStateFromRoom();
+                beginLoadout = nextState == RoomRaceState.Preparing && previousRaceState != RoomRaceState.Preparing;
+                leaveLoadout = previousRaceState == RoomRaceState.Preparing && nextState != RoomRaceState.Preparing;
             }
 
-            UpdateRoomListRaceState(roomRaceStateChanged.RoomId, roomRaceStateChanged.State);
-            return new RoomRaceChange(beginLoadout, leaveLoadout);
+            UpdateRoomListRaceState(roomRaceStateChanged.RoomId, roomRaceStateChanged.RoomVersion, RoomRules.NormalizeRaceState(roomRaceStateChanged.State));
+            return new RoomRaceChange(beginLoadout, leaveLoadout, applied: true);
         }
 
         public void ApplyRoomList(PacketRoomList roomList)
@@ -80,33 +103,106 @@ namespace TopSpeed.Core.Multiplayer
 
             return LocalizationService.Format(LocalizationService.Mark("Player {0}"), playerNumber + 1);
         }
+
+        private bool IsStaleRoomState(PacketRoomState roomState)
+        {
+            if (roomState == null)
+                return false;
+            if (!CurrentRoom.InRoom || !roomState.InRoom)
+                return false;
+            if (CurrentRoom.RoomId != roomState.RoomId)
+                return false;
+            if (roomState.EventSequence != 0 && _latestRoomStateSequence > roomState.EventSequence)
+                return true;
+            if (roomState.RoomVersion == 0)
+                return false;
+            return CurrentRoom.RoomVersion > roomState.RoomVersion;
+        }
+
+        private bool IsStaleEvent(uint eventSequence)
+        {
+            if (eventSequence == 0)
+                return false;
+            if (!CurrentRoom.InRoom)
+                return false;
+            if (_latestRoomEventSequence == 0)
+                return false;
+            return PacketValidation.IsStaleSequence(_latestRoomEventSequence, eventSequence);
+        }
+
+        private void AdvanceEventSequence(uint eventSequence)
+        {
+            if (eventSequence == 0)
+                return;
+
+            if (_latestRoomEventSequence < eventSequence)
+                _latestRoomEventSequence = eventSequence;
+            if (CurrentRoom.EventSequence < _latestRoomEventSequence)
+                CurrentRoom.EventSequence = _latestRoomEventSequence;
+        }
+
+        private void UpdateClientStateFromRoom()
+        {
+            if (!CurrentRoom.InRoom)
+            {
+                ClientState = MultiplayerClientState.Lobby;
+                return;
+            }
+
+            ClientState = RoomRules.NormalizeRaceState(CurrentRoom.RaceState) switch
+            {
+                RoomRaceState.Preparing => MultiplayerClientState.Preparing,
+                RoomRaceState.Racing => MultiplayerClientState.Racing,
+                RoomRaceState.Completed => MultiplayerClientState.Completed,
+                _ => MultiplayerClientState.InRoom
+            };
+        }
     }
 
     internal readonly struct RoomStateChange
     {
         public RoomStateChange(bool wasInRoom, uint previousRoomId, bool previousIsHost, GameRoomType previousRoomType)
+            : this(wasInRoom, previousRoomId, previousIsHost, previousRoomType, applied: true)
+        {
+        }
+
+        private RoomStateChange(bool wasInRoom, uint previousRoomId, bool previousIsHost, GameRoomType previousRoomType, bool applied)
         {
             WasInRoom = wasInRoom;
             PreviousRoomId = previousRoomId;
             PreviousIsHost = previousIsHost;
             PreviousRoomType = previousRoomType;
+            Applied = applied;
         }
 
         public bool WasInRoom { get; }
         public uint PreviousRoomId { get; }
         public bool PreviousIsHost { get; }
         public GameRoomType PreviousRoomType { get; }
+        public bool Applied { get; }
+
+        public RoomStateChange WithApplied(bool applied)
+        {
+            return new RoomStateChange(WasInRoom, PreviousRoomId, PreviousIsHost, PreviousRoomType, applied);
+        }
     }
 
     internal readonly struct RoomRaceChange
     {
         public RoomRaceChange(bool beginLoadout, bool leaveLoadout)
+            : this(beginLoadout, leaveLoadout, applied: true)
+        {
+        }
+
+        public RoomRaceChange(bool beginLoadout, bool leaveLoadout, bool applied)
         {
             BeginLoadout = beginLoadout;
             LeaveLoadout = leaveLoadout;
+            Applied = applied;
         }
 
         public bool BeginLoadout { get; }
         public bool LeaveLoadout { get; }
+        public bool Applied { get; }
     }
 }

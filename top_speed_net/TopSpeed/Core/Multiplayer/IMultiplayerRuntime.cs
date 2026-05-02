@@ -9,6 +9,7 @@ namespace TopSpeed.Core.Multiplayer
         bool IsInRoom { get; }
         bool IsCurrentRoomHost { get; }
         bool IsCurrentRacePaused { get; }
+        MultiplayerClientState ClientState { get; }
 
         void ConfigureMenuCloseHandlers();
         void ShowMultiplayerMenuAfterRace();
@@ -21,6 +22,7 @@ namespace TopSpeed.Core.Multiplayer
         void OpenSavedServersManager();
         bool UpdatePendingOperations();
         void OnSessionCleared();
+        void SetClientState(MultiplayerClientState state);
 
         void NextChatCategory();
         void PreviousChatCategory();

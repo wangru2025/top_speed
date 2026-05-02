@@ -7,6 +7,7 @@ namespace TopSpeed.Core.Multiplayer
 {
     internal sealed class CoordinatorConnectionState
     {
+        public MultiplayerClientState ClientState = MultiplayerClientState.Disconnected;
         public Task<IReadOnlyList<ServerInfo>>? DiscoveryTask;
         public CancellationTokenSource? DiscoveryCts;
         public Task<ConnectResult>? ConnectTask;

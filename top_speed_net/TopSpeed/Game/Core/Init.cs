@@ -91,13 +91,15 @@ namespace TopSpeed.Game
             _shortcutMapping = new ShortcutMappingHandler(input, _menu, _settings, speech, SaveSettings);
             _updateConfig = UpdateConfig.Default;
             _updateService = new UpdateService(_updateConfig);
+            _multiplayerConnector = new MultiplayerConnector();
+            _sessionReconnector = new SessionReconnector(_multiplayerConnector);
             var multiplayerCoordinator = new MultiplayerCoordinator(
                 _menu,
                 _dialogs,
                 audio,
                 speech,
                 _settings,
-                new MultiplayerConnector(),
+                _multiplayerConnector,
                 BeginPromptTextInput,
                 SaveSettings,
                 EnterMenuState,

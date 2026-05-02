@@ -9,10 +9,11 @@ namespace TopSpeed.Server.Network
 {
     internal sealed class PlayerConnection
     {
-        public PlayerConnection(IPEndPoint endPoint, uint id)
+        public PlayerConnection(IPEndPoint endPoint, uint id, ulong resumeToken)
         {
             EndPoint = endPoint;
             Id = id;
+            ResumeToken = resumeToken;
             Frequency = ProtocolConstants.DefaultFrequency;
             State = PlayerState.NotReady;
             Name = string.Empty;
@@ -25,7 +26,7 @@ namespace TopSpeed.Server.Network
             RadioVolumePercent = 100;
         }
 
-        public IPEndPoint EndPoint { get; }
+        public IPEndPoint EndPoint { get; private set; }
         public uint Id { get; }
         public uint? RoomId { get; set; }
         public byte PlayerNumber { get; set; }
@@ -48,6 +49,10 @@ namespace TopSpeed.Server.Network
         public InMedia? IncomingMedia { get; set; }
         public LiveState? Live { get; set; }
         public DateTime LastSeenUtc { get; set; }
+        public DateTime? SuspendedUtc { get; private set; }
+        public ConnectionLifecycleState LifecycleState { get; private set; } = ConnectionLifecycleState.Connected;
+        public bool Connected => LifecycleState == ConnectionLifecycleState.Connected || LifecycleState == ConnectionLifecycleState.Resumed;
+        public ulong ResumeToken { get; private set; }
         public float WidthM { get; set; }
         public float LengthM { get; set; }
         public float MassKg { get; set; }
@@ -55,6 +60,46 @@ namespace TopSpeed.Server.Network
         public ProtocolVer NegotiatedProtocol { get; set; }
         public ProtocolRange? ClientSupportedRange { get; set; }
         public ProtocolVer ClientVersion { get; set; }
+
+        public void Rebind(IPEndPoint endPoint)
+        {
+            EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+            LifecycleState = ConnectionLifecycleState.Resumed;
+            SuspendedUtc = null;
+            LastSeenUtc = DateTime.UtcNow;
+        }
+
+        public void MarkSuspended()
+        {
+            LifecycleState = ConnectionLifecycleState.Suspended;
+            SuspendedUtc = DateTime.UtcNow;
+            IncomingMedia = null;
+        }
+
+        public void MarkReconnecting()
+        {
+            LifecycleState = ConnectionLifecycleState.Reconnecting;
+        }
+
+        public void MarkConnected()
+        {
+            LifecycleState = ConnectionLifecycleState.Connected;
+            SuspendedUtc = null;
+            LastSeenUtc = DateTime.UtcNow;
+        }
+
+        public void MarkExpired()
+        {
+            LifecycleState = ConnectionLifecycleState.Expired;
+        }
+
+        public void MarkClosed()
+        {
+            LifecycleState = ConnectionLifecycleState.Closed;
+            ResumeToken = 0;
+            SuspendedUtc = null;
+            IncomingMedia = null;
+        }
 
         public PacketPlayerData ToPacket()
         {

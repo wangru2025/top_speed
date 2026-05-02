@@ -137,13 +137,14 @@ namespace TopSpeed.Server.Protocol
         public static byte[] WriteRoomState(PacketRoomState state)
         {
             var count = Math.Min(state.Players.Length, ProtocolConstants.MaxPlayers);
-            var payload = 4 + 4 + 4 + 4 + ProtocolConstants.MaxRoomNameLength + 1 + 1 + 1 + 1 + 1 + 1 + 12 + 1 + 4 + 1 +
+            var payload = 4 + 4 + 4 + 4 + 4 + ProtocolConstants.MaxRoomNameLength + 1 + 1 + 1 + 1 + 1 + 1 + 12 + 1 + 4 + 1 +
                 (count * (4 + 1 + 1 + ProtocolConstants.MaxPlayerNameLength));
             var buffer = WritePacketHeader(Command.RoomState, payload);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.RoomState);
             writer.WriteUInt32(state.RoomVersion);
+            writer.WriteUInt32(state.EventSequence);
             writer.WriteUInt32(state.RoomId);
             writer.WriteUInt32(state.RaceInstanceId);
             writer.WriteUInt32(state.HostPlayerId);
@@ -172,7 +173,7 @@ namespace TopSpeed.Server.Protocol
         public static byte[] WriteRoomGet(PacketRoomGet packet)
         {
             var count = Math.Min(packet.Players.Length, ProtocolConstants.MaxPlayers);
-            var payload = 1 + 4 + 4 + 4 + 4 + ProtocolConstants.MaxRoomNameLength + 1 + 1 + 1 + 1 + 12 + 1 + 4 + 1 +
+            var payload = 1 + 4 + 4 + 4 + 4 + 4 + ProtocolConstants.MaxRoomNameLength + 1 + 1 + 1 + 1 + 12 + 1 + 4 + 1 +
                 (count * (4 + 1 + 1 + ProtocolConstants.MaxPlayerNameLength));
             var buffer = WritePacketHeader(Command.RoomGet, payload);
             var writer = new PacketWriter(buffer);
@@ -180,6 +181,7 @@ namespace TopSpeed.Server.Protocol
             writer.WriteByte((byte)Command.RoomGet);
             writer.WriteBool(packet.Found);
             writer.WriteUInt32(packet.RoomVersion);
+            writer.WriteUInt32(packet.EventSequence);
             writer.WriteUInt32(packet.RoomId);
             writer.WriteUInt32(packet.RaceInstanceId);
             writer.WriteUInt32(packet.HostPlayerId);
@@ -206,7 +208,7 @@ namespace TopSpeed.Server.Protocol
 
         public static byte[] WriteRoomEvent(PacketRoomEvent evt)
         {
-            var payload = 4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
+            var payload = 4 + 4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
                 ProtocolConstants.MaxRoomNameLength + 4 + 1 + 1 + ProtocolConstants.MaxPlayerNameLength;
             var buffer = WritePacketHeader(Command.RoomEvent, payload);
             var writer = new PacketWriter(buffer);
@@ -214,6 +216,7 @@ namespace TopSpeed.Server.Protocol
             writer.WriteByte((byte)Command.RoomEvent);
             writer.WriteUInt32(evt.RoomId);
             writer.WriteUInt32(evt.RoomVersion);
+            writer.WriteUInt32(evt.EventSequence);
             writer.WriteUInt32(evt.RaceInstanceId);
             writer.WriteByte((byte)evt.Kind);
             writer.WriteUInt32(evt.HostPlayerId);
@@ -221,6 +224,7 @@ namespace TopSpeed.Server.Protocol
             writer.WriteByte(evt.PlayerCount);
             writer.WriteByte(evt.PlayersToStart);
             writer.WriteByte((byte)evt.RaceState);
+            writer.WriteBool(evt.RacePaused);
             writer.WriteFixedString(evt.TrackName ?? string.Empty, 12);
             writer.WriteByte(evt.Laps);
             writer.WriteUInt32(evt.GameRulesFlags);
@@ -234,13 +238,14 @@ namespace TopSpeed.Server.Protocol
 
         public static byte[] WriteRoomRaceStateChanged(PacketRoomRaceStateChanged packet)
         {
-            var payload = 4 + 4 + 4 + 1;
+            var payload = 4 + 4 + 4 + 4 + 1;
             var buffer = WritePacketHeader(Command.RoomRaceStateChanged, payload);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.RoomRaceStateChanged);
             writer.WriteUInt32(packet.RoomId);
             writer.WriteUInt32(packet.RoomVersion);
+            writer.WriteUInt32(packet.EventSequence);
             writer.WriteUInt32(packet.RaceInstanceId);
             writer.WriteByte((byte)packet.State);
             return buffer;
@@ -248,12 +253,14 @@ namespace TopSpeed.Server.Protocol
 
         public static byte[] WriteRoomRacePlayerFinished(PacketRoomRacePlayerFinished packet)
         {
-            var payload = 4 + 4 + 4 + 1 + 1 + 4;
+            var payload = 4 + 4 + 4 + 4 + 4 + 1 + 1 + 4;
             var buffer = WritePacketHeader(Command.RoomRacePlayerFinished, payload);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.RoomRacePlayerFinished);
             writer.WriteUInt32(packet.RoomId);
+            writer.WriteUInt32(packet.RoomVersion);
+            writer.WriteUInt32(packet.EventSequence);
             writer.WriteUInt32(packet.RaceInstanceId);
             writer.WriteUInt32(packet.PlayerId);
             writer.WriteByte(packet.PlayerNumber);
@@ -265,13 +272,14 @@ namespace TopSpeed.Server.Protocol
         public static byte[] WriteRoomRaceCompleted(PacketRoomRaceCompleted packet)
         {
             var count = Math.Min(packet.Results.Length, ProtocolConstants.MaxPlayers);
-            var payload = 4 + 4 + 4 + 1 + (count * (4 + 1 + 1 + 4 + 1));
+            var payload = 4 + 4 + 4 + 4 + 1 + (count * (4 + 1 + 1 + 4 + 1));
             var buffer = WritePacketHeader(Command.RoomRaceCompleted, payload);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.RoomRaceCompleted);
             writer.WriteUInt32(packet.RoomId);
             writer.WriteUInt32(packet.RoomVersion);
+            writer.WriteUInt32(packet.EventSequence);
             writer.WriteUInt32(packet.RaceInstanceId);
             writer.WriteByte((byte)count);
             for (var i = 0; i < count; i++)
@@ -288,13 +296,14 @@ namespace TopSpeed.Server.Protocol
 
         public static byte[] WriteRoomRaceAborted(PacketRoomRaceAborted packet)
         {
-            var payload = 4 + 4 + 4 + 1;
+            var payload = 4 + 4 + 4 + 4 + 1;
             var buffer = WritePacketHeader(Command.RoomRaceAborted, payload);
             var writer = new PacketWriter(buffer);
             writer.WriteByte(ProtocolConstants.Version);
             writer.WriteByte((byte)Command.RoomRaceAborted);
             writer.WriteUInt32(packet.RoomId);
             writer.WriteUInt32(packet.RoomVersion);
+            writer.WriteUInt32(packet.EventSequence);
             writer.WriteUInt32(packet.RaceInstanceId);
             writer.WriteByte((byte)packet.Reason);
             return buffer;

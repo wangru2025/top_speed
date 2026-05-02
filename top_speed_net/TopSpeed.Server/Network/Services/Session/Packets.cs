@@ -36,7 +36,8 @@ namespace TopSpeed.Server.Network
                     if (player == null)
                         return;
 
-                    player.LastSeenUtc = DateTime.UtcNow;
+                    if (player.Connected)
+                        player.LastSeenUtc = DateTime.UtcNow;
                     if (_owner.HandlePendingHandshake(player, header.Command, payload, endPoint))
                         return;
 

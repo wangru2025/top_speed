@@ -11,7 +11,7 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void HandleRoomListCore(PacketRoomList roomList)
         {
-            _state.Rooms.ApplyRoomList(roomList);
+            _roomReducer.ApplyRoomList(roomList);
             _roomUi.HandleRoomList();
         }
     }

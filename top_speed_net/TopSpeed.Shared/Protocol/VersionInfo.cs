@@ -24,28 +24,28 @@ namespace TopSpeed.Protocol
 
         // Current protocol implementation version (year.month.day.revision).
         public const ushort CurrentYear = 2026;
-        public const byte CurrentMonth = 4;
-        public const byte CurrentDay = 29;
+        public const byte CurrentMonth = 5;
+        public const byte CurrentDay = 1;
         public const byte CurrentRevision = 1;
 
         // Client supported protocol range (explicit values by design).
         public const ushort ClientMinYear = 2026;
-        public const byte ClientMinMonth = 4;
-        public const byte ClientMinDay = 13;
+        public const byte ClientMinMonth = 5;
+        public const byte ClientMinDay = 1;
         public const byte ClientMinRevision = 1;
         public const ushort ClientMaxYear = 2026;
-        public const byte ClientMaxMonth = 4;
-        public const byte ClientMaxDay = 29;
+        public const byte ClientMaxMonth = 5;
+        public const byte ClientMaxDay = 1;
         public const byte ClientMaxRevision = 1;
 
         // Server supported protocol range (explicit values by design).
         public const ushort ServerMinYear = 2026;
-        public const byte ServerMinMonth = 4;
-        public const byte ServerMinDay = 13;
+        public const byte ServerMinMonth = 5;
+        public const byte ServerMinDay = 1;
         public const byte ServerMinRevision = 1;
         public const ushort ServerMaxYear = 2026;
-        public const byte ServerMaxMonth = 4;
-        public const byte ServerMaxDay = 29;
+        public const byte ServerMaxMonth = 5;
+        public const byte ServerMaxDay = 1;
         public const byte ServerMaxRevision = 1;
     }
 }

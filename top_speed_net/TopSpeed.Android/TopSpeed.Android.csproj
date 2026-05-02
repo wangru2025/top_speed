@@ -78,4 +78,14 @@
       RemoveProperties="RuntimeIdentifier;RuntimeIdentifiers;TargetFramework;PlatformTarget" />
   </Target>
 
+  <Target Name="RenderAndIncludeDocsAssets" BeforeTargets="PrepareForBuild" Condition="Exists('..\..\docs\render_docs.py')">
+    <Exec Command="python &quot;..\..\docs\render_docs.py&quot; --all" ContinueOnError="WarnAndContinue" />
+    <ItemGroup>
+      <AndroidAsset Remove="..\..\docs\**\*.html" />
+      <AndroidAsset Include="..\..\docs\**\*.html">
+        <Link>docs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      </AndroidAsset>
+    </ItemGroup>
+  </Target>
+
 </Project>

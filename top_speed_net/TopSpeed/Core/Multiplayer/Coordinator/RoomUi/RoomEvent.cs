@@ -40,6 +40,9 @@ namespace TopSpeed.Core.Multiplayer
 
             public void HandleRoomRaceStateChanged(RoomRaceChange change)
             {
+                if (!change.Applied)
+                    return;
+
                 var effects = new List<PacketEffect>();
 
                 if (change.BeginLoadout)
@@ -72,7 +75,7 @@ namespace TopSpeed.Core.Multiplayer
                         if (roomEvent.SubjectPlayerId != 0 && roomEvent.SubjectPlayerId != localPlayerId)
                         {
                             effects.Add(PacketEffect.PlaySound("room_join.ogg"));
-                            effects.Add(PacketEffect.AddRoomEventHistory(HistoryText.ParticipantJoined(roomEvent)));
+                            effects.Add(PacketEffect.Speak(HistoryText.ParticipantJoined(roomEvent)));
                         }
                         break;
 
@@ -80,8 +83,18 @@ namespace TopSpeed.Core.Multiplayer
                         if (roomEvent.SubjectPlayerId != 0 && roomEvent.SubjectPlayerId != localPlayerId)
                         {
                             effects.Add(PacketEffect.PlaySound("room_leave.ogg"));
-                            effects.Add(PacketEffect.AddRoomEventHistory(HistoryText.ParticipantLeft(roomEvent)));
+                            effects.Add(PacketEffect.Speak(HistoryText.ParticipantLeft(roomEvent)));
                         }
+                        break;
+
+                    case RoomEventKind.BotAdded:
+                        effects.Add(PacketEffect.PlaySound("room_join.ogg"));
+                        effects.Add(PacketEffect.Speak(HistoryText.BotAdded(roomEvent)));
+                        break;
+
+                    case RoomEventKind.BotRemoved:
+                        effects.Add(PacketEffect.PlaySound("room_leave.ogg"));
+                        effects.Add(PacketEffect.Speak(HistoryText.BotRemoved(roomEvent)));
                         break;
                 }
             }

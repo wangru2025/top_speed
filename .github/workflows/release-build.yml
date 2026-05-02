@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main", "master" ]
     paths-ignore:
-      - '**.md'
       - '.gitignore'
 
 jobs:
@@ -139,11 +138,11 @@ jobs:
         dotnet restore TopSpeed.Server/TopSpeed.Server.csproj
         dotnet restore TopSpeed/TopSpeed.csproj
 
-    - name: Build shared tests (net10.0)
-      run: dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --no-restore
+    - name: Build shared tests (net10.0-windows)
+      run: dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-restore
 
-    - name: Run shared tests (net10.0)
-      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --no-build --verbosity normal
+    - name: Run shared tests (net10.0-windows)
+      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-build --verbosity normal
 
     - name: Publish Windows server
       run: dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=ReleaseWinX64
@@ -175,6 +174,25 @@ jobs:
 
         if (-not (Test-Path $serverZip)) {
           throw "Missing Windows server archive: $serverZip"
+        }
+
+        $requiredDocs = @(
+          "docs/game-guide.html",
+          "docs/track-creation-guide.html",
+          "docs/vehicle-physics-and-creation-guide.html"
+        )
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $gameZip))
+        try {
+          foreach ($doc in $requiredDocs) {
+            $entry = $archive.Entries | Where-Object { $_.FullName -eq $doc } | Select-Object -First 1
+            if ($null -eq $entry) {
+              throw "Missing required documentation file in Windows archive: $doc"
+            }
+          }
+        }
+        finally {
+          $archive.Dispose()
         }
 
         Get-Item $gameZip, $serverZip | Select-Object Name, Length
@@ -234,8 +252,8 @@ jobs:
     #     done
     #     sudo apt-get install -y clang llvm zlib1g-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu zlib1g-dev:arm64
 
-    - name: Run shared tests
-      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --verbosity normal
+    - name: Build shared project
+      run: dotnet build TopSpeed.Shared/TopSpeed.Shared.csproj --configuration Release
 
     - name: Publish Linux servers
       shell: bash
@@ -268,6 +286,9 @@ jobs:
         rm -f "$game_zip"
         (
           cd TopSpeed/bin/Release/net10.0/linux-x64
+          test -f docs/game-guide.html
+          test -f docs/track-creation-guide.html
+          test -f docs/vehicle-physics-and-creation-guide.html
           zip -rq "$GITHUB_WORKSPACE/top_speed_net/$game_zip" .
         )
 
@@ -289,6 +310,10 @@ jobs:
             zip -rq "$destination" .
           )
         done
+
+        unzip -l "$game_zip" | grep -F "docs/game-guide.html"
+        unzip -l "$game_zip" | grep -F "docs/track-creation-guide.html"
+        unzip -l "$game_zip" | grep -F "docs/vehicle-physics-and-creation-guide.html"
 
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v4
@@ -331,8 +356,8 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install markdown
 
-    - name: Run shared tests (net10.0)
-      run: dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0 --verbosity normal
+    - name: Build shared project
+      run: dotnet build TopSpeed.Shared/TopSpeed.Shared.csproj --configuration Release
 
     - name: Publish macOS client
       run: dotnet publish TopSpeed/TopSpeed.csproj --configuration Release -p:RuntimeIdentifier=osx-x64 -p:UseNativeAotUpdater=true
@@ -350,6 +375,9 @@ jobs:
         rm -f "$server_zip"
         (
           cd TopSpeed/bin/Publish/osx-x64
+          test -f TopSpeed.app/Contents/MacOS/docs/game-guide.html
+          test -f TopSpeed.app/Contents/MacOS/docs/track-creation-guide.html
+          test -f TopSpeed.app/Contents/MacOS/docs/vehicle-physics-and-creation-guide.html
           ditto -c -k --sequesterRsrc --keepParent TopSpeed.app "$GITHUB_WORKSPACE/top_speed_net/$game_zip"
         )
         (
@@ -433,6 +461,9 @@ jobs:
         fi
 
         cp "$apk_path" "$apk_name"
+        unzip -l "$apk_name" | grep -F "assets/docs/game-guide.html"
+        unzip -l "$apk_name" | grep -F "assets/docs/track-creation-guide.html"
+        unzip -l "$apk_name" | grep -F "assets/docs/vehicle-physics-and-creation-guide.html"
         ls -lh "$apk_name"
 
     - name: Upload Android artifact

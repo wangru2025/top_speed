@@ -52,10 +52,7 @@ namespace TopSpeed.Menu
             if (string.IsNullOrWhiteSpace(control))
                 return text;
 
-            return LocalizationService.Format(
-                LocalizationService.Mark("{0} {1}"),
-                text,
-                control);
+            return text + " " + control;
         }
     }
 }

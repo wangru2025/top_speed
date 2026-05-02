@@ -110,6 +110,7 @@ namespace TopSpeed.Core.Multiplayer
             _speech.Speak(LocalizationService.Mark("Attempting to connect, please wait..."));
             ClearPendingCompatibilityResult(disposeSession: true);
             _clearSession();
+            SetClientState(MultiplayerClientState.Joining);
             _lifetime.ResetPing();
             StartConnectingPulse();
             var connectCts = _lifetime.BeginConnectOperation();
@@ -145,6 +146,7 @@ namespace TopSpeed.Core.Multiplayer
                 return;
 
             _setSession(session);
+            SetClientState(MultiplayerClientState.Lobby);
             _resetPendingState();
             ClearPendingCompatibilityResult(disposeSession: false);
 

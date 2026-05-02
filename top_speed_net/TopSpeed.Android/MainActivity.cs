@@ -300,7 +300,9 @@ public class MainActivity : SdlActivityBase
             if (window == null)
                 return;
 
+            #pragma warning disable CA1422
             window.SetDecorFitsSystemWindows(false);
+            #pragma warning restore CA1422
             var controller = window.InsetsController;
             if (controller == null)
                 return;

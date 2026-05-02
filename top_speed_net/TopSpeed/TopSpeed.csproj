@@ -102,7 +102,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
     <Compile Remove="AndroidLauncher.cs" />
     <Compile Remove="Window\Eto\**\*.cs" />
-    <Compile Remove="Input\Devices\Keyboard\Backends\Eto\**\*.cs" />
     <Compile Remove="Window\Sdl\**\*.cs" />
   </ItemGroup>
 
@@ -240,6 +239,22 @@
     <Exec Command="python &quot;$(MSBuildThisFileDirectory)..\..\docs\render_docs.py&quot; --all" ContinueOnError="WarnAndContinue" />
   </Target>
 
+  <Target Name="CopyRenderedDocsToOutput" AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\..\docs')">
+    <ItemGroup>
+      <_RenderedDocs Include="$(MSBuildThisFileDirectory)..\..\docs\**\*.html" />
+    </ItemGroup>
+    <MakeDir Directories="$(OutDir)docs" Condition="'@(_RenderedDocs)' != ''" />
+    <Copy SourceFiles="@(_RenderedDocs)" DestinationFiles="@(_RenderedDocs->'$(OutDir)docs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyRenderedDocsToPublish" AfterTargets="Publish" Condition="Exists('$(MSBuildThisFileDirectory)..\..\docs')">
+    <ItemGroup>
+      <_RenderedPublishDocs Include="$(MSBuildThisFileDirectory)..\..\docs\**\*.html" />
+    </ItemGroup>
+    <MakeDir Directories="$(PublishDir)docs" Condition="'@(_RenderedPublishDocs)' != ''" />
+    <Copy SourceFiles="@(_RenderedPublishDocs)" DestinationFiles="@(_RenderedPublishDocs->'$(PublishDir)docs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
   <Target Name="CleanMarkdownDocsFromOutput" AfterTargets="Build">
     <ItemGroup Condition="Exists('$(OutDir)docs')">
       <_OutputMarkdownDocs Include="$(OutDir)docs\**\*.md" />
@@ -298,7 +313,7 @@
     <Copy SourceFiles="@(_UpdaterPublishedFiles)" DestinationFiles="@(_UpdaterPublishedFiles->'$(_PublishDestinationPath)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="CreateMacAppBundle" AfterTargets="Publish" DependsOnTargets="PublishUpdaterNet10" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64'">
+  <Target Name="CreateMacAppBundle" AfterTargets="Publish" DependsOnTargets="PublishUpdaterNet10;CopyRenderedDocsToPublish" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64'">
     <ItemGroup>
       <_MacBundleSourceFiles Include="$(MacPublishStagingDir)**\*" />
     </ItemGroup>

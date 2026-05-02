@@ -17,7 +17,13 @@ namespace TopSpeed.Server.Network
                 }
 
                 if (_owner._rooms.TryGetValue(player.RoomId.Value, out var room))
+                {
                     _owner._notify.SendRoomState(player, room);
+                    if (room.RaceState == RoomRaceState.Completed)
+                        _owner._notify.RaceCompletedTo(player, room);
+                    else if (room.RaceState == RoomRaceState.Aborted)
+                        _owner._notify.ReplayRoomEventsTo(player, room, afterSequence: 0);
+                }
                 else
                     _owner._notify.SendRoomState(player, null);
             }

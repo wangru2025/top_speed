@@ -16,7 +16,7 @@ namespace TopSpeed.Vehicles.Control
             return new CarControlIntent(
                 _input.Intents.GetAxisPercent(DriveIntent.Steering),
                 throttle: 0,
-                brake: _input.Intents.GetAxisPercent(DriveIntent.Brake),
+                brake: 0,
                 clutch: _input.Intents.GetAxisPercent(DriveIntent.Clutch),
                 horn: _input.Intents.IsTriggered(DriveIntent.Horn),
                 gearUp: false,

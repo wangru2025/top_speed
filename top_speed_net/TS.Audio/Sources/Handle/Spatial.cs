@@ -8,7 +8,9 @@ namespace TS.Audio
     {
         public void SetVolume(float value)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
             {
                 _userVolume = Clamp01(value);
@@ -19,9 +21,10 @@ namespace TS.Audio
                 else
                 {
                     _currentVolume = _userVolume;
-                    ApplyPan();
                 }
             }
+
+            QueueApplyControlState();
 
             if (ShouldEmitSourceDiagnostic(AudioDiagnosticKind.SourceVolumeChanged))
             {
@@ -50,12 +53,15 @@ namespace TS.Audio
 
         public void SetPitch(float value)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
             {
                 _pitch = value <= 0f ? 0.001f : value;
-                ApplyPlaybackSpeed();
             }
+
+            QueueApplyControlState();
 
             if (ShouldEmitSourceDiagnostic(AudioDiagnosticKind.SourcePitchChanged))
             {
@@ -83,12 +89,15 @@ namespace TS.Audio
 
         public void SetPan(float value)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
             {
                 _pan = Clamp(value, -1f, 1f);
-                ApplyPan();
             }
+
+            QueueApplyControlState();
 
             if (ShouldEmitSourceDiagnostic(AudioDiagnosticKind.SourcePanChanged))
             {
@@ -116,7 +125,9 @@ namespace TS.Audio
 
         public void SetStereoWidening(bool enabled)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _stereoWidening = enabled;
 
@@ -141,7 +152,9 @@ namespace TS.Audio
 
         public void SetPosition(Vector3 position)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _position = position;
 
@@ -168,7 +181,9 @@ namespace TS.Audio
 
         public void SetVelocity(Vector3 velocity)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _velocity = velocity;
 
@@ -195,7 +210,9 @@ namespace TS.Audio
 
         public void SetTransform(Vector3 position, Vector3 velocity)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
             {
                 if (_position == position && _velocity == velocity)
@@ -253,7 +270,9 @@ namespace TS.Audio
 
         public void SetDistanceModel(DistanceModel model, float minDistance, float maxDistance, float rollOff)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
             {
                 _distanceModel = model;
@@ -286,14 +305,18 @@ namespace TS.Audio
 
         public void ApplyCurveDistanceScaler(float value)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _curveDistanceScaler = value;
         }
 
         public void SetDopplerFactor(float value)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _dopplerFactor = value;
 
@@ -318,7 +341,9 @@ namespace TS.Audio
 
         public void SetRoomAcoustics(RoomAcoustics acoustics)
         {
-            ThrowIfDisposed();
+            if (_disposed)
+                return;
+
             lock (_stateSync)
                 _roomAcoustics = acoustics;
 
@@ -344,6 +369,9 @@ namespace TS.Audio
 
         public void Update(double deltaTime)
         {
+            if (_disposed)
+                return;
+
             DispatchPlaybackEndedIfNeeded();
             EmitStartedDiagnosticIfNeeded();
             UpdateFade(deltaTime);
@@ -404,6 +432,9 @@ namespace TS.Audio
 
         public float GetLengthSeconds()
         {
+            if (_disposed)
+                return _lastSnapshot?.LengthSeconds ?? _asset.LengthSeconds;
+
             return _asset.LengthSeconds > 0f ? _asset.LengthSeconds : _player.Duration;
         }
 

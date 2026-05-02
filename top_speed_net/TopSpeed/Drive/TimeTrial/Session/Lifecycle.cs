@@ -126,12 +126,7 @@ namespace TopSpeed.Drive.TimeTrial
         {
             _finished = true;
             PlayFinishAnnouncement();
-            _car.ManualTransmission = false;
-            _car.SetOverrideController(_finishLockController);
-            _car.SetNeutralGear();
-            _car.Quiet();
-            _car.ShutdownEngine();
-            _car.StopMotionImmediately();
+            TopSpeed.Drive.Session.FinishVehicle.Apply(_car, _finishLockController);
             _raceTime = _session.Context.ProgressMilliseconds;
             _requirePostFinishStopBeforeExit = true;
             _session.SetPhase(Phase.Finishing);

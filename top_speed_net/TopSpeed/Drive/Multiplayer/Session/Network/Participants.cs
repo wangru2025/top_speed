@@ -37,6 +37,7 @@ namespace TopSpeed.Drive.Multiplayer
 
             remote.Finished = true;
             remote.State = PlayerState.Finished;
+            remote.Player.MarkFinished(GetSpatialTrackLength());
             if (finishOrder > 0)
             {
                 var expectedIndex = Math.Max(0, finishOrder - 1);
@@ -45,6 +46,28 @@ namespace TopSpeed.Drive.Multiplayer
             }
 
             _progress.AnnounceRemoteFinish(playerNumber);
+        }
+
+        private void ApplyCompletedRemoteFinishes(PacketRoomRaceCompleted packet)
+        {
+            var results = packet?.Results ?? Array.Empty<PacketRoomRaceResultEntry>();
+            for (var i = 0; i < results.Length; i++)
+            {
+                var result = results[i];
+                if (result.Status != RoomRaceResultStatus.Finished)
+                    continue;
+                if (result.PlayerNumber == LocalPlayerNumber)
+                    continue;
+                if (result.PlayerNumber < _disconnectedPlayerSlots.Length && _disconnectedPlayerSlots[result.PlayerNumber])
+                    continue;
+                if (!_remotePlayers.TryGetValue(result.PlayerNumber, out var remote))
+                    continue;
+                if (remote.Finished)
+                    continue;
+
+                var finishOrder = (byte)Math.Max(1, Math.Min(byte.MaxValue, i + 1));
+                ApplyRemoteFinishCore(result.PlayerNumber, finishOrder);
+            }
         }
 
         private void RemoveRemotePlayerCore(byte playerNumber, bool markDisconnected)
@@ -119,15 +142,22 @@ namespace TopSpeed.Drive.Multiplayer
 
             var targetNumber = (byte)player;
             if (_remotePlayers.TryGetValue(targetNumber, out var remote))
+            {
+                if (remote.Finished)
+                    return 100;
                 return ClampPercent(remote.Player.PositionY);
+            }
 
             return 0;
         }
 
         private int ClampPercent(float positionY)
         {
-            var laps = Math.Max(1, _lapLimit);
-            var perc = (int)((positionY / (_track.Length * laps)) * 100f);
+            var raceDistance = GetSpatialTrackLength();
+            if (raceDistance <= 0f)
+                return 0;
+
+            var perc = (int)((positionY / raceDistance) * 100f);
             if (perc > 100)
                 perc = 100;
             if (perc < 0)

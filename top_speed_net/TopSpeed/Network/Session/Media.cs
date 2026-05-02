@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using TopSpeed.Protocol;
 
 namespace TopSpeed.Network.Session
@@ -8,6 +9,7 @@ namespace TopSpeed.Network.Session
     {
         private const int ChunkSize = ProtocolConstants.MaxMediaChunkBytes;
         private readonly Sender _sender;
+        private int _nextTransferId;
 
         public Media(Sender sender)
         {
@@ -33,8 +35,9 @@ namespace TopSpeed.Network.Session
                 return false;
 
             var extension = NormalizeExtension(filePath);
+            var transferId = NextTransferId();
             if (!_sender.TrySend(
-                ClientPacketSerializer.WritePlayerMediaBegin(playerId, playerNumber, mediaId, (uint)bytes.Length, extension),
+                ClientPacketSerializer.WritePlayerMediaBegin(playerId, playerNumber, mediaId, transferId, (uint)bytes.Length, extension),
                 PacketStream.Media))
             {
                 return false;
@@ -48,7 +51,7 @@ namespace TopSpeed.Network.Session
                 var chunk = new byte[length];
                 Buffer.BlockCopy(bytes, offset, chunk, 0, length);
                 if (!_sender.TrySend(
-                    ClientPacketSerializer.WritePlayerMediaChunk(playerId, playerNumber, mediaId, (ushort)chunkIndex, chunk),
+                    ClientPacketSerializer.WritePlayerMediaChunk(playerId, playerNumber, mediaId, transferId, (ushort)chunkIndex, chunk),
                     PacketStream.Media))
                 {
                     return false;
@@ -57,7 +60,7 @@ namespace TopSpeed.Network.Session
                 offset += length;
             }
 
-            return _sender.TrySend(ClientPacketSerializer.WritePlayerMediaEnd(playerId, playerNumber, mediaId), PacketStream.Media);
+            return _sender.TrySend(ClientPacketSerializer.WritePlayerMediaEnd(playerId, playerNumber, mediaId, transferId), PacketStream.Media);
         }
 
         public bool TrySendStreamed(uint playerId, byte playerNumber, uint mediaId, string filePath)
@@ -73,8 +76,9 @@ namespace TopSpeed.Network.Session
                     return false;
 
                 var extension = NormalizeExtension(filePath);
+                var transferId = NextTransferId();
                 if (!_sender.TrySend(
-                    ClientPacketSerializer.WritePlayerMediaBegin(playerId, playerNumber, mediaId, (uint)stream.Length, extension),
+                    ClientPacketSerializer.WritePlayerMediaBegin(playerId, playerNumber, mediaId, transferId, (uint)stream.Length, extension),
                     PacketStream.Media))
                 {
                     return false;
@@ -91,7 +95,7 @@ namespace TopSpeed.Network.Session
                     var chunk = new byte[read];
                     Buffer.BlockCopy(buffer, 0, chunk, 0, read);
                     if (!_sender.TrySend(
-                        ClientPacketSerializer.WritePlayerMediaChunk(playerId, playerNumber, mediaId, (ushort)chunkIndex, chunk),
+                        ClientPacketSerializer.WritePlayerMediaChunk(playerId, playerNumber, mediaId, transferId, (ushort)chunkIndex, chunk),
                         PacketStream.Media))
                     {
                         return false;
@@ -99,7 +103,7 @@ namespace TopSpeed.Network.Session
                     chunkIndex++;
                 }
 
-                return _sender.TrySend(ClientPacketSerializer.WritePlayerMediaEnd(playerId, playerNumber, mediaId), PacketStream.Media);
+                return _sender.TrySend(ClientPacketSerializer.WritePlayerMediaEnd(playerId, playerNumber, mediaId, transferId), PacketStream.Media);
             }
             catch
             {
@@ -129,6 +133,12 @@ namespace TopSpeed.Network.Session
             if (extension.Length > ProtocolConstants.MaxMediaFileExtensionLength)
                 extension = extension.Substring(0, ProtocolConstants.MaxMediaFileExtensionLength);
             return extension;
+        }
+
+        private uint NextTransferId()
+        {
+            var next = (uint)Interlocked.Increment(ref _nextTransferId);
+            return next == 0 ? 1u : next;
         }
     }
 }

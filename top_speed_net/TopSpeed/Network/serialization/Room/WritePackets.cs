@@ -7,7 +7,7 @@ namespace TopSpeed.Network
     {
         public static byte[] WriteRoomEvent(PacketRoomEvent evt)
         {
-            var payload = 4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
+            var payload = 4 + 4 + 4 + 4 + 1 + 4 + 1 + 1 + 1 + 1 + 1 + 12 + 1 + 4 +
                 ProtocolConstants.MaxRoomNameLength + 4 + 1 + 1 + ProtocolConstants.MaxPlayerNameLength;
             var buffer = WritePacketHeader(Command.RoomEvent, payload);
             var writer = new PacketWriter(buffer);
@@ -15,6 +15,7 @@ namespace TopSpeed.Network
             writer.WriteByte((byte)Command.RoomEvent);
             writer.WriteUInt32(evt.RoomId);
             writer.WriteUInt32(evt.RoomVersion);
+            writer.WriteUInt32(evt.EventSequence);
             writer.WriteUInt32(evt.RaceInstanceId);
             writer.WriteByte((byte)evt.Kind);
             writer.WriteUInt32(evt.HostPlayerId);
@@ -22,6 +23,7 @@ namespace TopSpeed.Network
             writer.WriteByte(evt.PlayerCount);
             writer.WriteByte(evt.PlayersToStart);
             writer.WriteByte((byte)evt.RaceState);
+            writer.WriteBool(evt.RacePaused);
             writer.WriteFixedString(evt.TrackName ?? string.Empty, 12);
             writer.WriteByte(evt.Laps);
             writer.WriteUInt32(evt.GameRulesFlags);

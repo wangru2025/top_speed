@@ -34,6 +34,13 @@ namespace TopSpeed.Protocol
             return value;
         }
 
+        public ulong ReadUInt64()
+        {
+            var lo = ReadUInt32();
+            var hi = ReadUInt32();
+            return lo | ((ulong)hi << 32);
+        }
+
         public int ReadInt32()
         {
             var value = _data[_offset]
@@ -97,6 +104,12 @@ namespace TopSpeed.Protocol
             _buffer[_offset++] = (byte)((value >> 8) & 0xFF);
             _buffer[_offset++] = (byte)((value >> 16) & 0xFF);
             _buffer[_offset++] = (byte)((value >> 24) & 0xFF);
+        }
+
+        public void WriteUInt64(ulong value)
+        {
+            WriteUInt32((uint)(value & 0xFFFFFFFF));
+            WriteUInt32((uint)(value >> 32));
         }
 
         public void WriteInt32(int value)

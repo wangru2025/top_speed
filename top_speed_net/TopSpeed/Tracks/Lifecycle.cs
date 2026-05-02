@@ -49,6 +49,42 @@ namespace TopSpeed.Tracks
             _audio.SetRoomAcoustics(RoomAcoustics.Default);
         }
 
+        public void PauseAudio()
+        {
+            StopActiveAudio();
+        }
+
+        public void ResumeAudio()
+        {
+            if (_ambience == TrackAmbience.Desert)
+                _soundDesert?.Play(loop: true);
+            else if (_ambience == TrackAmbience.Airport)
+                _soundAirport?.Play(loop: true);
+        }
+
+        private void StopActiveAudio()
+        {
+            _soundRain?.Stop();
+            _soundWind?.Stop();
+            _soundStorm?.Stop();
+            _soundCrowd?.Stop();
+            _soundOcean?.Stop();
+            _soundDesert?.Stop();
+            _soundAirport?.Stop();
+            _soundAirplane?.Stop();
+            _soundClock?.Stop();
+            _soundJet?.Stop();
+            _soundThunder?.Stop();
+            _soundPile?.Stop();
+            _soundConstruction?.Stop();
+            _soundRiver?.Stop();
+            _soundHelicopter?.Stop();
+            _soundOwl?.Stop();
+
+            for (var i = 0; i < _allTrackSounds.Count; i++)
+                _allTrackSounds[i].Stop();
+        }
+
         public void Run(float position)
         {
             if (_noisePlaying && position > _noiseEndPos)

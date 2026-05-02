@@ -26,14 +26,14 @@ namespace TopSpeed.Vehicles
             }
         }
 
-        private void ReplaceOwnedTempFile(string path)
+        private void ReplaceOwnedTempFile(string? path)
         {
             if (!string.IsNullOrWhiteSpace(_ownedTempFile) && !string.Equals(_ownedTempFile, path, StringComparison.OrdinalIgnoreCase))
                 SafeDelete(_ownedTempFile!);
             _ownedTempFile = path;
         }
 
-        private static void SafeDelete(string path)
+        private static void SafeDelete(string? path)
         {
             try
             {

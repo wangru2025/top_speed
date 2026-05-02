@@ -47,6 +47,11 @@ namespace TopSpeed.Drive.Multiplayer
             _panels.ApplyInputPolicy(context.InputPolicy);
             if (phaseChanged.Current == Phase.Paused)
             {
+                _soundQueue.Pause();
+                _track.PauseAudio();
+                _car.Pause();
+                foreach (var remote in _remotePlayers.Values)
+                    remote.Player.Pause();
                 _localRadio.PauseForGame();
                 _liveTx.Pause();
                 _soundPause?.Play(loop: false);
@@ -55,6 +60,11 @@ namespace TopSpeed.Drive.Multiplayer
 
             if (phaseChanged.Previous == Phase.Paused)
             {
+                _soundQueue.Resume();
+                _track.ResumeAudio();
+                _car.Unpause();
+                foreach (var remote in _remotePlayers.Values)
+                    remote.Player.Unpause();
                 _localRadio.ResumeFromGame();
                 _liveTx.Resume();
                 _soundResume?.Play(loop: false);
@@ -91,15 +101,13 @@ namespace TopSpeed.Drive.Multiplayer
 
         private void ApplyPlayerFinishState()
         {
+            if (_finished)
+                return;
+
             _finished = true;
             SpeakIfLoaded(GetRandomSoundBySlot((int)RandomSoundSlot.Finish), true);
 
-            _car.ManualTransmission = false;
-            _car.SetOverrideController(_finishLockController);
-            _car.SetNeutralGear();
-            _car.Quiet();
-            _car.ShutdownEngine();
-            _car.StopMotionImmediately();
+            TopSpeed.Drive.Session.FinishVehicle.Apply(_car, _finishLockController);
             _raceTime = Math.Max(0, _session.Context.ProgressMilliseconds);
             _requirePostFinishStopBeforeExit = true;
         }

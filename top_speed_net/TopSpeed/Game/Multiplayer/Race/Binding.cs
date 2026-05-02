@@ -13,6 +13,8 @@ namespace TopSpeed.Game
         public uint ActiveRoomId;
         public uint RoomId;
         public uint RaceInstanceId;
+        public uint EventSequence;
+        public uint StateSequence;
         public int VehicleIndex;
         public bool AutomaticTransmission = true;
 
@@ -21,6 +23,8 @@ namespace TopSpeed.Game
             ActiveRoomId = 0;
             RoomId = 0;
             RaceInstanceId = 0;
+            EventSequence = 0;
+            StateSequence = 0;
         }
 
         public void ResetPending()
@@ -62,6 +66,11 @@ namespace TopSpeed.Game
 
         public void ApplyRoomState(PacketRoomState roomState)
         {
+            if (IsStaleStateSequence(roomState.EventSequence))
+                return;
+
+            if (roomState.EventSequence != 0)
+                StateSequence = roomState.EventSequence;
             ActiveRoomId = roomState.InRoom ? roomState.RoomId : 0;
 
             if (roomState.InRoom
@@ -74,13 +83,19 @@ namespace TopSpeed.Game
             }
         }
 
-        public void ApplyRaceState(PacketRoomRaceStateChanged changed)
+        public bool ApplyRaceState(PacketRoomRaceStateChanged changed)
         {
+            if (IsStaleEventSequence(changed.EventSequence))
+                return false;
+
+            if (changed.EventSequence != 0)
+                EventSequence = changed.EventSequence;
             if (changed.State != RoomRaceState.Racing || changed.RoomId == 0 || changed.RaceInstanceId == 0)
-                return;
+                return true;
 
             RoomId = changed.RoomId;
             RaceInstanceId = changed.RaceInstanceId;
+            return true;
         }
 
         public void BindStartedRace()
@@ -94,6 +109,31 @@ namespace TopSpeed.Game
         {
             RoomId = 0;
             RaceInstanceId = 0;
+            EventSequence = 0;
+        }
+
+        public bool AcceptRaceEvent(uint roomId, uint raceInstanceId, uint eventSequence, bool allowBindRaceInstance)
+        {
+            if (IsStaleEventSequence(eventSequence))
+                return false;
+            if (!MatchesContext(roomId, raceInstanceId, allowBindRaceInstance))
+                return false;
+
+            if (eventSequence != 0)
+                EventSequence = eventSequence;
+            return true;
+        }
+
+        public bool ShouldRequestResync(uint roomId, uint raceInstanceId, uint eventSequence)
+        {
+            if (IsStaleEventSequence(eventSequence))
+                return false;
+            if (RoomId != 0 && roomId != 0 && RoomId != roomId)
+                return true;
+            if (RaceInstanceId != 0 && raceInstanceId != 0 && RaceInstanceId != raceInstanceId)
+                return true;
+
+            return false;
         }
 
         public bool MatchesRoom(uint roomId)
@@ -124,6 +164,16 @@ namespace TopSpeed.Game
             }
 
             return RaceInstanceId == raceInstanceId;
+        }
+
+        private bool IsStaleEventSequence(uint eventSequence)
+        {
+            return PacketValidation.IsStaleSequence(EventSequence, eventSequence);
+        }
+
+        private bool IsStaleStateSequence(uint eventSequence)
+        {
+            return PacketValidation.IsStaleSequence(StateSequence, eventSequence);
         }
     }
 }

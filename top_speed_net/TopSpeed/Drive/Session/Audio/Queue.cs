@@ -9,6 +9,7 @@ namespace TopSpeed.Drive.Session.Audio
         private readonly Queue<Source> _items = new Queue<Source>();
         private readonly object _lock = new object();
         private Source? _current;
+        private bool _paused;
 
         public bool IsIdle
         {
@@ -24,7 +25,7 @@ namespace TopSpeed.Drive.Session.Audio
             lock (_lock)
             {
                 _items.Enqueue(sound);
-                if (_current == null)
+                if (_current == null && !_paused)
                     PlayNextLocked();
             }
         }
@@ -34,12 +35,41 @@ namespace TopSpeed.Drive.Session.Audio
             lock (_lock)
             {
                 _items.Clear();
+                _current?.Stop();
                 _current = null;
+                _paused = false;
+            }
+        }
+
+        public void Pause()
+        {
+            lock (_lock)
+            {
+                _paused = true;
+                _current?.Pause();
+            }
+        }
+
+        public void Resume()
+        {
+            lock (_lock)
+            {
+                if (!_paused)
+                    return;
+
+                _paused = false;
+                if (_current != null)
+                    _current.Resume();
+                else
+                    PlayNextLocked();
             }
         }
 
         private void PlayNextLocked()
         {
+            if (_paused)
+                return;
+
             if (_items.Count == 0)
             {
                 _current = null;

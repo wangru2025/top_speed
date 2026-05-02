@@ -17,6 +17,7 @@ namespace TopSpeed.Server.Network
         private const float BotHornMinDistanceMeters = 100.0f;
         private const float BotBackfirePulseSeconds = 0.1f;
         private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan ReconnectGrace = ConnectionRecoveryRules.DefaultReconnectGrace;
 
         private readonly RaceServerConfig _config;
         private readonly Logger _logger;

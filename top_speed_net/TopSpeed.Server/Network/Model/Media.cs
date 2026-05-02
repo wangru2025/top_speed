@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Net;
-using TopSpeed.Bots;
-using TopSpeed.Data;
 using TopSpeed.Protocol;
 
 namespace TopSpeed.Server.Network
@@ -10,6 +6,8 @@ namespace TopSpeed.Server.Network
     internal sealed class MediaBlob
     {
         public uint MediaId { get; set; }
+        public uint TransferId { get; set; }
+        public MediaTransferState State { get; set; } = MediaTransferState.Complete;
         public string Extension { get; set; } = string.Empty;
         public byte[] Data { get; set; } = Array.Empty<byte>();
     }
@@ -17,6 +15,8 @@ namespace TopSpeed.Server.Network
     internal sealed class InMedia
     {
         public uint MediaId { get; set; }
+        public uint TransferId { get; set; }
+        public MediaTransferState State { get; set; } = MediaTransferState.Idle;
         public string Extension { get; set; } = string.Empty;
         public uint TotalBytes { get; set; }
         public ushort NextChunk { get; set; }

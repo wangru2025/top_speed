@@ -11,6 +11,7 @@ namespace TopSpeed.Game
         private const string GameGuideFileName = "game-guide.html";
         private const string TrackGuideFileName = "track-creation-guide.html";
         private const string VehicleGuideFileName = "vehicle-physics-and-creation-guide.html";
+        private const string ChangeLogFileName = "changes.html";
 
         private void OpenGameGuide()
         {
@@ -25,6 +26,11 @@ namespace TopSpeed.Game
         private void OpenVehicleCreationGuide()
         {
             OpenHelpDocument(VehicleGuideFileName);
+        }
+
+        private void OpenChangeLogFile()
+        {
+            OpenHelpDocument(ChangeLogFileName);
         }
 
         private void OpenHelpDocument(string fileName)

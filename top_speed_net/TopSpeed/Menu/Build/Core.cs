@@ -165,7 +165,8 @@ namespace TopSpeed.Menu
                 new MenuItem(LocalizationService.Mark("Game guide"), MenuAction.None, onActivate: _settingsActions.OpenGameGuide),
                 new MenuItem(LocalizationService.Mark("Track creation guide"), MenuAction.None, onActivate: _settingsActions.OpenTrackCreationGuide),
                 new MenuItem(LocalizationService.Mark("Vehicle creation guide"), MenuAction.None, onActivate: _settingsActions.OpenVehicleCreationGuide),
-                new MenuItem(LocalizationService.Mark("Latest changes"), MenuAction.None, onActivate: _settingsActions.ShowLatestChanges)
+                new MenuItem(LocalizationService.Mark("What's new"), MenuAction.None, onActivate: _settingsActions.ShowLatestChanges),
+                new MenuItem(LocalizationService.Mark("Change log file"), MenuAction.None, onActivate: _settingsActions.OpenChangeLogFile)
             }, string.Empty, spec: ScreenSpec.BackSilent);
         }
     }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:34+0300\n"
+"POT-Creation-Date: 2026-05-04 01:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -278,8 +278,8 @@ msgstr ""
 msgid "Could not launch updater: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:364
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\packages.cs:140
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\PackagesCatalog.cs:68
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Identity.cs:26
 msgid "Custom track"
 msgstr ""
 
@@ -293,12 +293,12 @@ msgid "Custom tracks"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Host.cs:224
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:37
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:16
 msgid "Custom tracks are disabled on this server."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Host.cs:49
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:42
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:21
 msgid "Custom tracks are not enabled for this room."
 msgstr ""
 
@@ -584,7 +584,7 @@ msgstr ""
 msgid "Invalid segment width '{0}'."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:301
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:65
 #, csharp-format
 msgid "Invalid sound asset path: {0}"
 msgstr ""
@@ -599,7 +599,7 @@ msgstr ""
 msgid "Invalid sound type '{0}'."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:47
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:26
 msgid "Invalid track package upload request."
 msgstr ""
 
@@ -729,7 +729,7 @@ msgstr ""
 msgid "Mini Cooper S"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:318
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:82
 #, csharp-format
 msgid "Missing sound asset file: {0}"
 msgstr ""
@@ -1189,7 +1189,7 @@ msgid ""
 "Sound '{0}' references start_area '{1}', but no matching segment id exists."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:312
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:76
 #, csharp-format
 msgid "Sound asset path escapes the track folder: {0}"
 msgstr ""
@@ -1255,8 +1255,8 @@ msgstr ""
 msgid "The current game is not paused."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:434
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:440
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:13
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:19
 msgid "The selected custom track is invalid."
 msgstr ""
 
@@ -1336,7 +1336,7 @@ msgstr ""
 msgid "Track cannot be empty."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:203
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Payload.cs:23
 msgid "Track data is missing."
 msgstr ""
 
@@ -1356,28 +1356,28 @@ msgstr ""
 msgid "Track must include at least one [segment:<id>] section."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:54
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:33
 msgid "Track package already exists on server."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:140
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:119
 msgid "Track package hash mismatch."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:97
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:76
 msgid "Track package upload exceeded declared size."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:127
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:106
 msgid "Track package upload is incomplete."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:89
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:120
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:68
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:99
 msgid "Track package upload ownership changed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:154
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:133
 msgid "Track package uploaded successfully."
 msgstr ""
 
@@ -1386,11 +1386,11 @@ msgstr ""
 msgid "Track path must point to a .tsm file inside a track folder: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:255
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:23
 msgid "Track source path is missing, so sound assets cannot be resolved."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Tracks\local_packages.cs:262
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:30
 msgid "Unable to resolve custom track folder path."
 msgstr ""
 
@@ -1398,7 +1398,7 @@ msgstr ""
 msgid "Unable to resume the previous multiplayer session."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\Packages.cs:150
+#: D:\top_speed\top_speed_net\TopSpeed.Server\Network\Services\Room\TrackPackages\Upload.cs:129
 msgid "Unable to store track package on server."
 msgstr ""
 

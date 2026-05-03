@@ -8,7 +8,7 @@ The game versioning follows a specific pattern by using year.month.day.revision,
 
 
 
-## 2026.5.3.1
+## 2026.5.4.1
 
 ### Game Changes
 
@@ -16,6 +16,7 @@ The game versioning follows a specific pattern by using year.month.day.revision,
 * Added Spanish translation for copilot and race announcements.
 * Added support for Mac ARM-64 and Android arm-32 (ARM-v7) builds.
 * Added support for uploading your custom tracks to the server.
+* Android builds now use a permenant signature and no longer conflicts with existing versions.
 
 
 

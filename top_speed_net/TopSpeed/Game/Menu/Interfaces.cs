@@ -43,6 +43,7 @@ namespace TopSpeed.Game
         void IMenuSettingsActions.OpenGameGuide() => OpenGameGuide();
         void IMenuSettingsActions.OpenTrackCreationGuide() => OpenTrackCreationGuide();
         void IMenuSettingsActions.OpenVehicleCreationGuide() => OpenVehicleCreationGuide();
+        void IMenuSettingsActions.OpenChangeLogFile() => OpenChangeLogFile();
         void IMenuSettingsActions.ShowLatestChanges() => StartLatestChangesFetch();
         void IMenuSettingsActions.SetDevice(InputDeviceMode mode) => SetDevice(mode);
         void IMenuSettingsActions.SetSpeechBackend(ulong? backendId) => SetSpeechBackend(backendId);

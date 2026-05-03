@@ -5,14 +5,14 @@ namespace TopSpeed.Protocol
     {
         // Client release version used by updater checks and release packaging.
         public const ushort ClientYear = 2026;
-        public const byte ClientMonth = 4;
-        public const byte ClientDay = 29;
+        public const byte ClientMonth = 5;
+        public const byte ClientDay = 4;
         public const byte ClientRevision = 1;
 
         // Server release version used by updater checks and packaging.
         public const ushort ServerYear = 2026;
-        public const byte ServerMonth = 4;
-        public const byte ServerDay = 29;
+        public const byte ServerMonth = 5;
+        public const byte ServerDay = 4;
         public const byte ServerRevision = 1;
     }
 
@@ -25,7 +25,7 @@ namespace TopSpeed.Protocol
         // Current protocol implementation version (year.month.day.revision).
         public const ushort CurrentYear = 2026;
         public const byte CurrentMonth = 5;
-        public const byte CurrentDay = 3;
+        public const byte CurrentDay = 4;
         public const byte CurrentRevision = 1;
 
         // Client supported protocol range (explicit values by design).
@@ -35,17 +35,17 @@ namespace TopSpeed.Protocol
         public const byte ClientMinRevision = 1;
         public const ushort ClientMaxYear = 2026;
         public const byte ClientMaxMonth = 5;
-        public const byte ClientMaxDay = 3;
+        public const byte ClientMaxDay = 4;
         public const byte ClientMaxRevision = 1;
 
         // Server supported protocol range (explicit values by design).
         public const ushort ServerMinYear = 2026;
         public const byte ServerMinMonth = 5;
-        public const byte ServerMinDay = 3;
+        public const byte ServerMinDay = 1;
         public const byte ServerMinRevision = 1;
         public const ushort ServerMaxYear = 2026;
         public const byte ServerMaxMonth = 5;
-        public const byte ServerMaxDay = 3;
+        public const byte ServerMaxDay = 4;
         public const byte ServerMaxRevision = 1;
     }
 }

@@ -17,6 +17,22 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TopSpeedAndroidSigningKeyStorePath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)top_speed.p12'))</TopSpeedAndroidSigningKeyStorePath>
+    <TopSpeedAndroidSigningPasswordFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)signpass.txt'))</TopSpeedAndroidSigningPasswordFile>
+    <TopSpeedAndroidSigningPasswordValue Condition="Exists('$(TopSpeedAndroidSigningPasswordFile)')">$([System.IO.File]::ReadAllText('$(TopSpeedAndroidSigningPasswordFile)').Trim())</TopSpeedAndroidSigningPasswordValue>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="Exists('$(TopSpeedAndroidSigningKeyStorePath)')">
+    <AndroidKeyStore Condition="'$(AndroidKeyStore)' == ''">true</AndroidKeyStore>
+    <AndroidSigningKeyStore Condition="'$(AndroidSigningKeyStore)' == ''">$(TopSpeedAndroidSigningKeyStorePath)</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias Condition="'$(AndroidSigningKeyAlias)' == ''">top_speed</AndroidSigningKeyAlias>
+    <AndroidSigningStorePass Condition="'$(AndroidSigningStorePass)' == '' and '$(ANDROID_KEY_PASS)' != ''">env:ANDROID_KEY_PASS</AndroidSigningStorePass>
+    <AndroidSigningKeyPass Condition="'$(AndroidSigningKeyPass)' == '' and '$(ANDROID_KEY_PASS)' != ''">env:ANDROID_KEY_PASS</AndroidSigningKeyPass>
+    <AndroidSigningStorePass Condition="'$(AndroidSigningStorePass)' == '' and '$(TopSpeedAndroidSigningPasswordValue)' != ''">pass:$(TopSpeedAndroidSigningPasswordValue)</AndroidSigningStorePass>
+    <AndroidSigningKeyPass Condition="'$(AndroidSigningKeyPass)' == '' and '$(TopSpeedAndroidSigningPasswordValue)' != ''">pass:$(TopSpeedAndroidSigningPasswordValue)</AndroidSigningKeyPass>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
   </PropertyGroup>
@@ -46,7 +62,7 @@
 
   <ItemGroup>
     <Reference Include="TopSpeed">
-      <HintPath>..\TopSpeed\bin\$(Configuration)\net10.0\linux-x64\TopSpeed.dll</HintPath>
+      <HintPath>..\TopSpeed\bin\$(Configuration)\net10.0\android-host\TopSpeed.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>
@@ -98,6 +114,16 @@
 
   <Target Name="RenderAndIncludeDocsAssets" BeforeTargets="PrepareForBuild" Condition="Exists('$(RepoDocsRenderScript)')">
     <Exec Command="python &quot;$(RepoDocsRenderScript)&quot; --all" ContinueOnError="WarnAndContinue" />
+  </Target>
+
+  <Target Name="CleanStaleSignedAndroidPackages" BeforeTargets="_PrepareForSign" Condition="'$(AndroidKeyStore)' == 'true' and Exists('$(TopSpeedAndroidSigningKeyStorePath)')">
+    <ItemGroup>
+      <_TopSpeedSignedPackage Include="$(OutputPath)$(ApplicationId)-Signed.apk" />
+      <_TopSpeedSignedPackage Include="$(OutputPath)$(ApplicationId)-Signed.aab" />
+      <_TopSpeedSignedPackage Include="$(OutputPath)publish\$(ApplicationId)-Signed.apk" />
+      <_TopSpeedSignedPackage Include="$(OutputPath)publish\$(ApplicationId)-Signed.aab" />
+    </ItemGroup>
+    <Delete Files="@(_TopSpeedSignedPackage)" TreatErrorsAsWarnings="true" />
   </Target>
 
 </Project>

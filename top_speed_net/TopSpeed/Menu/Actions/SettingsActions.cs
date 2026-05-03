@@ -20,6 +20,7 @@ namespace TopSpeed.Menu
         void OpenGameGuide();
         void OpenTrackCreationGuide();
         void OpenVehicleCreationGuide();
+        void OpenChangeLogFile();
         void ShowLatestChanges();
         void SetDevice(InputDeviceMode mode);
         void SetSpeechBackend(ulong? backendId);

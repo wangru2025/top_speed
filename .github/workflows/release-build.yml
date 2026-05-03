@@ -159,6 +159,19 @@ jobs:
         if: matrix.install_android_workload == 'true'
         run: dotnet workload install android
 
+      - name: Prepare Android signing keystore
+        if: matrix.platform == 'android'
+        shell: pwsh
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ANDROID_KEYSTORE_B64)) {
+            throw "Missing required secret ANDROID_KEYSTORE_B64."
+          }
+
+          $keystorePath = Join-Path $PWD "TopSpeed.Android/top_speed.p12"
+          [System.IO.File]::WriteAllBytes($keystorePath, [System.Convert]::FromBase64String($env:ANDROID_KEYSTORE_B64))
+
       - name: Build and package platform artifacts
         id: platform_build
         shell: pwsh
@@ -171,6 +184,7 @@ jobs:
           GAME_ZIP_OSX: ${{ needs.metadata.outputs.game_zip_osx }}
           GAME_APK_ANDROID_ARM64: ${{ needs.metadata.outputs.game_apk_android_arm64 }}
           GAME_APK_ANDROID_ARM32: ${{ needs.metadata.outputs.game_apk_android_arm32 }}
+          ANDROID_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
         run: |
           $platform = "${{ matrix.platform }}"
           $serverZipWin = "TopSpeed.Server-win-x64-Release-v-$env:SERVER_VERSION.zip"
@@ -196,6 +210,10 @@ jobs:
           }
 
           if ($platform -eq "android") {
+            if ([string]::IsNullOrWhiteSpace($env:ANDROID_KEY_PASS)) {
+              throw "Missing Android signing password secret ANDROID_KEY_PASS."
+            }
+
             bash build/ci/android.sh "$env:VERSION" "$env:ANDROID_VERSION_CODE" "$env:GAME_APK_ANDROID_ARM64" "$env:GAME_APK_ANDROID_ARM32"
             exit $LASTEXITCODE
           }

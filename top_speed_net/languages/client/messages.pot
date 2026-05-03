@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:34+0300\n"
+"POT-Creation-Date: 2026-05-04 01:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgstr ""
 msgid "A saved server entry was ignored because the host is empty."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:207
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:58
 msgid "A track upload is already in progress."
 msgstr ""
 
@@ -260,7 +260,7 @@ msgstr ""
 msgid "Average {0}-lap time for this track: {1}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:673
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:50
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:63
 msgid "B"
 msgstr ""
@@ -400,7 +400,7 @@ msgstr ""
 msgid "Call sign cannot be empty."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:360
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:39
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Language.cs:54
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:27
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Dialogs\Choice.cs:51
@@ -425,6 +425,10 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:40
 msgid "Change game options"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:169
+msgid "Change log file"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:75
@@ -804,9 +808,9 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Identity.cs:26
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:336
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:468
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:574
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:452
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Selection\TrackSource.cs:38
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:144
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\TrackPackages\State.cs:57
@@ -819,7 +823,7 @@ msgstr ""
 msgid "Custom track errors"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:379
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadBuild.cs:16
 msgid "Custom track file path is empty."
 msgstr ""
 
@@ -827,7 +831,7 @@ msgstr ""
 msgid "Custom tracks"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:126
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:50
 msgid "Custom tracks are disabled for this room."
 msgstr ""
 
@@ -1237,7 +1241,7 @@ msgstr ""
 msgid "Fiat 500"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:349
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:28
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\TrackPackages\DownloadProgress.cs:41
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:17
 #, csharp-format
@@ -1280,7 +1284,7 @@ msgstr ""
 msgid "French coast"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:676
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:53
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:66
 msgid "GB"
 msgstr ""
@@ -1353,7 +1357,7 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:36
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:42
 msgid "Help file not found"
 msgstr ""
 
@@ -1491,7 +1495,7 @@ msgstr ""
 msgid "Invalid segment width '{0}'."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:511
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:65
 #, csharp-format
 msgid "Invalid sound asset path: {0}"
 msgstr ""
@@ -1566,7 +1570,7 @@ msgstr ""
 msgid "Joystick"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:674
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:51
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:64
 msgid "KB"
 msgstr ""
@@ -1683,7 +1687,6 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:134
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:152
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:168
 msgid "Latest changes"
 msgstr ""
 
@@ -1785,7 +1788,7 @@ msgstr ""
 msgid "Live streaming stopped because media decoding failed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:150
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:74
 msgid "Loading custom tracks from server."
 msgstr ""
 
@@ -1797,7 +1800,7 @@ msgstr ""
 msgid "Loop mode on."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:675
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:52
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:65
 msgid "MB"
 msgstr ""
@@ -1951,7 +1954,7 @@ msgstr ""
 msgid "Missing required section [{0}]."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:528
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:82
 #, csharp-format
 msgid "Missing sound asset file: {0}"
 msgstr ""
@@ -2049,7 +2052,7 @@ msgstr ""
 msgid "No controllers were found. The game has reverted to keyboard input."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:188
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:112
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Drive\Tracks.cs:100
 msgid "No custom tracks found."
 msgstr ""
@@ -2184,7 +2187,7 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Create.cs:108
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:19
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:69
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:138
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:62
 msgid "Not connected to a server."
 msgstr ""
 
@@ -2382,7 +2385,7 @@ msgstr ""
 msgid "Pause the game"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:351
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:30
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\TrackPackages\DownloadProgress.cs:43
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:19
 #, csharp-format
@@ -2653,7 +2656,7 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:341
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:356
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:170
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:94
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Drive\Tracks.cs:18
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Drive\Tracks.cs:35
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Drive\Tracks.cs:64
@@ -3251,7 +3254,7 @@ msgid ""
 "Sound '{0}' references start_area '{1}', but no matching segment id exists."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:522
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:76
 #, csharp-format
 msgid "Sound asset path escapes the track folder: {0}"
 msgstr ""
@@ -3623,16 +3626,16 @@ msgstr ""
 msgid "The race section is missing. Defaults were used for race settings."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:37
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:43
 msgid "The requested help file could not be found."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:60
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:66
 msgid "The requested help file could not be opened."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:644
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:650
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:13
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:19
 msgid "The selected custom track is invalid."
 msgstr ""
 
@@ -3826,7 +3829,7 @@ msgstr ""
 msgid "Track creation guide"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:417
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Payload.cs:23
 msgid "Track data is missing."
 msgstr ""
 
@@ -3855,11 +3858,11 @@ msgstr ""
 msgid "Track must include at least one [segment:<id>] section."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:83
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:50
 msgid "Track package upload failed."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:76
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:43
 msgid "Track package uploaded successfully."
 msgstr ""
 
@@ -3868,15 +3871,15 @@ msgstr ""
 msgid "Track path must point to a .tsm file inside a track folder: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:469
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:23
 msgid "Track source path is missing, so sound assets cannot be resolved."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:240
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:91
 msgid "Track upload canceled because the connection was lost."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:69
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:36
 msgid "Track upload canceled."
 msgstr ""
 
@@ -3889,7 +3892,7 @@ msgstr ""
 msgid "Track, currently {0}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:348
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:27
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\TrackPackages\DownloadProgress.cs:40
 #: D:\top_speed\top_speed_net\TopSpeed\Tracks\TrackLoadException.cs:30
 #, csharp-format
@@ -3913,15 +3916,15 @@ msgstr ""
 msgid "Unable to copy to clipboard."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:59
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Menu\Help.cs:65
 msgid "Unable to open help file"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:214
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:65
 msgid "Unable to prepare custom track upload."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:476
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:30
 msgid "Unable to resolve custom track folder path."
 msgstr ""
 
@@ -4102,16 +4105,16 @@ msgstr ""
 msgid "Upload a local custom track"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:169
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:93
 msgid "Upload a local track"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:350
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:29
 #, csharp-format
 msgid "Uploaded size: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:355
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:34
 msgid "Uploading track..."
 msgstr ""
 
@@ -4223,6 +4226,10 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Race\Runtime.cs:245
 msgid "What would you like to do?"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:168
+msgid "What's new"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:192
@@ -4558,7 +4565,7 @@ msgstr ""
 msgid "curves only"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:143
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:67
 msgid "custom track list request"
 msgstr ""
 
@@ -4890,19 +4897,19 @@ msgstr ""
 msgid "track change request"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:273
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:124
 msgid "track upload cancel"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:302
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:153
 msgid "track upload chunk"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:317
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:168
 msgid "track upload completion"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages.cs:254
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:105
 msgid "track upload start"
 msgstr ""
 

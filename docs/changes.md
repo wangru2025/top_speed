@@ -2,11 +2,11 @@
 
 This file tracks new changes to the game for both client and server to make it easier to find previous changes.
 
-
-
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
+## 2026.5.4.2
+This is a hot fix for Android arm 32 and Mac.
 
 ## 2026.5.4.1
 
@@ -17,7 +17,6 @@ The game versioning follows a specific pattern by using year.month.day.revision,
 * Added support for Mac ARM-64 and Android arm-32 (ARM-v7) builds.
 * Added support for uploading your custom tracks to the server.
 * Android builds now use a permenant signature and no longer conflicts with existing versions.
-
 
 
 ### Server Changes

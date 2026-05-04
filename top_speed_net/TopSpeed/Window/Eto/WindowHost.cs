@@ -31,7 +31,7 @@ namespace TopSpeed.Windowing.Eto
 
         public WindowHost()
         {
-            _application = Application.Instance ?? new Application();
+            _application = ApplicationFactory.GetOrCreate();
             _window = new Form
             {
                 Title = ResolveWindowTitle(),

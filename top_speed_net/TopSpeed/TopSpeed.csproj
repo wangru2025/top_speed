@@ -2,10 +2,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseCurrentRuntimeIdentifier>false</UseCurrentRuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT' and '$(AndroidHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == '' and '$(OS)' != 'Windows_NT' and '$(AndroidHostBuild)' != 'true'">linux-x64</RuntimeIdentifier>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">net10.0</TargetFramework>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(RuntimeIdentifier)' == 'win-x64'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(AndroidHostBuild)' != 'true'">net10.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(AndroidHostBuild)' != 'true' and '$(OS)' == 'Windows_NT'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(AndroidHostBuild)' != 'true' and '$(OS)' != 'Windows_NT'">net10.0</TargetFramework>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(TargetFramework)' == 'net10.0-windows' and '$(AndroidHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>TopSpeed</RootNamespace>

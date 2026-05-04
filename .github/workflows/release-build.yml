@@ -148,7 +148,7 @@ jobs:
           $kind = "${{ matrix.kind }}"
 
           if ($kind -eq "game") {
-            dotnet restore TopSpeed/TopSpeed.csproj --runtime win-x64
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier=win-x64
             dotnet restore TopSpeed.Tests/TopSpeed.Tests.csproj
             dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-restore
             dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-build --verbosity normal
@@ -242,7 +242,7 @@ jobs:
             rid="${{ matrix.runtime_id }}"
             zip_name="TopSpeed-mac-${{ matrix.game_arch_tag }}-Release-v-$VERSION.zip"
 
-            dotnet restore TopSpeed/TopSpeed.csproj --runtime "$rid"
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier="$rid"
             dotnet publish TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0 --runtime "$rid" -p:UseNativeAotUpdater=true -p:UseTrimmedUpdater=false --no-restore
 
             rm -f "$zip_name"
@@ -360,7 +360,7 @@ jobs:
           if [[ "$kind" == "game" ]]; then
             zip_name="TopSpeed-linux-x64-Release-v-$VERSION.zip"
 
-            dotnet restore TopSpeed/TopSpeed.csproj --runtime linux-x64
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier=linux-x64
             dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0 --runtime linux-x64 -p:UseNativeAotUpdater=false -p:UseTrimmedUpdater=true --no-restore
 
             rm -f "$zip_name"

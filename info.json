@@ -1,12 +1,10 @@
 {
-  "version": "2026.5.4.1",
+  "version": "2026.5.4.2",
   "serverVersion": "2026.5.4.1",
   "changes": [
-    "Fixed many crashes that could happen randomly due to audio processing for invalid audio buffers.",
-    "Added Spanish translation for copilot and race announcements.",
-    "Added support for Mac ARM-64 and Android arm-32 (ARM-v7) builds.",
-    "Added support for uploading your custom tracks to the server.",
-    "Android builds now use a permenant signature and no longer conflicts with existing versions."
+    "Fixed SDL3 on Android ARM 32 and updated SDL3 to latest version (v3.4.8) for all platforms.",
+    "Fixed GTK error on Mac.",
+    "The game now trys to catch startup errors early even if there is no window created. This helps to show managed exceptions early."
   ],
   "serverChanges": [
     "Refactored server and made race finish events much more reliable.",

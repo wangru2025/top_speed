@@ -45,6 +45,7 @@ public class SdlActivityBase : Activity
     Theme = "@style/TopSpeed.Fullscreen",
     MainLauncher = true,
     Exported = true,
+    ScreenOrientation = ScreenOrientation.SensorLandscape,
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.KeyboardHidden)]
 public class MainActivity : SdlActivityBase
 {

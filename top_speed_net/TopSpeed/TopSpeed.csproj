@@ -8,6 +8,12 @@
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(TargetFramework)' == 'net10.0-windows' and '$(AndroidHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <!--
+      Required for ZDSR to work on .NET 9+.
+      .NET 9 enables CET compatibility by default for the AppHost.
+      The native DLL crashes with 0xC0000409 unless CET is disabled.
+    -->
+    <CETCompat>false</CETCompat>
     <RootNamespace>TopSpeed</RootNamespace>
     <AssemblyName>TopSpeed</AssemblyName>
   </PropertyGroup>

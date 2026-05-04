@@ -53,9 +53,7 @@ namespace TopSpeed.Game
             if (task == null || !task.IsCompleted)
                 return false;
 
-            result = task.IsFaulted || task.IsCanceled
-                ? ConnectResult.CreateFail(LocalizationService.Mark("Reconnection failed."))
-                : task.GetAwaiter().GetResult();
+            result = BuildReconnectFailureResult(task);
             wasInRace = _wasInRace;
             State = result.Success ? ConnectionLifecycleState.Resumed : ConnectionLifecycleState.Closed;
             Clear();
@@ -114,6 +112,27 @@ namespace TopSpeed.Game
             }
 
             return last;
+        }
+
+        private static ConnectResult BuildReconnectFailureResult(Task<ConnectResult> task)
+        {
+            if (task.IsCanceled)
+                return ConnectResult.CreateFail(LocalizationService.Mark("Reconnection canceled."));
+
+            if (task.IsFaulted)
+            {
+                var message = task.Exception?.GetBaseException().Message;
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    return ConnectResult.CreateFail(LocalizationService.Format(
+                        LocalizationService.Mark("Reconnection failed: {0}"),
+                        message));
+                }
+
+                return ConnectResult.CreateFail(LocalizationService.Mark("Reconnection failed."));
+            }
+
+            return task.GetAwaiter().GetResult();
         }
     }
 }

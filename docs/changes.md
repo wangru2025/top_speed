@@ -5,6 +5,17 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
+## 2026.5.4.3
+### Game Changes
+- Added the ability to choose which modifier keys are being used when you remap a key in the game. This allows you to either use both modifiers, or the left/right.
+- Fixed a critical crash with ZDSR by disabling CET compatibility. The game should no longer crash again when ZDSR is installed.
+- Fixed some critical crashes when discovering local servers on the network.
+- Android version now runs in landscape mode.
+
+
+### Server Changes
+- Fixed a regression where protocol version mismatches did not trigger a hard fail.
+
 ## 2026.5.4.2
 This is a hot fix for Android arm 32 and Mac.
 

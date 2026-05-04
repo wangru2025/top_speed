@@ -87,7 +87,19 @@ namespace TopSpeed.Game
             _menu.SetMenuAutoFocus(_settings.MenuAutoFocus);
             _selection = new DriveSelection(_setup, _settings);
             _menuRegistry = new MenuRegistry(_menu, _settings, _setup, _driveInput, _selection, this, this, this, this, this, this);
-            _inputMapping = new InputMappingHandler(input, _driveInput, _settings, speech, SaveSettings);
+            _inputMapping = new InputMappingHandler(
+                input,
+                _driveInput,
+                _settings,
+                speech,
+                SaveSettings,
+                (title, caption, items, cancelable, cancelLabel, onResult) => ShowChoiceDialog(
+                    title,
+                    caption,
+                    items,
+                    cancelable,
+                    cancelLabel,
+                    result => onResult(result.IsCanceled, result.ChoiceId)));
             _shortcutMapping = new ShortcutMappingHandler(input, _menu, _settings, speech, SaveSettings);
             _updateConfig = UpdateConfig.Default;
             _updateService = new UpdateService(_updateConfig);

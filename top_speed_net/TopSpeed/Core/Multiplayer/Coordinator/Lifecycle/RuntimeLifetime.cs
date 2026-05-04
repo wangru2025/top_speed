@@ -25,16 +25,19 @@ namespace TopSpeed.Core.Multiplayer
         public void SetConnectTask(Task<ConnectResult> task)
         {
             _state.Connection.ConnectTask = task;
+            ObserveFault(task);
         }
 
         public void CompleteConnectOperation()
         {
+            ObserveFault(_state.Connection.ConnectTask);
             _state.Connection.ConnectTask = null;
             DisposeToken(ref _state.Connection.ConnectCts);
         }
 
         public void CancelConnectOperation()
         {
+            ObserveFault(_state.Connection.ConnectTask);
             _state.Connection.ConnectTask = null;
             CancelAndDisposeToken(ref _state.Connection.ConnectCts);
         }
@@ -50,16 +53,19 @@ namespace TopSpeed.Core.Multiplayer
         public void SetDiscoveryTask(Task<IReadOnlyList<ServerInfo>> task)
         {
             _state.Connection.DiscoveryTask = task;
+            ObserveFault(task);
         }
 
         public void CompleteDiscoveryOperation()
         {
+            ObserveFault(_state.Connection.DiscoveryTask);
             _state.Connection.DiscoveryTask = null;
             DisposeToken(ref _state.Connection.DiscoveryCts);
         }
 
         public void CancelDiscoveryOperation()
         {
+            ObserveFault(_state.Connection.DiscoveryTask);
             _state.Connection.DiscoveryTask = null;
             CancelAndDisposeToken(ref _state.Connection.DiscoveryCts);
         }
@@ -120,6 +126,24 @@ namespace TopSpeed.Core.Multiplayer
             {
                 cts = null;
             }
+        }
+
+        private static void ObserveFault(Task? task)
+        {
+            if (task == null)
+                return;
+
+            if (task.IsFaulted)
+            {
+                _ = task.Exception;
+                return;
+            }
+
+            _ = task.ContinueWith(
+                static t => _ = t.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
     }
 }

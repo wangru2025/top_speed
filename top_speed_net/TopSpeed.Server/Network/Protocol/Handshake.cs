@@ -73,6 +73,16 @@ namespace TopSpeed.Server.Network
 
             player.ClientVersion = hello.ClientVersion;
             player.ClientSupportedRange = clientRange;
+            if (hello.ClientVersion < clientRange.MinSupported || hello.ClientVersion > clientRange.MaxSupported)
+            {
+                RejectHandshake(
+                    player,
+                    LocalizationService.Format(
+                        LocalizationService.Mark("Invalid protocol handshake. Reported protocol version {0} is outside declared supported range {1}."),
+                        hello.ClientVersion,
+                        clientRange));
+                return;
+            }
 
             var serverRange = ProtocolProfile.ServerSupported;
             var compat = ProtocolCompat.Resolve(clientRange, serverRange);
@@ -90,7 +100,7 @@ namespace TopSpeed.Server.Network
                 SendStream(player, PacketSerializer.WriteProtocolWelcome(rejectedWelcome), PacketStream.Control);
                 _logger.Warning(
                     LocalizationService.Format(
-                        LocalizationService.Mark("Protocol rejected: player={0}, endpoint={1}, clientVersion={2}, clientSupported={3}, serverSupported={4}, status={5}."),
+                        LocalizationService.Mark("Protocol rejected: player={0}, endpoint={1}, reportedProtocolVersion={2}, clientSupported={3}, serverSupported={4}, status={5}."),
                         player.Id,
                         player.EndPoint,
                         hello.ClientVersion,
@@ -104,6 +114,17 @@ namespace TopSpeed.Server.Network
                     sendDisconnectPacket: true,
                     reason: "protocol_mismatch",
                     disconnectMessage: rejectedWelcome.Message);
+                return;
+            }
+
+            if (compat.NegotiatedVersion != hello.ClientVersion)
+            {
+                RejectHandshake(
+                    player,
+                    LocalizationService.Format(
+                        LocalizationService.Mark("Protocol mismatch. Reported protocol version is {0}, but negotiation resolved {1}. Please update client or server so protocol versions match."),
+                        hello.ClientVersion,
+                        compat.NegotiatedVersion));
                 return;
             }
 
@@ -141,7 +162,7 @@ namespace TopSpeed.Server.Network
             };
             _logger.Warning(
                 LocalizationService.Format(
-                    LocalizationService.Mark("Protocol rejected: player={0}, endpoint={1}, clientVersion={2}, clientSupported={3}, serverSupported={4}, reason={5}"),
+                    LocalizationService.Mark("Protocol rejected: player={0}, endpoint={1}, reportedProtocolVersion={2}, clientSupported={3}, serverSupported={4}, reason={5}"),
                     player.Id,
                     player.EndPoint,
                     player.ClientVersion,
@@ -169,27 +190,27 @@ namespace TopSpeed.Server.Network
                 case ProtocolCompatStatus.CompatibleDowngrade:
                     if (clientVersion > serverRange.MaxSupported)
                         return LocalizationService.Format(
-                            LocalizationService.Mark("Your client protocol version is newer than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
+                            LocalizationService.Mark("Your protocol version is newer than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
                             clientVersion,
                             serverRange);
 
                     return LocalizationService.Format(
-                        LocalizationService.Mark("Your client protocol version is older than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
+                        LocalizationService.Mark("Your protocol version is older than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
                         clientVersion,
                         serverRange);
                 case ProtocolCompatStatus.ClientTooOld:
                     return LocalizationService.Format(
-                        LocalizationService.Mark("Your client protocol version is out-of-date: {0}. This server supports protocol versions {1}. Please update your client."),
+                        LocalizationService.Mark("Your protocol version is out-of-date: {0}. This server supports protocol versions {1}. Please update your client."),
                         clientVersion,
                         serverRange);
                 case ProtocolCompatStatus.ClientTooNew:
                     return LocalizationService.Format(
-                        LocalizationService.Mark("Your client protocol version is too new: {0} and does not match this server protocol. This server supports protocol versions {1}. The server needs an update."),
+                        LocalizationService.Mark("Your protocol version is too new: {0} and does not match this server protocol. This server supports protocol versions {1}. The server needs an update."),
                         clientVersion,
                         serverRange);
                 default:
                     return LocalizationService.Format(
-                        LocalizationService.Mark("Your client protocol version is {0}. This server supports protocol versions {1}."),
+                        LocalizationService.Mark("Your protocol version is {0}. This server supports protocol versions {1}."),
                         clientVersion,
                         serverRange);
             }

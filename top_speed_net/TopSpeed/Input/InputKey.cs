@@ -147,6 +147,9 @@ namespace TopSpeed.Input
         MyComputer = 235,
         Mail = 236,
         MediaSelect = 237,
+        BothShift = 240,
+        BothControl = 241,
+        BothAlt = 242,
     }
 }
 

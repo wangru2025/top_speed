@@ -197,7 +197,7 @@ namespace TopSpeed.Input
                 [DriveIntent.SteerRight] = Key.Right,
                 [DriveIntent.Throttle] = Key.Up,
                 [DriveIntent.Brake] = Key.Down,
-                [DriveIntent.Clutch] = Key.LeftShift,
+                [DriveIntent.Clutch] = Key.BothShift,
                 [DriveIntent.GearUp] = Key.A,
                 [DriveIntent.GearDown] = Key.Z,
                 [DriveIntent.Horn] = Key.Space,

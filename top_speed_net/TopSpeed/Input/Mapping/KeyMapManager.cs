@@ -47,7 +47,7 @@ namespace TopSpeed.Input
             {
                 if (action.Action == ignore)
                     continue;
-                if (GetKey(action.Action) == key)
+                if (ModifierKeys.Conflicts(GetKey(action.Action), key))
                     return true;
             }
             return false;
@@ -73,7 +73,7 @@ namespace TopSpeed.Input
                 return true;
             if (key >= Key.D1 && key <= Key.D8)
                 return true;
-            return key == Key.LeftAlt;
+            return key == Key.LeftAlt || key == Key.BothAlt;
         }
 
         public static string FormatKey(Key key)

@@ -1,4 +1,3 @@
-using Key = TopSpeed.Input.InputKey;
 using System;
 
 namespace TopSpeed.Input
@@ -22,7 +21,7 @@ namespace TopSpeed.Input
                 return controllerSteer;
 
             var keyboardSteer = _settings.KeyboardProgressiveRate == KeyboardProgressiveRate.Off
-                ? (_lastState.IsDown(_kbLeft) ? -100 : (_lastState.IsDown(_kbRight) ? 100 : 0))
+                ? (IsKeyDown(_lastState, _kbLeft) ? -100 : (IsKeyDown(_lastState, _kbRight) ? 100 : 0))
                 : (int)(_simSteer * 100f);
 
             var baseSteering = Math.Abs(keyboardSteer) > Math.Abs(controllerSteer) ? keyboardSteer : controllerSteer;
@@ -49,7 +48,7 @@ namespace TopSpeed.Input
                 return controllerThrottle;
 
             var keyboardThrottle = _settings.KeyboardProgressiveRate == KeyboardProgressiveRate.Off
-                ? (_lastState.IsDown(_kbThrottle) ? 100 : 0)
+                ? (IsKeyDown(_lastState, _kbThrottle) ? 100 : 0)
                 : (int)(_simThrottle * 100f);
 
             return Math.Max(_touchThrottle, Math.Max(controllerThrottle, keyboardThrottle));
@@ -65,7 +64,7 @@ namespace TopSpeed.Input
                 return controllerBrake;
 
             var keyboardBrake = _settings.KeyboardProgressiveRate == KeyboardProgressiveRate.Off
-                ? (_lastState.IsDown(_kbBrake) ? -100 : 0)
+                ? (IsKeyDown(_lastState, _kbBrake) ? -100 : 0)
                 : (int)(_simBrake * -100f);
 
             return Math.Min(_touchBrake, Math.Min(controllerBrake, keyboardBrake));
@@ -95,9 +94,7 @@ namespace TopSpeed.Input
 
         private bool IsClutchKeyDown()
         {
-            if (_kbClutch == Key.LeftShift || _kbClutch == Key.RightShift)
-                return _lastState.IsDown(Key.LeftShift) || _lastState.IsDown(Key.RightShift);
-            return _lastState.IsDown(_kbClutch);
+            return IsKeyDown(_lastState, _kbClutch);
         }
     }
 }

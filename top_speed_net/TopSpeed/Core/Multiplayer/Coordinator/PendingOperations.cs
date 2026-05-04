@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TopSpeed.Network;
 using TopSpeed.Localization;
 
@@ -16,12 +17,13 @@ namespace TopSpeed.Core.Multiplayer
         {
             if (_state.Connection.ConnectTask != null)
             {
-                if (!_state.Connection.ConnectTask.IsCompleted)
+                var connectTask = _state.Connection.ConnectTask;
+                if (connectTask == null)
+                    return true;
+                if (!connectTask.IsCompleted)
                     return true;
 
-                var result = _state.Connection.ConnectTask.IsFaulted || _state.Connection.ConnectTask.IsCanceled
-                    ? ConnectResult.CreateFail(LocalizationService.Mark("Connection attempt failed."))
-                    : _state.Connection.ConnectTask.GetAwaiter().GetResult();
+                var result = BuildConnectFailureResult(connectTask);
                 _lifetime.CompleteConnectOperation();
                 HandleConnectResult(result);
                 return false;
@@ -47,6 +49,27 @@ namespace TopSpeed.Core.Multiplayer
                 return true;
 
             return false;
+        }
+
+        private static ConnectResult BuildConnectFailureResult(Task<ConnectResult> connectTask)
+        {
+            if (connectTask.IsCanceled)
+                return ConnectResult.CreateFail(LocalizationService.Mark("Connection attempt canceled."));
+
+            if (connectTask.IsFaulted)
+            {
+                var message = connectTask.Exception?.GetBaseException().Message;
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    return ConnectResult.CreateFail(LocalizationService.Format(
+                        LocalizationService.Mark("Connection attempt failed: {0}"),
+                        message));
+                }
+
+                return ConnectResult.CreateFail(LocalizationService.Mark("Connection attempt failed."));
+            }
+
+            return connectTask.GetAwaiter().GetResult();
         }
     }
 }

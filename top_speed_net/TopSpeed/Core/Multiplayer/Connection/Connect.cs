@@ -175,7 +175,7 @@ namespace TopSpeed.Core.Multiplayer
                     ? LocalizationService.Mark("The server and client are compatible, but not an exact match.")
                     : notice.Message),
                 new DialogItem(LocalizationService.Format(
-                    LocalizationService.Mark("Your client protocol version: {0}"),
+                    LocalizationService.Mark("Your protocol version: {0}"),
                     notice.ClientVersion)),
                 new DialogItem(LocalizationService.Format(
                     LocalizationService.Mark("Server supported protocol versions: {0} to {1}"),

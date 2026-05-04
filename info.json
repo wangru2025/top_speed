@@ -1,15 +1,17 @@
 {
-  "version": "2026.5.4.2",
-  "serverVersion": "2026.5.4.1",
+  "version": "2026.5.4.3",
+  "serverVersion": "2026.5.4.2",
   "changes": [
-    "Fixed SDL3 on Android ARM 32 and updated SDL3 to latest version (v3.4.8) for all platforms.",
-    "Fixed GTK error on Mac.",
-    "The game now trys to catch startup errors early even if there is no window created. This helps to show managed exceptions early."
+    "Added the ability to choose which modifier keys are being used when you remap a key in the game. This allows you to either use both modifiers, or the left/right.",
+    "Fixed a critical crash with ZDSR by disabling CET compatibility. The game should no longer crash again when ZDSR is installed.",
+    "Fixed some critical crashes when discovering local servers on the network.",
+    "Android now runs in landscape mode"
   ],
   "serverChanges": [
     "Refactored server and made race finish events much more reliable.",
     "Added reconnect support, when a player loses connection suddenly, there is now a 20 seconds reconnect period before fully disposing the player.",
     "Fixed player randomization.",
+    "Fixed a regression where protocol version mismatches did not trigger a hard fail.",
     "Added moderation tools to prevent duplicate names on the server, prevent long names, prevent repeated letters in a name, and control text chat on the server level.",
     "Added initial support for custom tracks.",
     "You can now host your own custom tracks on the server, and other people can see them when they enable custom tracks."

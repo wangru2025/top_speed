@@ -54,6 +54,23 @@ public sealed class ServerHandshakeBehaviorTests
         snapshot.LifecycleState.Should().Be(ConnectionLifecycleState.Connected);
     }
 
+    [Fact]
+    public void Handshake_ShouldReject_WhenNegotiatedProtocolDiffersFromClientVersion()
+    {
+        using var fixture = new HandshakeFixture();
+        fixture.SendProtocolHello(new PacketProtocolHello
+        {
+            ClientVersion = ProtocolProfile.ClientSupported.MinSupported,
+            MinSupported = ProtocolProfile.ClientSupported.MinSupported,
+            MaxSupported = ProtocolProfile.ClientSupported.MaxSupported,
+            ResumePlayerId = 0,
+            ResumeToken = 0
+        });
+
+        Action readRemovedPlayer = () => fixture.Server.GetPlayerSnapshotForTest(1);
+        readRemovedPlayer.Should().Throw<InvalidOperationException>();
+    }
+
     private sealed class HandshakeFixture : IDisposable
     {
         public HandshakeFixture(ServerModerationSettings? moderation = null)
@@ -77,14 +94,19 @@ public sealed class ServerHandshakeBehaviorTests
 
         public void SendProtocolHello()
         {
-            Send(ClientPacketSerializer.WriteProtocolHello(new PacketProtocolHello
+            SendProtocolHello(new PacketProtocolHello
             {
                 ClientVersion = ProtocolProfile.Current,
                 MinSupported = ProtocolProfile.ClientSupported.MinSupported,
                 MaxSupported = ProtocolProfile.ClientSupported.MaxSupported,
                 ResumePlayerId = 0,
                 ResumeToken = 0
-            }));
+            });
+        }
+
+        public void SendProtocolHello(PacketProtocolHello hello)
+        {
+            Send(ClientPacketSerializer.WriteProtocolHello(hello));
         }
 
         public void SendPlayerHello(string name)

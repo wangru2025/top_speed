@@ -1,11 +1,6 @@
 using System;
-using System.Linq;
-using LiteNetLib;
-using TopSpeed.Bots;
-using TopSpeed.Data;
 using TopSpeed.Protocol;
 using TopSpeed.Server.Protocol;
-using TopSpeed.Server.Tracks;
 
 namespace TopSpeed.Server.Network
 {
@@ -16,15 +11,6 @@ namespace TopSpeed.Server.Network
             foreach (var id in room.PlayerIds)
             {
                 if (_players.TryGetValue(id, out var player))
-                    SendTrack(room, player);
-            }
-        }
-
-        private void SendTrackToNotReady(RaceRoom room)
-        {
-            foreach (var id in room.PlayerIds)
-            {
-                if (_players.TryGetValue(id, out var player) && player.State == PlayerState.NotReady)
                     SendTrack(room, player);
             }
         }

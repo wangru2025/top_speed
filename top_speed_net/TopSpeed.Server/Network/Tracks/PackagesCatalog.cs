@@ -48,6 +48,15 @@ namespace TopSpeed.Server.Network
             SendStream(player, PacketSerializer.WriteTrackPackageCatalog(packet ?? new PacketTrackPackageCatalog()), PacketStream.Room);
         }
 
+        private void SendTrackPackageCatalogToRoom(RaceRoom room, PacketTrackPackageCatalog packet)
+        {
+            if (room == null)
+                return;
+
+            var payload = PacketSerializer.WriteTrackPackageCatalog(packet ?? new PacketTrackPackageCatalog());
+            _notify.ToRoom(room, payload, PacketStream.Room);
+        }
+
         private static string ResolveTrackPackageDisplayName(PackageRecord record)
         {
             var metadata = record.Payload?.Metadata;

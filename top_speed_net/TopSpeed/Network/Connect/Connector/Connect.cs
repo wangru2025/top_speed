@@ -37,6 +37,8 @@ namespace TopSpeed.Network
             NetPeer? connectedPeer = null;
             var disconnected = false;
             var disconnectReason = string.Empty;
+            var sawProtocolPacketVersionMismatch = false;
+            var remotePacketVersion = (byte)0;
 
             listener.PeerConnectedEvent += peer => connectedPeer = peer;
             listener.PeerDisconnectedEvent += (_, info) =>
@@ -52,6 +54,13 @@ namespace TopSpeed.Network
             {
                 var data = reader.GetRemainingBytes();
                 reader.Recycle();
+                if (data.Length > 0 && data[0] != ProtocolConstants.Version)
+                {
+                    sawProtocolPacketVersionMismatch = true;
+                    remotePacketVersion = data[0];
+                    return;
+                }
+
                 if (ClientPacketSerializer.TryReadHeader(data, out var command))
                     incoming.Enqueue(new IncomingPacket(command, data, DateTime.UtcNow.Ticks));
             };
@@ -140,8 +149,22 @@ namespace TopSpeed.Network
             }
 
             manager.Stop();
+            if (token.IsCancellationRequested)
+                return ConnectResult.CreateFail(LocalizationService.Mark("Connection attempt canceled."));
+
             if (protocolHelloSent && !protocolNegotiated)
+            {
+                if (sawProtocolPacketVersionMismatch)
+                {
+                    return ConnectResult.CreateFail(LocalizationService.Format(
+                        LocalizationService.Mark("Protocol packet version mismatch. Server uses packet version {0}, client expects {1}. Update your client or server."),
+                        remotePacketVersion,
+                        ProtocolConstants.Version));
+                }
+
                 return ConnectResult.CreateFail(LocalizationService.Mark("No protocol negotiation response from server. The server may be outdated or incompatible."));
+            }
+
             return ConnectResult.CreateFail(LocalizationService.Mark("No response from server. The server may be offline or unreachable."));
         }
     }

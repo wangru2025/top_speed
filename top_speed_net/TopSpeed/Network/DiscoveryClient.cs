@@ -30,15 +30,30 @@ namespace TopSpeed.Network
         {
             var results = new Dictionary<string, ServerInfo>(StringComparer.OrdinalIgnoreCase);
 
-            _client = new UdpClient(AddressFamily.InterNetwork);
-            _client.EnableBroadcast = true;
-            _client.Client.ReceiveBufferSize = 1024 * 1024;
-            _client.Client.SendBufferSize = 1024 * 1024;
-            _client.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+            var client = _client = new UdpClient(AddressFamily.InterNetwork);
+            client.EnableBroadcast = true;
+            client.Client.ReceiveBufferSize = 1024 * 1024;
+            client.Client.SendBufferSize = 1024 * 1024;
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
 
             var request = BuildRequest();
             var broadcast = new IPEndPoint(IPAddress.Broadcast, discoveryPort);
-            await _client.SendAsync(request, request.Length, broadcast);
+            try
+            {
+                await client.SendAsync(request, request.Length, broadcast);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                return Array.Empty<ServerInfo>();
+            }
+            catch (ObjectDisposedException) when (token.IsCancellationRequested)
+            {
+                return Array.Empty<ServerInfo>();
+            }
+            catch (SocketException)
+            {
+                return Array.Empty<ServerInfo>();
+            }
 
             var deadline = DateTime.UtcNow + timeout;
             while (DateTime.UtcNow < deadline && !token.IsCancellationRequested)
@@ -47,13 +62,32 @@ namespace TopSpeed.Network
                 if (remaining <= TimeSpan.Zero)
                     break;
 
-                var delayTask = Task.Delay(remaining, token);
-                var receiveTask = _client.ReceiveAsync();
-                var completed = await Task.WhenAny(receiveTask, delayTask);
-                if (completed != receiveTask)
-                    break;
+                using var receiveCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                receiveCts.CancelAfter(remaining);
 
-                var result = receiveTask.Result;
+                UdpReceiveResult result;
+                try
+                {
+                    result = await client.ReceiveAsync(receiveCts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (ObjectDisposedException) when (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (SocketException ex) when (IsExpectedShutdown(ex, token))
+                {
+                    break;
+                }
+                catch (SocketException)
+                {
+                    // Ignore transient network errors while scanning.
+                    continue;
+                }
+
                 if (TryParseResponse(result.Buffer, result.RemoteEndPoint, out var server))
                 {
                     var key = $"{server.Address}:{server.Port}";
@@ -62,6 +96,22 @@ namespace TopSpeed.Network
             }
 
             return new List<ServerInfo>(results.Values);
+        }
+
+        private static bool IsExpectedShutdown(SocketException exception, CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return true;
+
+            switch (exception.SocketErrorCode)
+            {
+                case SocketError.OperationAborted:
+                case SocketError.Interrupted:
+                case SocketError.NotSocket:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private static byte[] BuildRequest()

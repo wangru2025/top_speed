@@ -96,11 +96,11 @@ namespace TopSpeed.Network
                 else if (packet.Command == Command.ProtocolWelcome && ClientPacketSerializer.TryReadProtocolWelcome(packet.Payload, out var welcome))
                 {
                     state.ProtocolWelcome = welcome;
-                    if (!IsCompatibilityAccepted(welcome.Status))
+                    var acceptedCompatibility = IsCompatibilityAccepted(welcome.Status)
+                        && welcome.NegotiatedVersion == ProtocolProfile.Current;
+                    if (!acceptedCompatibility)
                     {
-                        state.ProtocolFailureMessage = string.IsNullOrWhiteSpace(welcome.Message)
-                            ? LocalizationService.Mark("Connection refused due to protocol mismatch.")
-                            : welcome.Message;
+                        state.ProtocolFailureMessage = ResolveProtocolCompatibilityFailure(welcome);
                         disconnectedDuringPoll = true;
                         continue;
                     }

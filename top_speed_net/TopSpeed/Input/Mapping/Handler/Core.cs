@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Key = TopSpeed.Input.InputKey;
 using TopSpeed.Localization;
 using TopSpeed.Speech;
@@ -13,6 +14,7 @@ namespace TopSpeed.Input
         private readonly DriveSettings _settings;
         private readonly SpeechService _speech;
         private readonly Action _saveSettings;
+        private readonly Action<string, string?, IReadOnlyDictionary<int, string>, bool, string?, Action<bool, int>> _showChoiceDialog;
 
         private bool _mappingActive;
         private InputMappingMode _mappingMode;
@@ -26,13 +28,15 @@ namespace TopSpeed.Input
             DriveInput driveInput,
             DriveSettings settings,
             SpeechService speech,
-            Action saveSettings)
+            Action saveSettings,
+            Action<string, string?, IReadOnlyDictionary<int, string>, bool, string?, Action<bool, int>> showChoiceDialog)
         {
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _driveInput = driveInput ?? throw new ArgumentNullException(nameof(driveInput));
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _speech = speech ?? throw new ArgumentNullException(nameof(speech));
             _saveSettings = saveSettings ?? throw new ArgumentNullException(nameof(saveSettings));
+            _showChoiceDialog = showChoiceDialog ?? throw new ArgumentNullException(nameof(showChoiceDialog));
         }
 
         public bool IsActive => _mappingActive;

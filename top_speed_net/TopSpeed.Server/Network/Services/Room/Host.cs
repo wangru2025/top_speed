@@ -57,7 +57,7 @@ namespace TopSpeed.Server.Network
                     }
                 }
 
-                _owner.SendTrackToNotReady(room);
+                _owner.SendTrackToRoom(room);
                 TouchVersion(room);
                 _owner._notify.RoomLifecycle(room, RoomEventKind.TrackChanged);
             }
@@ -98,7 +98,7 @@ namespace TopSpeed.Server.Network
                         SetTrackData(room, room.TrackName);
                     }
                 }
-                _owner.SendTrackToNotReady(room);
+                _owner.SendTrackToRoom(room);
                 TouchVersion(room);
                 _owner._notify.RoomLifecycle(room, RoomEventKind.LapsChanged);
             }

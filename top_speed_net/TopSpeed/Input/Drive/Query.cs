@@ -56,7 +56,7 @@ namespace TopSpeed.Input
 
         public bool GetRepeatPlayerInfoRequest() => _allowAuxiliaryInput && !_overlayInputBlocked && _touchRepeatPlayerInfo;
 
-        public bool GetFlush() => !_overlayInputBlocked && _lastState.IsDown(_kbFlush);
+        public bool GetFlush() => !_overlayInputBlocked && IsKeyDown(_lastState, _kbFlush);
 
         public bool GetNextPanelRequest() => WasPressed(Key.Tab) && IsCtrlDown() && !IsShiftDown();
 
@@ -84,7 +84,7 @@ namespace TopSpeed.Input
         {
             if (_overlayInputBlocked)
                 return false;
-            return _lastState.IsDown(key) && !_prevState.IsDown(key);
+            return IsKeyDown(_lastState, key) && !IsKeyDown(_prevState, key);
         }
 
         private DriveIntentState CaptureIntentState()
@@ -152,7 +152,7 @@ namespace TopSpeed.Input
                 return false;
 
             var active = meta.KeyboardMode == TriggerMode.Hold
-                ? _lastState.IsDown(key)
+                ? IsKeyDown(_lastState, key)
                 : WasPressed(key);
             if (!active && meta.AllowNumpadEnterAlias && key == Key.Return)
                 active = WasPressed(Key.NumberPadEnter);
@@ -236,6 +236,17 @@ namespace TopSpeed.Input
                 return binding.Meta;
 
             return new DriveIntentMeta(InputScope.Auxiliary, TriggerMode.Press, TriggerMode.Press);
+        }
+
+        private static bool IsKeyDown(InputState state, Key key)
+        {
+            if (ModifierKeys.TryGetGroup(key, out var group) && ModifierKeys.IsBothKey(key))
+            {
+                return state.IsDown(ModifierKeys.GetLeftKey(group))
+                    || state.IsDown(ModifierKeys.GetRightKey(group));
+            }
+
+            return state.IsDown(key);
         }
     }
 }

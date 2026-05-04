@@ -31,6 +31,7 @@ namespace TopSpeed.Server.Network
                 if (_owner.TryGetTrackPackage(hash, out _))
                 {
                     _owner.SendTrackPackageUploadResult(player, packet.UploadId, TrackPackageUploadStatus.Reused, hash, LocalizationService.Mark("Track package already exists on server."));
+                    _owner.SendTrackPackageCatalogToRoom(room, _owner.BuildTrackPackageCatalog());
                     return;
                 }
 
@@ -131,6 +132,7 @@ namespace TopSpeed.Server.Network
                 }
 
                 _owner.SendTrackPackageUploadResult(player, packet.UploadId, TrackPackageUploadStatus.Accepted, computedHash, LocalizationService.Mark("Track package uploaded successfully."));
+                _owner.SendTrackPackageCatalogToRoom(room, _owner.BuildTrackPackageCatalog());
             }
         }
     }

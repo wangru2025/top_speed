@@ -4621,4 +4621,538 @@ msgstr ""
 msgid "gear_ratios must be non-increasing from gear 1 to last gear."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsi
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Gears.cs:33
+#, csharp-format
+msgid "gear_ratios[{0}] is outside allowed range 0.20 to 8.00."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\Buffers.cs:165
+msgid "global chat"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:67
+msgid "hard"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:100
+msgid ""
+"high_speed_steer_full_kph must be greater than high_speed_steer_start_kph."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:30
+msgid "imperial"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:129
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Helpers.cs:132
+msgid "keyboard"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:95
+msgid "lap count change request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:46
+msgid "laps only"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Transmission\Modes.cs:53
+msgid ""
+"launch_coupling_max must be greater than or equal to launch_coupling_min in "
+"[transmission_atc]."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Transmission\Modes.cs:181
+msgid ""
+"launch_coupling_max must be greater than or equal to launch_coupling_min in "
+"[transmission_cvt]."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Transmission\Modes.cs:104
+msgid ""
+"launch_coupling_max must be greater than or equal to launch_coupling_min in "
+"[transmission_dct]."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:62
+msgid "launch_rpm must not exceed rev_limiter."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Domain\Online\Map.cs:9
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:12
+msgid "main room"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:30
+msgid "max_rpm must be greater than or equal to idle_rpm."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:29
+msgid "metric"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Parse\Powertrain.cs:49
+msgid ""
+"min_coupled_rise_full_rpm_per_s must be greater than or equal to "
+"min_coupled_rise_idle_rpm_per_s."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Settings\Manager\Load.cs:101
+msgid "missing"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:11
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:124
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:173
+msgid "none"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:66
+msgid "normal"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Items\CheckBox.cs:36
+msgid "not checked"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:19
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:45
+msgid "off"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:47
+msgid "on"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:64
+msgid "one-on-one"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:27
+msgid "online players request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:165
+msgid "panel"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:54
+msgid "peak_torque_rpm must be between idle_rpm and rev_limiter."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:63
+msgid "percent"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:90
+#, csharp-format
+msgid "pitch_curve_exponent must be between {0} and {1}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:105
+msgid "player count change request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:148
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Single\Session\Results.cs:50
+#, csharp-format
+msgid "player {0}"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:270
+msgid "race preparation withdrawal"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:82
+msgid "race start request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:66
+msgid "race with bots"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:65
+msgid "race without bots"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:66
+msgid "racing"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Items\RadioButton.cs:47
+msgid "radio button"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Transmission\Modes.cs:163
+msgid ""
+"ratio_max must be greater than or equal to ratio_min in [transmission_cvt]."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:150
+msgid "ready state"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:118
+msgid "remove bot request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:38
+msgid "rev_limiter must be between idle_rpm and max_rpm."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\Buffers.cs:166
+msgid "room chat"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Create.cs:120
+msgid "room create request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\Buffers.cs:168
+msgid "room events"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:37
+msgid "room join request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:61
+msgid "room leave request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:24
+msgid "room list request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:102
+msgid "shift on demand"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:78
+msgid "shift_freq must be between idle_freq and top_freq."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Transmission.cs:35
+msgid ""
+"shift_on_demand is ignored because supported_types does not include an "
+"automatic transmission type."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Items\Slider.cs:78
+msgid "slider"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Speech.cs:101
+msgid "speech only"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Speech.cs:103
+msgid "speech with braille"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:27
+msgid "speed dependent"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:259
+msgid "start_area cannot be empty."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Items\Switch.cs:36
+msgid "switch"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Transmission\Modes.cs:172
+msgid ""
+"target_rpm_high must be greater than or equal to target_rpm_low in "
+"[transmission_cvt]."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Tires.cs:35
+msgid "tire_aspect must be between 5 and 150."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Tires.cs:20
+msgid "tire_circumference must be between 0.2 and 5.0 meters."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Tires.cs:37
+msgid "tire_rim must be between 4 and 30 inches."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Tires.cs:33
+msgid "tire_width must be between 20 and 450 mm."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Validation\Core.cs:70
+msgid "top_freq must be greater than or equal to idle_freq."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Policy\PolicyValidation.cs:22
+#, csharp-format
+msgid "top_speed_gear must be within 1..{0}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:88
+msgid "track change request"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:124
+msgid "track upload cancel"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:153
+msgid "track upload chunk"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:168
+msgid "track upload completion"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:105
+msgid "track upload start"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Issues.cs:26
+msgid "unknown"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:202
+#, csharp-format
+msgid "{0:F0} feet traveled"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:183
+#, csharp-format
+msgid "{0:F0} kilometers per hour, {1:F0} RPM, {2:F0} horsepower"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:210
+#, csharp-format
+msgid "{0:F0} meters traveled"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:175
+#, csharp-format
+msgid "{0:F0} miles per hour, {1:F0} RPM, {2:F0} horsepower"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:208
+#, csharp-format
+msgid "{0:F1} kilometers traveled"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\CoreRequests.cs:200
+#, csharp-format
+msgid "{0:F1} miles traveled"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Dialogs\Announcement.cs:9
+#, csharp-format
+msgid "{0}  dialog"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Dialogs\Announcement.cs:10
+#, csharp-format
+msgid "{0}  dialog  {1}"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Localization\ClientLanguages.cs:31
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Speech.cs:181
+#, csharp-format
+msgid "{0} ({1})"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:26
+#, csharp-format
+msgid "{0} ({1}, {2})"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Connect.cs:160
+#, csharp-format
+msgid "{0} Message of the day: {1}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:49
+#, csharp-format
+msgid "{0} and {1}"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:93
+#, csharp-format
+msgid "{0} changed ready state."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:86
+#, csharp-format
+msgid "{0} crashes."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:71
+#, csharp-format
+msgid "{0} game with {1} people, maximum {2} players"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Controls.cs:217
+#, csharp-format
+msgid "{0} has no shortcuts."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:28
+#, csharp-format
+msgid "{0} joined the current room."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Issues.cs:31
+#, csharp-format
+msgid "{0} key '{1}': {2}"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:292
+#, csharp-format
+msgid "{0} lap"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:293
+#, csharp-format
+msgid "{0} laps"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:35
+#, csharp-format
+msgid "{0} left the current room."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:39
+#, csharp-format
+msgid "{0} milliseconds"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:24
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:37
+#, csharp-format
+msgid "{0} minute"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:25
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:38
+#, csharp-format
+msgid "{0} minutes"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Policy\PolicyValidation.cs:76
+#, csharp-format
+msgid "{0} must be a float between 0 and 2 seconds."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Build\Policy\PolicyValidation.cs:90
+#, csharp-format
+msgid "{0} must be between {1} and {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:169
+#, csharp-format
+msgid "{0} panel"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:48
+#, csharp-format
+msgid "{0} people are connected."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:297
+#, csharp-format
+msgid "{0} player"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:298
+#, csharp-format
+msgid "{0} players"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:31
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:42
+#, csharp-format
+msgid "{0} second"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:32
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:43
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:104
+#, csharp-format
+msgid "{0} seconds"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\Handler\Controller.cs:42
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\Handler\Keyboard.cs:31
+#: D:\top_speed\top_speed_net\TopSpeed\Shortcuts\Mapping.cs:107
+#, csharp-format
+msgid "{0} set to {1}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:42
+#, csharp-format
+msgid "{0} was added to the current room."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:49
+#, csharp-format
+msgid "{0} was removed from the current room."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Panels\RadioPanel\Feedback.cs:35
+#, csharp-format
+msgid "{0}%"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:188
+#, csharp-format
+msgid "{0}, host"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:82
+#, csharp-format
+msgid "{0}, in progress"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:84
+#, csharp-format
+msgid "{0}, room is full"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:76
+#, csharp-format
+msgid "{0}, {1} game with {2} people, maximum {3} players"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:161
+#, csharp-format
+msgid "{0}, {1}, {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:153
+#, csharp-format
+msgid "{0}, {1}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:74
+#, csharp-format
+msgid "{0}: completed in position {1} with a time of {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:68
+#, csharp-format
+msgid "{0}: crossed in position {1} after {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:62
+#, csharp-format
+msgid "{0}: finished in position {1} with {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:61
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:67
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:73
+#, csharp-format
+msgid "{0}: position {1}, time {2}."
+msgstr ""

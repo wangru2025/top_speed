@@ -93,7 +93,7 @@ msgstr "调整当前语音引擎的语速。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\RoomTexts.cs:7
 msgid "All players are ready. Starting game."
-msgstr "所有玩家已准备就绪。开始游戏。"
+msgstr "所有玩家已就绪，游戏开始。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Volume.cs:50
 msgid "Ambients and sound sources"
@@ -982,7 +982,7 @@ msgstr "不允许在部分 [{1}] 中重复键 '{0}'。"
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Validate.cs:71
 #, csharp-format
 msgid "Duplicate room id '{0}'."
-msgstr "重复的房间ID '{0}'。"
+msgstr "重复的房间 ID「{0}」。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Parsing\Core\Load\Sections.cs:33
 #, csharp-format
@@ -1002,7 +1002,7 @@ msgstr "重复的声源ID '{0}'。"
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Validate.cs:66
 #, csharp-format
 msgid "Duplicate weather id '{0}'."
-msgstr "重复的天气ID '{0}'。"
+msgstr "重复的天气 ID「{0}」。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\SavedServers\Menu.cs:29
 msgid "Edit"
@@ -1082,11 +1082,11 @@ msgstr "输入用于手动连接的默认服务器端口。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Connection\Prompt.cs:45
 msgid "Enter the server IP address or domain."
-msgstr "输入服务器IP地址或域名。"
+msgstr "输入服务器 IP 地址或域名。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\SavedServers\Draft.cs:29
 msgid "Enter the server IP address or host name."
-msgstr "输入服务器IP地址或域名。"
+msgstr "输入服务器 IP 地址或主机名。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\SavedServers\Draft.cs:12
 msgid "Enter the server name."
@@ -1426,12 +1426,12 @@ msgstr "无效端口。请输入1到65535之间的数字。"
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:300
 #, csharp-format
 msgid "Invalid room override value '{0}' for key '{1}'."
-msgstr "键 '{1}' 的无效房间覆盖值 '{0}'。"
+msgstr "键「{1}」的房间覆盖值「{0}」无效。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:186
 #, csharp-format
 msgid "Invalid room value '{0}' for key '{1}'."
-msgstr "键 '{1}' 的无效房间值 '{0}'。"
+msgstr "键「{1}」的房间值「{0}」无效。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:60
 #, csharp-format
@@ -2875,7 +2875,7 @@ msgstr "赛道段长度 '{0}' 低于最小值 {1}，将被限制。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:87
 msgid "Segment room id cannot be empty."
-msgstr "赛道段房间ID不能为空。"
+msgstr "赛道段房间 ID 不能为空。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:100
 msgid "Segment sound source list cannot be empty."
@@ -2883,7 +2883,7 @@ msgstr "赛道段声源列表不能为空。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:68
 msgid "Segment weather profile id cannot be empty."
-msgstr "路段天气配置文件ID不能为空。"
+msgstr "赛道段天气配置 ID 不能为空。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Drive\Tracks.cs:41
 msgid "Select a custom track"
@@ -3162,14 +3162,14 @@ msgstr "声音 '{0}' 引用了 start_area '{1}'，但不存在匹配的赛道段
 #, csharp-format
 msgid ""
 "Sound key '{0}' contains invalid path '{1}'. Paths must be track-relative."
-msgstr "声音键 '{0}' 包含无效路径 '{1}'。路径必须是相对于赛道的路径。"
+msgstr "音效键「{0}」包含无效路径「{1}」。路径必须是相对于赛道文件夹的。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:213
 #, csharp-format
 msgid ""
 "Sound key '{0}' must be a track-relative path and cannot escape the track "
 "folder."
-msgstr "声音键 '{0}' 必须是相对于赛道的路径，且不能逃出赛道文件夹。"
+msgstr "音效键「{0}」必须是相对于赛道文件夹的路径，且不能跳出赛道文件夹。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:221
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Data\Tracks\Parser\Rules.cs:237
@@ -3638,7 +3638,7 @@ msgstr "此对话框无法取消。您需要选择一个选项。"
 
 #: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\RoomTexts.cs:8
 msgid "This game room is unavailable because it is full."
-msgstr "此游戏室已满，无法添加。"
+msgstr "房间已满，无法加入。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Network\Connect\Connector\Poll.cs:57
 msgid ""

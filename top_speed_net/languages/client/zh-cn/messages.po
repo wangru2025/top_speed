@@ -67,7 +67,7 @@ msgstr "操作"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Items\MenuItem.cs:116
 msgid "Actions available."
-msgstr "可用操作"
+msgstr "有可用操作。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:41
 msgid "Add"
@@ -306,7 +306,7 @@ msgstr "绑定意图缺失，已被忽略。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Controls.cs:70
 msgid "Both"
-msgstr "双向"
+msgstr "两者"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:88
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:106
@@ -2239,7 +2239,7 @@ msgstr "只有房主可以开始游戏。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\RoomUi\Online.cs:22
 msgid "Only you are connected right now."
-msgstr "目前只有您已连接。"
+msgstr "目前只有你在线。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Rooms.cs:54
 msgid "Open global chat"
@@ -3022,7 +3022,7 @@ msgstr "设置弯道提示根据车速播报的提前时间。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:61
 msgid "Sets how many computer-controlled cars will race against you."
-msgstr "设置有多少计算机控制的汽车将与你比赛。"
+msgstr "设置有多少辆电脑控制的赛车将与你比赛。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Drive.cs:56
 msgid ""
@@ -4265,7 +4265,7 @@ msgstr "你跟护栏打了个招呼就走了。"
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:11
 #, csharp-format
 msgid "You joined {0}."
-msgstr "您加入了{0}。"
+msgstr "你已加入 {0}。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:112
 msgid "You kept finding the wrong line and proving it."
@@ -4277,7 +4277,7 @@ msgstr "你退出了比赛准备，回到了房间控制界面。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:17
 msgid "You left the game room."
-msgstr "你离开了游戏房间。"
+msgstr "你已离开对局房间。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:98
 msgid "You made it through with one clear mistake and no excuse."
@@ -4740,12 +4740,12 @@ msgstr "{0}钟{1}"
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:86
 #, csharp-format
 msgid "{0} crashes."
-msgstr "{0} 次碰撞。"
+msgstr "发生了 {0} 次碰撞。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:71
 #, csharp-format
 msgid "{0} game with {1} people, maximum {2} players"
-msgstr "{0}，当前 {1} 人，最多 {2} 名玩家"
+msgstr "{0} 对局，当前 {1} 人，最多 {2} 名玩家"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Dispatch\Room.cs:41
 #, csharp-format
@@ -4760,7 +4760,7 @@ msgstr "{0} 没有快捷键。"
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:28
 #, csharp-format
 msgid "{0} joined the current room."
-msgstr "{0} 加入了当前房间。"
+msgstr "{0} 加入了此房间。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Issues.cs:31
 #, csharp-format
@@ -4770,7 +4770,7 @@ msgstr "{0} 键 '{1}'：{2}"
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:35
 #, csharp-format
 msgid "{0} left the current room."
-msgstr "{0} 离开了当前房间。"
+msgstr "{0} 离开了此房间。"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:39
 #, csharp-format
@@ -4868,7 +4868,7 @@ msgstr "{0}，房间已满"
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:76
 #, csharp-format
 msgid "{0}, {1} game with {2} people, maximum {3} players"
-msgstr "{0}，{1} 游戏，{2} 人，最多 {3} 名玩家"
+msgstr "{0} 对局“{1}”，当前 {2} 人，最多 {3} 名玩家"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:161
 #, csharp-format

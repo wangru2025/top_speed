@@ -1,8 +1,5 @@
 name: Release Build
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 on:
   push:
     branches: [ "china-release" ]
@@ -26,7 +23,7 @@ jobs:
       changes_md: ${{ steps.release_info.outputs.changes_md }}
       server_changes_md: ${{ steps.release_info.outputs.server_changes_md }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -141,7 +138,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -191,7 +188,7 @@ jobs:
           "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -231,7 +228,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -293,7 +290,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -350,7 +347,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -411,7 +408,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -435,7 +432,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -515,7 +512,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -533,13 +530,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-assets-*
           path: release-assets
@@ -584,7 +581,7 @@ jobs:
           git push -f origin release-build
 
       - name: Clean Existing Release Assets
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const tag = "release-build";
@@ -621,7 +618,7 @@ jobs:
             }
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: release-build
           name: Release Build v${{ needs.metadata.outputs.version }}

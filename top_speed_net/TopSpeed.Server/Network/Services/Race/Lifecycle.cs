@@ -49,8 +49,11 @@ namespace TopSpeed.Server.Network
                     return;
 
                 var minimumParticipants = GetMinimumParticipantsToStart(room);
-                if (GetRoomParticipantCount(room) < minimumParticipants)
+                var activeHumanIds = _owner.EnumerateActiveHumanPlayerIds(room).ToArray();
+                var activeParticipantsForBarrier = activeHumanIds.Length + room.Bots.Count;
+                if (activeParticipantsForBarrier < minimumParticipants)
                 {
+                    _owner._startBarrierBlockedInsufficientActive++;
                     TransitionState(room, RoomRaceState.Lobby);
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
@@ -60,7 +63,7 @@ namespace TopSpeed.Server.Network
                         LocalizationService.Mark("Race prepare cancelled: room={0} \"{1}\", participants={2}, minStart={3}, capacity={4}."),
                         room.Id,
                         room.Name,
-                        GetRoomParticipantCount(room),
+                        activeParticipantsForBarrier,
                         minimumParticipants,
                         room.PlayersToStart));
                     return;
@@ -68,22 +71,26 @@ namespace TopSpeed.Server.Network
 
                 var readyHumans = CountReadyHumans(room);
                 var skippedHumans = CountSkippedHumans(room);
-                var unresolvedHumans = Math.Max(0, room.PlayerIds.Count - (readyHumans + skippedHumans));
+                var unresolvedHumans = Math.Max(0, activeHumanIds.Length - (readyHumans + skippedHumans));
                 if (unresolvedHumans > 0)
                 {
+                    _owner._startBarrierBlockedMissingReady++;
                     _owner._logger.Debug(LocalizationService.Format(
                         LocalizationService.Mark("Waiting for loadouts: room={0}, ready={1}, skipped={2}, totalHumans={3}."),
                         room.Id,
                         readyHumans,
                         skippedHumans,
-                        room.PlayerIds.Count));
+                        activeHumanIds.Length));
                     return;
                 }
 
-                var activeHumanParticipantIds = room.PendingLoadouts.Keys.Where(id => room.PlayerIds.Contains(id)).ToArray();
+                var activeHumanParticipantIds = activeHumanIds
+                    .Where(id => room.PendingLoadouts.ContainsKey(id))
+                    .ToArray();
                 var activeParticipants = activeHumanParticipantIds.Length + room.Bots.Count;
                 if (activeParticipants < minimumParticipants)
                 {
+                    _owner._startBarrierBlockedInsufficientActive++;
                     TransitionState(room, RoomRaceState.Lobby);
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
@@ -100,6 +107,7 @@ namespace TopSpeed.Server.Network
 
                 if (!_owner.EnsureRoomTrackPackageReady(room, activeHumanParticipantIds))
                 {
+                    _owner._startBarrierBlockedTrackNotReady++;
                     _owner._logger.Debug(LocalizationService.Format(
                         LocalizationService.Mark("Waiting for track package readiness: room={0}, trackHash={1}, ready={2}/{3}."),
                         room.Id,
@@ -165,7 +173,9 @@ namespace TopSpeed.Server.Network
                     return;
 
                 _owner._room.ShuffleNumbersForRaceStart(room);
-                var activePlayerIds = room.PlayerIds.Where(id => room.PendingLoadouts.ContainsKey(id)).ToList();
+                var activePlayerIds = _owner.EnumerateActiveHumanPlayerIds(room)
+                    .Where(id => room.PendingLoadouts.ContainsKey(id))
+                    .ToList();
                 if (!room.TrackSelected || room.TrackData == null)
                     _owner._room.SetTrackData(room, room.TrackName);
 
@@ -329,12 +339,12 @@ namespace TopSpeed.Server.Network
 
             private int CountReadyHumans(RaceRoom room)
             {
-                return room.PendingLoadouts.Keys.Count(id => room.PlayerIds.Contains(id));
+                return room.PendingLoadouts.Keys.Count(id => _owner.IsRoomMemberActive(room, id));
             }
 
             private int CountSkippedHumans(RaceRoom room)
             {
-                return room.PrepareSkips.Count(id => room.PlayerIds.Contains(id));
+                return room.PrepareSkips.Count(id => _owner.IsRoomMemberActive(room, id));
             }
         }
     }

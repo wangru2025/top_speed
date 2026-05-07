@@ -32,17 +32,21 @@ namespace TopSpeed.Core.Multiplayer
             return string.IsNullOrWhiteSpace(text) ? null : text;
         }
 
-        private static List<MenuItem> BuildHistoryItems(IReadOnlyList<string> entries)
+        private List<MenuItem> BuildHistoryItems(IReadOnlyList<string> entries)
         {
             var items = new List<MenuItem>();
             if (entries == null || entries.Count == 0)
             {
-                items.Add(new MenuItem(LocalizationService.Mark("No messages yet."), MenuAction.None));
+                var emptyText = LocalizationService.Mark("No messages yet.");
+                items.Add(new MenuItem(emptyText, MenuAction.None, onActivate: () => CopyHistoryItemFromScreen(emptyText)));
                 return items;
             }
 
             for (var i = 0; i < entries.Count; i++)
-                items.Add(new MenuItem(entries[i], MenuAction.None));
+            {
+                var entry = entries[i] ?? string.Empty;
+                items.Add(new MenuItem(entry, MenuAction.None, onActivate: () => CopyHistoryItemFromScreen(entry)));
+            }
 
             return items;
         }

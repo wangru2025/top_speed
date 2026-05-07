@@ -22,7 +22,10 @@ public sealed class ServerHandshakeBehaviorTests
         snapshot.Handshake.Should().Be(HandshakeState.AwaitingPlayerHello);
 
         fixture.Send(ClientPacketSerializer.WriteGeneral(Command.Ping));
-        fixture.Server.GetStressSnapshotForTest().PlayerCount.Should().Be(0);
+        fixture.Server.GetStressSnapshotForTest().PlayerCount.Should().Be(1);
+
+        var afterPing = fixture.Server.GetPlayerSnapshotForTest(1);
+        afterPing.Handshake.Should().Be(HandshakeState.AwaitingPlayerHello);
     }
 
     [Fact]
@@ -55,7 +58,7 @@ public sealed class ServerHandshakeBehaviorTests
     }
 
     [Fact]
-    public void Handshake_ShouldReject_WhenNegotiatedProtocolDiffersFromClientVersion()
+    public void Handshake_ShouldAllow_WhenNegotiatedProtocolDiffersFromClientVersion()
     {
         using var fixture = new HandshakeFixture();
         fixture.SendProtocolHello(new PacketProtocolHello
@@ -67,8 +70,43 @@ public sealed class ServerHandshakeBehaviorTests
             ResumeToken = 0
         });
 
-        Action readRemovedPlayer = () => fixture.Server.GetPlayerSnapshotForTest(1);
-        readRemovedPlayer.Should().Throw<InvalidOperationException>();
+        var pending = fixture.Server.GetPlayerSnapshotForTest(1);
+        pending.Handshake.Should().Be(HandshakeState.AwaitingPlayerHello);
+        pending.LifecycleState.Should().Be(ConnectionLifecycleState.ProtocolNegotiated);
+
+        fixture.SendPlayerHello("pilot");
+        var completed = fixture.Server.GetPlayerSnapshotForTest(1);
+        completed.Handshake.Should().Be(HandshakeState.Complete);
+    }
+
+    [Fact]
+    public void Resume_ShouldFallbackToNewSession_WhenRemoteIpDoesNotMatch()
+    {
+        using var fixture = new HandshakeFixture();
+        fixture.SendProtocolHello();
+        fixture.SendPlayerHello("pilot");
+
+        var original = fixture.Server.GetPlayerSnapshotForTest(1);
+        fixture.Server.DisconnectPeerForTest(new IPEndPoint(IPAddress.Loopback, 30101));
+
+        var mismatchedEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.2"), 40101);
+        fixture.SendProtocolHello(new PacketProtocolHello
+        {
+            ClientVersion = ProtocolProfile.Current,
+            MinSupported = ProtocolProfile.ClientSupported.MinSupported,
+            MaxSupported = ProtocolProfile.ClientSupported.MaxSupported,
+            ResumePlayerId = original.PlayerId,
+            ResumeToken = original.ResumeToken
+        }, mismatchedEndpoint);
+        fixture.SendPlayerHello("pilot", mismatchedEndpoint);
+
+        Action readOldPlayer = () => fixture.Server.GetPlayerSnapshotForTest(1);
+        readOldPlayer.Should().Throw<InvalidOperationException>();
+
+        var fallbackSnapshot = fixture.Server.GetPlayerSnapshotForTest(2);
+        fallbackSnapshot.Handshake.Should().Be(HandshakeState.Complete);
+        fallbackSnapshot.LifecycleState.Should().Be(ConnectionLifecycleState.Connected);
+        fixture.Server.GetStressSnapshotForTest().PlayerCount.Should().Be(1);
     }
 
     private sealed class HandshakeFixture : IDisposable
@@ -92,6 +130,11 @@ public sealed class ServerHandshakeBehaviorTests
             Server.InjectPacketForTest(Endpoint, payload);
         }
 
+        public void Send(byte[] payload, IPEndPoint endPoint)
+        {
+            Server.InjectPacketForTest(endPoint, payload);
+        }
+
         public void SendProtocolHello()
         {
             SendProtocolHello(new PacketProtocolHello
@@ -109,9 +152,19 @@ public sealed class ServerHandshakeBehaviorTests
             Send(ClientPacketSerializer.WriteProtocolHello(hello));
         }
 
+        public void SendProtocolHello(PacketProtocolHello hello, IPEndPoint endPoint)
+        {
+            Send(ClientPacketSerializer.WriteProtocolHello(hello), endPoint);
+        }
+
         public void SendPlayerHello(string name)
         {
             Send(WritePlayerHello(name));
+        }
+
+        public void SendPlayerHello(string name, IPEndPoint endPoint)
+        {
+            Send(WritePlayerHello(name), endPoint);
         }
 
         public void Dispose()

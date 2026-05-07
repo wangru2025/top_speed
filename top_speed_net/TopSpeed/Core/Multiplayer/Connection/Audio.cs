@@ -10,6 +10,11 @@ namespace TopSpeed.Core.Multiplayer
 {
     internal sealed partial class MultiplayerCoordinator
     {
+        public void PlayConnectedSound()
+        {
+            PlayNetworkSound("connected.ogg");
+        }
+
         private void StartConnectingPulse()
         {
             StopConnectingPulse();

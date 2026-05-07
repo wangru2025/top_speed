@@ -128,10 +128,18 @@ namespace TopSpeed.Server.Network
                 if (player == null || room == null)
                     return;
 
+                var replayedAny = false;
                 foreach (var entry in RoomEventJournal.ReplayAfter(room, afterSequence))
                 {
+                    replayedAny = true;
                     ToPlayer(player, entry.Payload, entry.Stream);
                 }
+
+                if (afterSequence > 0 && !replayedAny && room.EventSequence > afterSequence)
+                    _owner._replayGapCount++;
+
+                // Replay is followed by full room snapshot to converge drift deterministically.
+                SendRoomState(player, room);
             }
 
             public void ProtocolToRoom(RaceRoom room, string text)

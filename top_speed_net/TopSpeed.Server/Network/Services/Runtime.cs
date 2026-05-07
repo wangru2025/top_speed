@@ -15,14 +15,20 @@ namespace TopSpeed.Server.Network
 
             public void Update(float deltaSeconds)
             {
+                _owner._transport.Pump();
+
                 lock (_owner._lock)
                 {
+                    _owner.EnsureServerLoopThreadUnsafe();
+                    _owner.DrainCommandQueueUnsafe();
+
                     if (deltaSeconds <= 0f)
                         return;
 
                     _owner._simulationAccumulator += deltaSeconds;
                     while (_owner._simulationAccumulator >= ServerSimulationStepSeconds)
                     {
+                        _owner.DrainCommandQueueUnsafe();
                         _owner._simulationAccumulator -= ServerSimulationStepSeconds;
                         _owner._simulationTick++;
                         _owner._cleanupAccumulator += ServerSimulationStepSeconds;
@@ -44,6 +50,8 @@ namespace TopSpeed.Server.Network
                             _owner.BroadcastPlayerData();
                         }
                     }
+
+                    _owner.DrainCommandQueueUnsafe();
                 }
             }
         }

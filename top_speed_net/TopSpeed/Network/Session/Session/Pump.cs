@@ -20,11 +20,24 @@ namespace TopSpeed.Network
                 // Keep session alive even if the transport reports a transient poll error.
             }
 
+            EvaluateHeartbeatTimeout();
             QueueSyntheticDisconnectIfNeeded();
         }
 
         private void SendKeepAlive()
         {
+            var nextClientTick = ++_heartbeatTick;
+            var heartbeat = ClientPacketSerializer.WriteClientHeartbeat(new PacketClientHeartbeat
+            {
+                PlayerId = PlayerId,
+                SessionId = ResumeToken,
+                ClientTick = nextClientTick,
+                LastReceivedServerTick = _lastServerHeartbeatTick
+            });
+            _lastHeartbeatProbeUtc = DateTime.UtcNow;
+            if (_sender.TrySend(heartbeat, PacketStream.Control, PacketDeliveryKind.Unreliable))
+                return;
+
             _sender.TrySend(
                 new[] { ProtocolConstants.Version, (byte)Command.KeepAlive },
                 PacketStream.Control,

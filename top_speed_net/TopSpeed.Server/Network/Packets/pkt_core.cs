@@ -11,10 +11,54 @@ namespace TopSpeed.Server.Network
     {
         private void RegisterCorePackets()
         {
-            _pktReg.Add("core", Command.KeepAlive, (_, _, _) => { });
+            _pktReg.Add("core", Command.KeepAlive, (player, _, _) =>
+            {
+                player.LastHeartbeatUtc = DateTime.UtcNow;
+            });
             _pktReg.Add("core", Command.Ping, (player, _, _) =>
             {
+                player.LastHeartbeatUtc = DateTime.UtcNow;
                 SendStream(player, PacketSerializer.WriteGeneral(Command.Pong), PacketStream.Control);
+            });
+            _pktReg.Add("core", Command.ClientHeartbeat, (player, payload, endPoint) =>
+            {
+                if (!PacketSerializer.TryReadClientHeartbeat(payload, out var heartbeat))
+                {
+                    PacketFail(endPoint, Command.ClientHeartbeat);
+                    return;
+                }
+
+                if (heartbeat.PlayerId != 0 && heartbeat.PlayerId != player.Id)
+                {
+                    _logger.Debug(LocalizationService.Format(
+                        LocalizationService.Mark("Ignored client heartbeat with mismatched player id from {0}: expected={1}, received={2}."),
+                        endPoint,
+                        player.Id,
+                        heartbeat.PlayerId));
+                    return;
+                }
+
+                if (heartbeat.SessionId != 0 && heartbeat.SessionId != player.ResumeToken)
+                {
+                    _logger.Debug(LocalizationService.Format(
+                        LocalizationService.Mark("Ignored client heartbeat with mismatched session id from {0}: expected={1}, received={2}."),
+                        endPoint,
+                        player.ResumeToken,
+                        heartbeat.SessionId));
+                    return;
+                }
+
+                player.LastClientHeartbeatTick = heartbeat.ClientTick;
+                player.LastClientObservedServerTick = heartbeat.LastReceivedServerTick;
+                if (player.Handshake == HandshakeState.Complete)
+                    player.MarkActive();
+
+                var response = PacketSerializer.WriteServerHeartbeat(new PacketServerHeartbeat
+                {
+                    ServerTick = _simulationTick,
+                    LastReceivedClientTick = heartbeat.ClientTick
+                });
+                SendStream(player, response, PacketStream.Control, PacketDeliveryKind.Unreliable);
             });
             _pktReg.Add("core", Command.PlayerHello, (player, payload, endPoint) =>
             {
@@ -37,7 +81,13 @@ namespace TopSpeed.Server.Network
         {
             var key = endpoint.ToString();
             if (_endpointIndex.TryGetValue(key, out var id) && _players.TryGetValue(id, out var existing))
+            {
+                _endpointEpochIndex[key] = existing.ConnectionEpoch;
                 return existing;
+            }
+
+            _endpointIndex.Remove(key);
+            _endpointEpochIndex.TryRemove(key, out _);
 
             if (_players.Count >= _config.MaxPlayers && !HasDisconnectedResumeCandidate())
             {
@@ -52,6 +102,7 @@ namespace TopSpeed.Server.Network
             var player = new PlayerConnection(endpoint, playerId, CreateResumeToken());
             _players[playerId] = player;
             _endpointIndex[key] = playerId;
+            _endpointEpochIndex[key] = player.ConnectionEpoch;
 
             _logger.Debug(LocalizationService.Format(
                 LocalizationService.Mark("Connection pending protocol negotiation: playerId={0}, endpoint={1}."),

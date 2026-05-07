@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Sockets;
 using LiteNetLib;
 using TopSpeed.Localization;
 using TopSpeed.Protocol;
@@ -21,6 +22,8 @@ namespace TopSpeed.Network
             PacketProtocolWelcome? protocolWelcome,
             string? protocolFailureMessage,
             string disconnectReason,
+            ClientDisconnectClassification? disconnectClassification,
+            SocketError? transportSocketError,
             string sanitizedCallSign,
             IPEndPoint endpoint)
         {
@@ -96,8 +99,7 @@ namespace TopSpeed.Network
                 else if (packet.Command == Command.ProtocolWelcome && ClientPacketSerializer.TryReadProtocolWelcome(packet.Payload, out var welcome))
                 {
                     state.ProtocolWelcome = welcome;
-                    var acceptedCompatibility = IsCompatibilityAccepted(welcome.Status)
-                        && welcome.NegotiatedVersion == ProtocolProfile.Current;
+                    var acceptedCompatibility = IsCompatibilityAccepted(welcome.Status);
                     if (!acceptedCompatibility)
                     {
                         state.ProtocolFailureMessage = ResolveProtocolCompatibilityFailure(welcome);
@@ -134,7 +136,12 @@ namespace TopSpeed.Network
             if (disconnectedDuringPoll)
             {
                 manager.Stop();
-                state.Result = BuildDisconnectedResult(state.ProtocolFailureMessage, state.ProtocolWelcome, disconnectReason);
+                state.Result = BuildDisconnectedResult(
+                    state.ProtocolFailureMessage,
+                    state.ProtocolWelcome,
+                    disconnectReason,
+                    disconnectClassification,
+                    transportSocketError);
                 return state;
             }
 
@@ -158,15 +165,40 @@ namespace TopSpeed.Network
         private static ConnectResult BuildDisconnectedResult(
             string? protocolFailureMessage,
             PacketProtocolWelcome? protocolWelcome,
-            string disconnectReason)
+            string disconnectReason,
+            ClientDisconnectClassification? disconnectClassification,
+            SocketError? transportSocketError)
         {
             if (!string.IsNullOrWhiteSpace(protocolFailureMessage))
-                return ConnectResult.CreateFail(protocolFailureMessage!);
+            {
+                return ConnectResult.CreateFail(
+                    protocolFailureMessage!,
+                    MultiplayerDisconnectReason.ProtocolError,
+                    MultiplayerConnectionState.ProtocolError);
+            }
 
             if (protocolWelcome != null && !IsCompatibilityAccepted(protocolWelcome.Status))
             {
                 var fallback = BuildProtocolRefusalFallback(protocolWelcome);
-                return ConnectResult.CreateFail(fallback);
+                return ConnectResult.CreateFail(
+                    fallback,
+                    MultiplayerDisconnectReason.ProtocolError,
+                    MultiplayerConnectionState.ProtocolError);
+            }
+
+            if (disconnectClassification.HasValue)
+            {
+                var mapped = disconnectClassification.Value;
+                var message = mapped.Message;
+                if (transportSocketError.HasValue)
+                {
+                    message = LocalizationService.Format(
+                        LocalizationService.Mark("{0} Socket error: {1}."),
+                        message,
+                        transportSocketError.Value);
+                }
+
+                return ConnectResult.CreateFail(message, mapped.Reason, mapped.State);
             }
 
             var reason = string.IsNullOrWhiteSpace(disconnectReason)
@@ -174,7 +206,10 @@ namespace TopSpeed.Network
                 : LocalizationService.Format(
                     LocalizationService.Mark("The server refused the connection. Details: {0}."),
                     disconnectReason);
-            return ConnectResult.CreateFail(reason);
+            return ConnectResult.CreateFail(
+                reason,
+                MultiplayerDisconnectReason.Unknown,
+                MultiplayerConnectionState.ConnectionLostSuspected);
         }
 
         private struct ConnectPollState

@@ -122,14 +122,6 @@ namespace TopSpeed.Network
 
         private static string ResolveProtocolCompatibilityFailure(PacketProtocolWelcome welcome)
         {
-            if (welcome.NegotiatedVersion != ProtocolProfile.Current)
-            {
-                return LocalizationService.Format(
-                    LocalizationService.Mark("Protocol mismatch. Your client uses protocol version {0}, but the server negotiated {1}. Please update client or server so both use the same protocol version."),
-                    ProtocolProfile.Current,
-                    welcome.NegotiatedVersion);
-            }
-
             if (!string.IsNullOrWhiteSpace(welcome.Message))
                 return welcome.Message!;
 
@@ -140,7 +132,7 @@ namespace TopSpeed.Network
         {
             var range = new ProtocolRange(welcome.ServerMinSupported, welcome.ServerMaxSupported);
             return LocalizationService.Format(
-                LocalizationService.Mark("Your protocol version is {0}. This server supports protocol versions {1}."),
+                LocalizationService.Mark("Your client protocol version is {0}. This server supports protocol versions {1}."),
                 ProtocolProfile.Current,
                 range);
         }

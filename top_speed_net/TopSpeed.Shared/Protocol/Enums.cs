@@ -120,7 +120,9 @@ namespace TopSpeed.Protocol
         TrackPackageTransferEnd = 65,
         TrackPackageReady = 66,
         TrackPackageCatalogRequest = 67,
-        TrackPackageCatalog = 68
+        TrackPackageCatalog = 68,
+        ClientHeartbeat = 69,
+        ServerHeartbeat = 70
     }
 
     public enum ProtocolMessageCode : byte
@@ -216,12 +218,51 @@ namespace TopSpeed.Protocol
 
     public enum ConnectionLifecycleState : byte
     {
-        Connected = 0,
-        Suspended = 1,
-        Reconnecting = 2,
-        Resumed = 3,
-        Expired = 4,
-        Closed = 5
+        TransportConnected = 0,
+        ProtocolNegotiated = 1,
+        PlayerIdentified = 2,
+        SessionReady = 3,
+        InRoom = 4,
+        Active = 5,
+        SuspectedLost = 6,
+        Reconnecting = 7,
+        Resumed = 8,
+        Expired = 9,
+        Closed = 10,
+
+        // Backward-compatible aliases for previous lifecycle labels.
+        Connected = Active,
+        Suspended = SuspectedLost
+    }
+
+    public enum MultiplayerConnectionState : byte
+    {
+        Connecting = 0,
+        Connected = 1,
+        ConnectionLostSuspected = 2,
+        DisconnectedCleanly = 3,
+        TimedOut = 4,
+        Kicked = 5,
+        ServerShutdown = 6,
+        ProtocolError = 7
+    }
+
+    public enum MultiplayerDisconnectReason : byte
+    {
+        Unknown = 0,
+        DisconnectedCleanly = 1,
+        TimedOut = 2,
+        Kicked = 3,
+        ServerShutdown = 4,
+        ProtocolError = 5,
+        ConnectionFailed = 6,
+        ConnectionRejected = 7,
+        NetworkError = 8,
+        HostUnreachable = 9,
+        UnknownHost = 10,
+        PeerNotFound = 11,
+        LocalDisconnect = 12,
+        ReconnectRequested = 13
     }
 
     public enum ProtocolCompatStatus : byte

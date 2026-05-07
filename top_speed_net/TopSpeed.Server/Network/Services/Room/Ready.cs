@@ -27,6 +27,11 @@ namespace TopSpeed.Server.Network
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.NotInRoom, LocalizationService.Mark("You are not in this game room."));
                     return;
                 }
+                if (!_owner.IsRoomMemberActive(room, player.Id))
+                {
+                    _owner.SendProtocolMessage(player, ProtocolMessageCode.Failed, LocalizationService.Mark("You are temporarily disconnected from this game room."));
+                    return;
+                }
 
                 var selectedCar = RaceServer.NormalizeNetworkCar(ready.Car);
                 player.Car = selectedCar;
@@ -66,6 +71,11 @@ namespace TopSpeed.Server.Network
                 if (!room.PlayerIds.Contains(player.Id))
                 {
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.NotInRoom, LocalizationService.Mark("You are not in this game room."));
+                    return;
+                }
+                if (!_owner.IsRoomMemberActive(room, player.Id))
+                {
+                    _owner.SendProtocolMessage(player, ProtocolMessageCode.Failed, LocalizationService.Mark("You are temporarily disconnected from this game room."));
                     return;
                 }
 

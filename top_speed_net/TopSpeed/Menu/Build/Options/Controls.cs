@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TopSpeed.Input;
 using TopSpeed.Shortcuts;
@@ -9,8 +10,11 @@ namespace TopSpeed.Menu
     {
         private const string ShortcutGroupsMenuId = "options_controls_shortcuts";
         private const string ShortcutBindingsMenuId = "options_controls_shortcut_bindings";
+        private const int ResetShortcutsYesChoiceId = 1;
+        private const int ResetShortcutsNoChoiceId = 2;
 
         private string _activeShortcutGroupId = string.Empty;
+        private string _activeShortcutGroupName = string.Empty;
 
         private MenuScreen BuildOptionsControlsMenu()
         {
@@ -196,6 +200,7 @@ namespace TopSpeed.Menu
         {
             var groups = _menu.GetShortcutGroups();
             var items = new List<MenuItem>();
+
             for (var i = 0; i < groups.Count; i++)
             {
                 var group = groups[i];
@@ -205,12 +210,19 @@ namespace TopSpeed.Menu
                     onActivate: () => OpenShortcutGroup(group)));
             }
 
+            items.Add(new MenuItem(
+                LocalizationService.Mark("Reset all menu shortcuts to defaults"),
+                MenuAction.None,
+                onActivate: ShowResetAllShortcutBindingsDialog,
+                hint: LocalizationService.Mark("Restore every menu shortcut binding to its default value.")));
+
             _menu.UpdateItems(ShortcutGroupsMenuId, items, preserveSelection: true);
         }
 
         private void OpenShortcutGroup(ShortcutGroup group)
         {
             _activeShortcutGroupId = group.Id;
+            _activeShortcutGroupName = group.Name;
             if (!RebuildShortcutBindingsMenu())
             {
                 _ui.SpeakMessage(LocalizationService.Format(
@@ -233,6 +245,7 @@ namespace TopSpeed.Menu
             }
 
             var bindings = _menu.GetShortcutBindings(_activeShortcutGroupId);
+
             for (var i = 0; i < bindings.Count; i++)
             {
                 var binding = bindings[i];
@@ -248,6 +261,15 @@ namespace TopSpeed.Menu
                     hint: description));
             }
 
+            if (bindings.Count > 0)
+            {
+                items.Add(new MenuItem(
+                    LocalizationService.Mark("Reset shortcuts in this menu"),
+                    MenuAction.None,
+                    onActivate: ShowResetActiveShortcutGroupDialog,
+                    hint: LocalizationService.Mark("Restore only the shortcuts in this menu to their default values.")));
+            }
+
             if (items.Count == 0)
                 return false;
 
@@ -255,16 +277,123 @@ namespace TopSpeed.Menu
             return true;
         }
 
+        private void ShowResetAllShortcutBindingsDialog()
+        {
+            _ui.ShowChoiceDialog(
+                LocalizationService.Mark("Reset all menu shortcuts?"),
+                LocalizationService.Mark("This will restore every menu shortcut binding to its default value."),
+                BuildResetShortcutChoiceItems(
+                    LocalizationService.Mark("Yes"),
+                    LocalizationService.Mark("No")),
+                cancelable: true,
+                cancelLabel: LocalizationService.Mark("Cancel"),
+                onResult: HandleResetAllShortcutBindingsDialog);
+        }
+
+        private void HandleResetAllShortcutBindingsDialog(ChoiceDialogResult result)
+        {
+            if (result.IsCanceled || result.ChoiceId == ResetShortcutsNoChoiceId)
+                return;
+            if (result.ChoiceId != ResetShortcutsYesChoiceId)
+                return;
+
+            _menu.ResetShortcutBindings();
+            _settingsActions.UpdateSetting(() =>
+            {
+                _settings.ShortcutKeyBindings = new Dictionary<string, InputKey>(StringComparer.Ordinal);
+                _settings.ShortcutModifierBindings = new Dictionary<string, ShortcutModifiers>(StringComparer.Ordinal);
+            });
+
+            RebuildShortcutBindingsMenu();
+            RebuildShortcutGroupsMenu();
+            _ui.SpeakMessage(LocalizationService.Mark("All menu shortcuts were reset to defaults."));
+        }
+
+        private void ShowResetActiveShortcutGroupDialog()
+        {
+            if (string.IsNullOrWhiteSpace(_activeShortcutGroupId))
+                return;
+
+            var groupName = GetActiveShortcutGroupName();
+            _ui.ShowChoiceDialog(
+                LocalizationService.Mark("Reset shortcuts in this menu?"),
+                LocalizationService.Format(
+                    LocalizationService.Mark("This will restore all shortcuts in {0} to their default values."),
+                    groupName),
+                BuildResetShortcutChoiceItems(
+                    LocalizationService.Mark("Yes"),
+                    LocalizationService.Mark("No")),
+                cancelable: true,
+                cancelLabel: LocalizationService.Mark("Cancel"),
+                onResult: HandleResetActiveShortcutGroupDialog);
+        }
+
+        private void HandleResetActiveShortcutGroupDialog(ChoiceDialogResult result)
+        {
+            if (result.IsCanceled || result.ChoiceId == ResetShortcutsNoChoiceId)
+                return;
+            if (result.ChoiceId != ResetShortcutsYesChoiceId)
+                return;
+            if (string.IsNullOrWhiteSpace(_activeShortcutGroupId))
+                return;
+
+            var bindings = _menu.GetShortcutBindings(_activeShortcutGroupId);
+            if (bindings.Count == 0)
+            {
+                _ui.SpeakMessage(LocalizationService.Mark("This shortcut menu has no bindings to reset."));
+                return;
+            }
+
+            if (!_menu.ResetShortcutBindingsInGroup(_activeShortcutGroupId))
+                return;
+
+            _settingsActions.UpdateSetting(() =>
+            {
+                _settings.ShortcutKeyBindings ??= new Dictionary<string, InputKey>(StringComparer.Ordinal);
+                _settings.ShortcutModifierBindings ??= new Dictionary<string, ShortcutModifiers>(StringComparer.Ordinal);
+
+                for (var i = 0; i < bindings.Count; i++)
+                {
+                    var actionId = bindings[i].ActionId;
+                    _settings.ShortcutKeyBindings.Remove(actionId);
+                    _settings.ShortcutModifierBindings.Remove(actionId);
+                }
+            });
+
+            RebuildShortcutBindingsMenu();
+            _ui.SpeakMessage(LocalizationService.Format(
+                LocalizationService.Mark("Shortcuts in {0} were reset to defaults."),
+                GetActiveShortcutGroupName()));
+        }
+
+        private string GetActiveShortcutGroupName()
+        {
+            var groupName = _activeShortcutGroupName;
+            if (string.IsNullOrWhiteSpace(groupName))
+                groupName = LocalizationService.Mark("this menu");
+
+            return LocalizationService.Translate(groupName);
+        }
+
+        private static IReadOnlyDictionary<int, string> BuildResetShortcutChoiceItems(string yesLabel, string noLabel)
+        {
+            return new Dictionary<int, string>
+            {
+                [ResetShortcutsYesChoiceId] = yesLabel,
+                [ResetShortcutsNoChoiceId] = noLabel
+            };
+        }
+
         private string GetShortcutKeyText(string actionId, InputKey fallbackKey)
         {
             if (_menu.TryGetShortcutBinding(actionId, out var binding))
-                return FormatShortcutKey(binding.Key);
-            return FormatShortcutKey(fallbackKey);
+                return FormatShortcutKey(binding.Key, binding.Modifiers);
+            return FormatShortcutKey(fallbackKey, ShortcutModifiers.None);
         }
 
-        private static string FormatShortcutKey(InputKey key)
+        private static string FormatShortcutKey(InputKey key, ShortcutModifiers modifiers)
         {
-            return InputDisplayText.Key(key);
+            return ShortcutBindingText.Format(key, modifiers);
         }
 
         private static string FormatLabelValue(string label, string value)

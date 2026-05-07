@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
+using LiteNetLib;
 using TopSpeed.Localization;
 using TopSpeed.Protocol;
 using TopSpeed.Server.Protocol;
@@ -14,20 +16,34 @@ namespace TopSpeed.Server.Network
             public void CleanupExpiredConnections()
             {
                 var now = DateTime.UtcNow;
-                var expiredConnected = _owner._players.Values
-                    .Where(p => p.Connected && now - p.LastSeenUtc > ConnectionTimeout)
+                var heartbeatMissed = _owner._players.Values
+                    .Where(p => p.Connected
+                                && p.Handshake == HandshakeState.Complete
+                                && now - p.LastHeartbeatUtc > HeartbeatMissWindow)
                     .Select(p => p.Id)
                     .ToList();
 
-                foreach (var id in expiredConnected)
+                foreach (var id in heartbeatMissed)
                 {
                     if (!_owner._players.TryGetValue(id, out var player))
                         continue;
 
-                    if (player.RoomId.HasValue && player.Handshake == HandshakeState.Complete)
-                        SuspendConnection(player, sendDisconnectPacket: false, reason: "timeout");
-                    else
-                        RemoveConnection(player, notifyRoom: true, sendDisconnectPacket: true, reason: "timeout");
+                    SuspendConnection(player, sendDisconnectPacket: false, reason: "heartbeat_missed");
+                }
+
+                var expiredPreAuth = _owner._players.Values
+                    .Where(p => p.Connected
+                                && p.Handshake != HandshakeState.Complete
+                                && now - p.LastHeartbeatUtc > ConnectTimeout)
+                    .Select(p => p.Id)
+                    .ToList();
+
+                foreach (var id in expiredPreAuth)
+                {
+                    if (!_owner._players.TryGetValue(id, out var player))
+                        continue;
+
+                    RemoveConnection(player, notifyRoom: true, sendDisconnectPacket: true, reason: "connect_timeout");
                 }
 
                 var expiredDisconnected = _owner._players.Values
@@ -47,25 +63,90 @@ namespace TopSpeed.Server.Network
                 _owner.CleanupLiveStreams();
             }
 
-            public void HandlePeerDisconnected(IPEndPoint endpoint)
+            public void HandlePeerDisconnected(
+                IPEndPoint endpoint,
+                uint endpointEpoch,
+                TransportDisconnectClassification disconnectClassification,
+                DisconnectReason transportDisconnectReason,
+                SocketError transportSocketError)
             {
-                lock (_owner._lock)
+                var key = endpoint.ToString();
+                if (endpointEpoch != 0)
                 {
-                    var key = endpoint.ToString();
-                    if (!_owner._endpointIndex.TryGetValue(key, out var id))
+                    if (!_owner._endpointEpochIndex.TryGetValue(key, out var expectedEpoch)
+                        || expectedEpoch != endpointEpoch)
+                    {
+                        _owner._epochRejectCount++;
                         return;
-                    if (!_owner._players.TryGetValue(id, out var player))
-                        return;
-
-                    if (player.RoomId.HasValue && player.Handshake == HandshakeState.Complete)
-                        SuspendConnection(player, sendDisconnectPacket: false, reason: "peer_disconnect");
-                    else
-                        RemoveConnection(player, notifyRoom: true, sendDisconnectPacket: false, reason: "peer_disconnect");
+                    }
                 }
+
+                if (!_owner._endpointIndex.TryGetValue(key, out var id))
+                    return;
+                if (!_owner._players.TryGetValue(id, out var player))
+                    return;
+
+                player.SetDisconnectOutcome(disconnectClassification.Reason, disconnectClassification.State);
+
+                if (player.Handshake == HandshakeState.Complete)
+                {
+                    if (disconnectClassification.State == MultiplayerConnectionState.DisconnectedCleanly)
+                    {
+                        RemoveConnection(
+                            player,
+                            notifyRoom: true,
+                            sendDisconnectPacket: false,
+                            reason: disconnectClassification.SessionReasonCode);
+                    }
+                    else if (disconnectClassification.State == MultiplayerConnectionState.ProtocolError)
+                    {
+                        RemoveConnection(
+                            player,
+                            notifyRoom: true,
+                            sendDisconnectPacket: false,
+                            reason: disconnectClassification.SessionReasonCode);
+                    }
+                    else
+                    {
+                        SuspendConnection(
+                            player,
+                            sendDisconnectPacket: false,
+                            reason: disconnectClassification.SessionReasonCode,
+                            disconnectReason: disconnectClassification.Reason,
+                            connectionState: disconnectClassification.State);
+                    }
+                }
+                else
+                {
+                    RemoveConnection(
+                        player,
+                        notifyRoom: true,
+                        sendDisconnectPacket: false,
+                        reason: disconnectClassification.SessionReasonCode);
+                }
+
+                _owner._logger.Debug(LocalizationService.Format(
+                    LocalizationService.Mark("Transport disconnect observed: player={0}, endpoint={1}, transportReason={2}, socketError={3}, mappedReason={4}, mappedState={5}."),
+                    player.Id,
+                    endpoint,
+                    transportDisconnectReason,
+                    transportSocketError,
+                    disconnectClassification.Reason,
+                    disconnectClassification.State));
             }
 
-            private void SuspendConnection(PlayerConnection player, bool sendDisconnectPacket, string reason)
+            private void SuspendConnection(
+                PlayerConnection player,
+                bool sendDisconnectPacket,
+                string reason,
+                MultiplayerDisconnectReason disconnectReason = MultiplayerDisconnectReason.TimedOut,
+                MultiplayerConnectionState connectionState = MultiplayerConnectionState.ConnectionLostSuspected)
             {
+                if (player == null)
+                    return;
+                if (ConnectionRecoveryRules.IsRecoverableState(player.LifecycleState))
+                    return;
+
                 var roomId = player.RoomId;
                 RaceRoom? room = null;
                 if (roomId.HasValue)
@@ -79,7 +160,10 @@ namespace TopSpeed.Server.Network
                     _owner.StopLive(player, room, notifyRoom: true);
                     _owner.ResetMediaState(player, room);
                     _owner._trackPackageUploads.Remove(player.Id);
+                    room.PendingLoadouts.Remove(player.Id);
+                    room.PrepareSkips.Remove(player.Id);
                     room.TrackReadyPlayers.Remove(player.Id);
+                    _owner.SetRoomMemberPresence(room, player.Id, RoomMemberPresenceState.Suspended);
                     var payload = PacketSerializer.WritePlayer(Command.PlayerDisconnected, player.Id, player.PlayerNumber);
                     _owner._notify.ToRoomExcept(room, player.Id, payload, PacketStream.RaceEvent);
                     _owner._notify.ToRoomExcept(room, player.Id, payload, PacketStream.Room);
@@ -89,10 +173,14 @@ namespace TopSpeed.Server.Network
                         LocalizationService.Format(
                             LocalizationService.Mark("{0} lost connection. Waiting for reconnect."),
                             RaceServer.DescribePlayer(player)));
+                    _owner._notify.BroadcastRoomState(room);
                 }
 
                 _owner._endpointIndex.Remove(player.EndPoint.ToString());
+                _owner._endpointEpochIndex.TryRemove(player.EndPoint.ToString(), out _);
                 player.MarkSuspended();
+                player.SetDisconnectOutcome(disconnectReason, connectionState);
+                _owner._heartbeatSuspicionCount++;
                 if (room != null && room.HostId == player.Id)
                     MigrateHostAfterSuspend(room, player.Id);
                 _owner._logger.Info(LocalizationService.Format(
@@ -132,6 +220,10 @@ namespace TopSpeed.Server.Network
                 bool announcePresenceDisconnect = true)
             {
                 var roomId = player.RoomId;
+                var resolvedOutcome = ResolveDisconnectOutcome(reason);
+                player.SetDisconnectOutcome(resolvedOutcome.Reason, resolvedOutcome.State);
+                var disconnectReason = player.LastDisconnectReason;
+                var disconnectState = player.GameConnectionState;
                 player.MarkClosed();
                 if (player.RoomId.HasValue)
                     _owner._room.Leave(player, notifyRoom);
@@ -147,13 +239,16 @@ namespace TopSpeed.Server.Network
                 }
 
                 _owner._endpointIndex.Remove(player.EndPoint.ToString());
+                _owner._endpointEpochIndex.TryRemove(player.EndPoint.ToString(), out _);
                 _owner._players.Remove(player.Id);
                 _owner._logger.Info(LocalizationService.Format(
-                    LocalizationService.Mark("Connection removed: player={0}, endpoint={1}, room={2}, reason={3}."),
+                    LocalizationService.Mark("Connection removed: player={0}, endpoint={1}, room={2}, reason={3}, mappedReason={4}, mappedState={5}."),
                     player.Id,
                     player.EndPoint,
                     roomId?.ToString() ?? LocalizationService.Translate(LocalizationService.Mark("none")),
-                    reason));
+                    reason,
+                    disconnectReason,
+                    disconnectState));
             }
         }
     }

@@ -118,22 +118,13 @@ namespace TopSpeed.Server.Network
                 var evt = CreateRoomEvent(room, kind);
                 var payload = PacketSerializer.WriteRoomEvent(evt);
                 RoomEventJournal.Record(room, Command.RoomEvent, evt.EventSequence, payload, PacketStream.Room);
-                var roomOnly =
-                    kind == RoomEventKind.HostChanged ||
-                    kind == RoomEventKind.TrackChanged ||
-                    kind == RoomEventKind.LapsChanged ||
-                    kind == RoomEventKind.PlayersToStartChanged ||
-                    kind == RoomEventKind.GameRulesChanged ||
-                    kind == RoomEventKind.RacePaused ||
-                    kind == RoomEventKind.RaceResumed;
-
-                if (roomOnly)
+                if (kind == RoomEventKind.RoomCreated)
                 {
-                    ToRoom(room, payload, PacketStream.Room);
+                    ToLobby(payload, PacketStream.Room);
                     return;
                 }
 
-                ToAll(payload, PacketStream.Room);
+                ToRoom(room, payload, PacketStream.Room);
             }
 
             public void RoomParticipant(RaceRoom room, RoomEventKind kind, uint playerId, byte playerNumber, PlayerState state, string name)
@@ -147,20 +138,6 @@ namespace TopSpeed.Server.Network
                 RoomEventJournal.Record(room, Command.RoomEvent, evt.EventSequence, payload, PacketStream.Room);
 
                 ToRoom(room, payload, PacketStream.Room);
-            }
-
-            public void RoomRemoved(uint roomId, string roomName)
-            {
-                var evt = new PacketRoomEvent
-                {
-                    RoomId = roomId,
-                    RoomVersion = 0,
-                    Kind = RoomEventKind.RoomRemoved,
-                    RoomName = roomName ?? string.Empty
-                };
-
-                var payload = PacketSerializer.WriteRoomEvent(evt);
-                ToAll(payload, PacketStream.Room);
             }
 
             private PacketRoomSummary BuildRoomSummary(RaceRoom room)

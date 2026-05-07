@@ -122,6 +122,15 @@ namespace TopSpeed.Core.Settings
 
         [DataMember(Name = "key")]
         public int? Key { get; set; }
+
+        [DataMember(Name = "shift")]
+        public bool? Shift { get; set; }
+
+        [DataMember(Name = "control")]
+        public bool? Control { get; set; }
+
+        [DataMember(Name = "alt")]
+        public bool? Alt { get; set; }
     }
 
     [DataContract]

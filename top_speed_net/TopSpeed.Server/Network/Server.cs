@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using Bogus;
 using TopSpeed.Protocol;
 using TopSpeed.Server.Logging;
@@ -17,12 +19,14 @@ namespace TopSpeed.Server.Network
         private const float BotAiLookaheadMeters = 30.0f;
         private const float BotHornMinDistanceMeters = 100.0f;
         private const float BotBackfirePulseSeconds = 0.1f;
-        private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan ConnectTimeout = ConnectionRecoveryRules.DefaultConnectTimeout;
+        private static readonly TimeSpan HeartbeatMissWindow = ConnectionRecoveryRules.DefaultHeartbeatMissWindow;
         private static readonly TimeSpan ReconnectGrace = ConnectionRecoveryRules.DefaultReconnectGrace;
 
         private readonly RaceServerConfig _config;
         private readonly Logger _logger;
         private readonly object _lock = new object();
+        private readonly ServerCommandBus _commandBus = new ServerCommandBus();
         private readonly UdpServerTransport _transport;
         private readonly ServerPktReg _pktReg;
         private readonly Session _session;
@@ -35,6 +39,7 @@ namespace TopSpeed.Server.Network
         private readonly Notify _notify;
         private readonly Dictionary<uint, PlayerConnection> _players = new Dictionary<uint, PlayerConnection>();
         private readonly Dictionary<string, uint> _endpointIndex = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, uint> _endpointEpochIndex = new ConcurrentDictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<uint, RaceRoom> _rooms = new Dictionary<uint, RaceRoom>();
         private readonly Dictionary<string, PackageRecord> _trackPackageCache = new Dictionary<string, PackageRecord>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<uint, PackageUploadSession> _trackPackageUploads = new Dictionary<uint, PackageUploadSession>();
@@ -42,12 +47,12 @@ namespace TopSpeed.Server.Network
         private readonly Random _random = new Random();
 
         private uint _nextPlayerId = 1;
-        private uint _nextRoomId = 1;
         private uint _nextBotId = 1_000_000;
         private float _simulationAccumulator;
         private float _snapshotAccumulator;
         private float _cleanupAccumulator;
         private uint _simulationTick;
+        private int _serverLoopThreadId;
         private int _authorityDropsPlayerState;
         private int _authorityDropsPlayerData;
         private int _authorityDropsPlayerStarted;
@@ -65,6 +70,22 @@ namespace TopSpeed.Server.Network
         private int _botFinishEvents;
         private int _botHornOvertakeEvents;
         private int _botHornBumpEvents;
+        private int _droppedPacketsStaleEpoch;
+        private int _droppedPacketsInvalidHeader;
+        private int _droppedPacketsVersionMismatch;
+        private int _droppedPacketsUnknownCommand;
+        private int _replayGapCount;
+        private int _epochRejectCount;
+        private int _heartbeatSuspicionCount;
+        private int _startBarrierBlockedInsufficientActive;
+        private int _startBarrierBlockedMissingReady;
+        private int _startBarrierBlockedTrackNotReady;
+        private int _transportNetworkErrorCount;
+        private int _transportLastLatencyMs;
+        private int _transportMaxLatencyMs;
+        private long _transportLatencyTotalMs;
+        private int _transportLatencySampleCount;
+        private int _transportPeerAddressChangedCount;
 
         public RaceServer(RaceServerConfig config, Logger logger)
         {
@@ -85,6 +106,9 @@ namespace TopSpeed.Server.Network
             RegisterPackets();
             _transport.PacketReceived += OnPacket;
             _transport.PeerDisconnected += OnPeerDisconnected;
+            _transport.NetworkError += OnNetworkError;
+            _transport.PeerLatencyUpdated += OnPeerLatencyUpdated;
+            _transport.PeerAddressChanged += OnPeerAddressChanged;
         }
     }
 }

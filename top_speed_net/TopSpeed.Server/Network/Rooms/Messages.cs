@@ -50,7 +50,7 @@ namespace TopSpeed.Server.Network
 
             foreach (var player in _players.Values)
             {
-                if (player.Handshake != HandshakeState.Complete)
+                if (!player.Connected || player.Handshake != HandshakeState.Complete)
                     continue;
                 SendStream(player, payload, PacketStream.Chat);
             }
@@ -92,7 +92,7 @@ namespace TopSpeed.Server.Network
             {
                 if (!_players.TryGetValue(playerId, out var player))
                     continue;
-                if (player.Handshake != HandshakeState.Complete)
+                if (!player.Connected || player.Handshake != HandshakeState.Complete)
                     continue;
                 SendStream(player, payload, PacketStream.Chat);
             }

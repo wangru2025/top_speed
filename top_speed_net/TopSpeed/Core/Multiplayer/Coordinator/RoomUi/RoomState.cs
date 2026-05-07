@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TopSpeed.Core.Multiplayer.Chat;
+using TopSpeed.Protocol;
 
 namespace TopSpeed.Core.Multiplayer
 {
@@ -28,6 +29,7 @@ namespace TopSpeed.Core.Multiplayer
                 if (roomControlsChanged)
                     AddRoomMenuRebuildEffects(effects);
 
+                AddLoadoutCatchUpEffects(effects);
                 effects.Add(PacketEffect.RebuildRoomPlayers());
                 _owner.DispatchPacketEffects(effects);
             }
@@ -71,6 +73,23 @@ namespace TopSpeed.Core.Multiplayer
                 effects.Add(PacketEffect.RebuildRoomControls());
                 effects.Add(PacketEffect.RebuildRoomOptions());
                 effects.Add(PacketEffect.RebuildRoomGameRules());
+            }
+
+            private void AddLoadoutCatchUpEffects(List<PacketEffect> effects)
+            {
+                var inLoadoutMenu = _owner._menu.CurrentId == MultiplayerMenuKeys.LoadoutVehicle
+                    || _owner._menu.CurrentId == MultiplayerMenuKeys.LoadoutTransmission;
+                var shouldBeInLoadout = _owner._state.Rooms.CurrentRoom.InRoom
+                    && _owner._state.Rooms.CurrentRoom.RaceState == RoomRaceState.Preparing;
+
+                if (shouldBeInLoadout && !inLoadoutMenu)
+                {
+                    effects.Add(PacketEffect.BeginRaceLoadout());
+                    return;
+                }
+
+                if (!shouldBeInLoadout && inLoadoutMenu)
+                    effects.Add(PacketEffect.ShowRoot(MultiplayerMenuKeys.RoomControls));
             }
         }
     }

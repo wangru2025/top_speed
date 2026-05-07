@@ -38,6 +38,7 @@ namespace TopSpeed.Core.Multiplayer
         private readonly DriveSettings _settings;
         private readonly MultiplayerConnector _connector;
         private readonly Action<string, string?, SpeechService.SpeakFlag, bool, Action<TextInputResult>> _promptTextInput;
+        private readonly Func<string, bool> _trySetClipboardText;
         private readonly Action _saveSettings;
         private readonly Action _enterMenuState;
         private readonly Action<MultiplayerSession> _setSession;
@@ -62,6 +63,7 @@ namespace TopSpeed.Core.Multiplayer
             DriveSettings settings,
             MultiplayerConnector connector,
             Action<string, string?, SpeechService.SpeakFlag, bool, Action<TextInputResult>> promptTextInput,
+            Func<string, bool> trySetClipboardText,
             Action saveSettings,
             Action enterMenuState,
             Action<MultiplayerSession> setSession,
@@ -78,6 +80,7 @@ namespace TopSpeed.Core.Multiplayer
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _connector = connector ?? throw new ArgumentNullException(nameof(connector));
             _promptTextInput = promptTextInput ?? throw new ArgumentNullException(nameof(promptTextInput));
+            _trySetClipboardText = trySetClipboardText ?? throw new ArgumentNullException(nameof(trySetClipboardText));
             _saveSettings = saveSettings ?? throw new ArgumentNullException(nameof(saveSettings));
             _enterMenuState = enterMenuState ?? throw new ArgumentNullException(nameof(enterMenuState));
             _setSession = setSession ?? throw new ArgumentNullException(nameof(setSession));

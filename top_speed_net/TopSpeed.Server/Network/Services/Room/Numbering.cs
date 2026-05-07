@@ -86,11 +86,15 @@ namespace TopSpeed.Server.Network
                 }
 
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
-                _owner._logger.Debug(LocalizationService.Format(
-                    LocalizationService.Mark("Room numbers reassigned: room={0}, players={1}, bots={2}."),
-                    room.Id,
-                    changedPlayers.Count,
-                    changedBots.Count));
+                var changedCount = changedPlayers.Count + changedBots.Count;
+                if (changedCount > 1 || changedBots.Count > 0)
+                {
+                    _owner._logger.Debug(LocalizationService.Format(
+                        LocalizationService.Mark("Room numbers reassigned: room={0}, players={1}, bots={2}."),
+                        room.Id,
+                        changedPlayers.Count,
+                        changedBots.Count));
+                }
             }
 
             public void ShuffleNumbersForRaceStart(RaceRoom room)

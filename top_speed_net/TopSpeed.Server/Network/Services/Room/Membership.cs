@@ -11,16 +11,17 @@ namespace TopSpeed.Server.Network
         {
             public void Create(PlayerConnection player, PacketRoomCreate packet)
             {
+                var roomId = _owner.AllocateRoomId();
                 var roomName = (packet.RoomName ?? string.Empty).Trim();
                 if (string.IsNullOrWhiteSpace(roomName))
-                    roomName = LocalizationService.Format(LocalizationService.Mark("Game {0}"), _owner._nextRoomId);
+                    roomName = LocalizationService.Format(LocalizationService.Mark("Game {0}"), roomId);
                 if (roomName.Length > ProtocolConstants.MaxRoomNameLength)
                     roomName = roomName.Substring(0, ProtocolConstants.MaxRoomNameLength);
 
                 var roomType = RoomRules.NormalizeType(packet.RoomType);
                 var playersToStart = RoomRules.NormalizePlayersToStart(roomType, packet.PlayersToStart);
 
-                var room = new RaceRoom(_owner._nextRoomId++, roomName, roomType, playersToStart);
+                var room = new RaceRoom(roomId, roomName, roomType, playersToStart);
                 _owner._rooms[room.Id] = room;
                 SetTrackData(room, room.TrackName);
                 JoinPlayer(player, room);
@@ -96,6 +97,11 @@ namespace TopSpeed.Server.Network
                 {
                     player.RoomId = null;
                     player.Live = null;
+                    if (player.LifecycleState != ConnectionLifecycleState.Closed
+                        && player.LifecycleState != ConnectionLifecycleState.Expired)
+                    {
+                        player.MarkSessionReady();
+                    }
                     _owner._notify.SendRoomState(player, null);
                     return;
                 }
@@ -103,6 +109,7 @@ namespace TopSpeed.Server.Network
                 var oldNumber = player.PlayerNumber;
                 var leftName = RaceServer.DescribePlayer(player);
                 room.PlayerIds.Remove(player.Id);
+                _owner.RemoveRoomMemberPresence(room, player.Id);
                 if (room.RaceStarted)
                 {
                     _owner._race.MarkParticipantDnf(room, player.Id, oldNumber);
@@ -112,6 +119,11 @@ namespace TopSpeed.Server.Network
                 player.RoomId = null;
                 player.PlayerNumber = 0;
                 player.State = PlayerState.NotReady;
+                if (player.LifecycleState != ConnectionLifecycleState.Closed
+                    && player.LifecycleState != ConnectionLifecycleState.Expired)
+                {
+                    player.MarkSessionReady();
+                }
                 room.PendingLoadouts.Remove(player.Id);
                 room.PrepareSkips.Remove(player.Id);
                 room.TrackReadyPlayers.Remove(player.Id);
@@ -137,11 +149,10 @@ namespace TopSpeed.Server.Network
 
                 _owner._notify.SendRoomState(player, null);
 
-                if (room.PlayerIds.Count == 0)
+                var roomClosed = room.PlayerIds.Count == 0;
+                if (roomClosed)
                 {
                     _owner._rooms.Remove(room.Id);
-                    _owner._notify.RoomRemoved(roomId, room.Name);
-                    _owner._logger.Info(LocalizationService.Format(LocalizationService.Mark("Room closed: room={0} \"{1}\"."), room.Id, room.Name));
                 }
                 else
                 {
@@ -165,17 +176,27 @@ namespace TopSpeed.Server.Network
                 }
 
                 _owner._logger.Info(LocalizationService.Format(
-                    LocalizationService.Mark("Player left room: room={0} \"{1}\", player={2}, notify={3}."),
+                    LocalizationService.Mark("Player left room: room={0} \"{1}\", player={2}, notify={3}, roomClosed={4}."),
                     room.Id,
                     room.Name,
                     player.Id,
-                    notify));
+                    notify,
+                    roomClosed));
+                if (roomClosed)
+                {
+                    _owner._logger.Info(LocalizationService.Format(
+                        LocalizationService.Mark("Room closed: room={0} \"{1}\", reason=last_participant_left."),
+                        room.Id,
+                        room.Name));
+                }
             }
 
             public void JoinPlayer(PlayerConnection player, RaceRoom room)
             {
                 if (player.RoomId == room.Id && room.PlayerIds.Contains(player.Id))
                 {
+                    _owner.SetRoomMemberPresence(room, player.Id, RoomMemberPresenceState.Active);
+                    player.MarkInRoom();
                     _owner.SendStream(player, PacketSerializer.WritePlayerNumber(player.Id, player.PlayerNumber), PacketStream.Control);
                     _owner.SendTrack(room, player);
                     _owner.SyncMediaTo(room, player);
@@ -188,10 +209,12 @@ namespace TopSpeed.Server.Network
                     Leave(player, true);
 
                 room.PlayerIds.Add(player.Id);
+                _owner.SetRoomMemberPresence(room, player.Id, RoomMemberPresenceState.Active);
                 if (room.HostId == 0 || !room.PlayerIds.Contains(room.HostId))
                     room.HostId = player.Id;
 
                 player.RoomId = room.Id;
+                player.MarkInRoom();
                 player.PlayerNumber = byte.MaxValue;
                 player.State = PlayerState.NotReady;
                 room.PrepareSkips.Remove(player.Id);
@@ -219,12 +242,7 @@ namespace TopSpeed.Server.Network
                     : player.Name;
                 var joined = new PacketPlayerJoined { PlayerId = player.Id, PlayerNumber = player.PlayerNumber, Name = joinedName };
                 _owner._notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayerJoined(joined), PacketStream.Room);
-                _owner._logger.Debug(LocalizationService.Format(
-                    LocalizationService.Mark("Join room assignment: room={0}, player={1}, playerNumber={2}, host={3}."),
-                    room.Id,
-                    player.Id,
-                    player.PlayerNumber,
-                    room.HostId));
+                _owner._notify.BroadcastRoomState(room);
             }
         }
     }

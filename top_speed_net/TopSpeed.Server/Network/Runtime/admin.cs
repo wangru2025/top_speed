@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TopSpeed.Localization;
@@ -9,18 +10,13 @@ namespace TopSpeed.Server.Network
     {
         public void SetMotd(string motd)
         {
-            lock (_lock)
-            {
-                _config.Motd = motd ?? string.Empty;
-            }
+            var normalized = motd ?? string.Empty;
+            ExecuteOnServerLoop(() => _config.Motd = normalized, waitForCompletion: true);
         }
 
         public void SetMaxPlayers(int maxPlayers)
         {
-            lock (_lock)
-            {
-                _config.MaxPlayers = maxPlayers;
-            }
+            ExecuteOnServerLoop(() => _config.MaxPlayers = maxPlayers, waitForCompletion: true);
         }
 
         public void SetModerationSettings(ServerModerationSettings moderation)
@@ -28,10 +24,8 @@ namespace TopSpeed.Server.Network
             if (moderation == null)
                 return;
 
-            lock (_lock)
-            {
-                _config.Moderation = moderation.Clone();
-            }
+            var cloned = moderation.Clone();
+            ExecuteOnServerLoop(() => _config.Moderation = cloned, waitForCompletion: true);
         }
 
         public void SetFeatureSettings(ServerFeaturesSettings features)
@@ -39,10 +33,8 @@ namespace TopSpeed.Server.Network
             if (features == null)
                 return;
 
-            lock (_lock)
-            {
-                _config.Features = features.Clone();
-            }
+            var cloned = features.Clone();
+            ExecuteOnServerLoop(() => _config.Features = cloned, waitForCompletion: true);
         }
 
         public ServerPlayerInfo[] GetPlayersSnapshot()
@@ -69,7 +61,8 @@ namespace TopSpeed.Server.Network
                 ? LocalizationService.Mark("The server will be shut down immediately by the host.")
                 : announcementMessage.Trim();
 
-            lock (_lock)
+            var removedCount = 0;
+            ExecuteOnServerLoop(() =>
             {
                 var players = _players.Values
                     .OrderBy(player => player.PlayerNumber)
@@ -90,7 +83,37 @@ namespace TopSpeed.Server.Network
                         announcePresenceDisconnect: false);
                 }
 
-                return players.Length;
+                removedCount = players.Length;
+            }, waitForCompletion: true);
+
+            return removedCount;
+        }
+
+        public string GetDiagnosticsSummary()
+        {
+            lock (_lock)
+            {
+                var latencySamples = _transportLatencySampleCount;
+                var latencyAvg = latencySamples <= 0
+                    ? 0
+                    : (int)Math.Round((double)_transportLatencyTotalMs / latencySamples);
+
+                return LocalizationService.Format(
+                    LocalizationService.Mark("authoritative players={0}, rooms={1}, stale_epoch_drops={2}, replay_gaps={3}, epoch_rejects={4}, heartbeat_suspicions={5}, start_blocked_insufficient_active={6}, start_blocked_missing_ready={7}, start_blocked_track_not_ready={8}, transport_network_errors={9}, transport_latency_last_ms={10}, transport_latency_avg_ms={11}, transport_latency_max_ms={12}, transport_peer_address_changes={13}"),
+                    _players.Count,
+                    _rooms.Count,
+                    _droppedPacketsStaleEpoch,
+                    _replayGapCount,
+                    _epochRejectCount,
+                    _heartbeatSuspicionCount,
+                    _startBarrierBlockedInsufficientActive,
+                    _startBarrierBlockedMissingReady,
+                    _startBarrierBlockedTrackNotReady,
+                    _transportNetworkErrorCount,
+                    _transportLastLatencyMs,
+                    latencyAvg,
+                    _transportMaxLatencyMs,
+                    _transportPeerAddressChangedCount);
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Key = TopSpeed.Input.InputKey;
 using TopSpeed.Core;
 using TopSpeed.Input;
+using TopSpeed.Shortcuts;
 
 using TopSpeed.Localization;
 namespace TopSpeed.Menu
@@ -124,12 +125,14 @@ namespace TopSpeed.Menu
                 LocalizationService.Mark("Previous chat category"),
                 LocalizationService.Mark("Switches chat history to the previous category in the shared lobby chat view."),
                 Key.Left,
+                ShortcutModifiers.None,
                 _server.PreviousChatCategory);
             _menu.RegisterShortcutAction(
                 NextChatCategoryShortcutActionId,
                 LocalizationService.Mark("Next chat category"),
                 LocalizationService.Mark("Switches chat history to the next category in the shared lobby chat view."),
                 Key.Right,
+                ShortcutModifiers.None,
                 _server.NextChatCategory);
             _menu.SetViewShortcutActions(
                 _sharedLobbyChatScreen.Id,

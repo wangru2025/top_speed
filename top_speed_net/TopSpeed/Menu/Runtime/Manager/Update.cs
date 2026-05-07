@@ -13,7 +13,11 @@ namespace TopSpeed.Menu
                 return MenuAction.None;
 
             var current = _stack.Peek();
-            var helpRequested = input.WasPressed(Key.Space) || input.WasGesturePressed(GestureIntent.LongPress);
+            var ctrlHeld = input.IsDown(Key.LeftControl) || input.IsDown(Key.RightControl);
+            var shiftHeld = input.IsDown(Key.LeftShift) || input.IsDown(Key.RightShift);
+            var altHeld = input.IsDown(Key.LeftAlt) || input.IsDown(Key.RightAlt);
+            var plainSpacePressed = !ctrlHeld && !shiftHeld && !altHeld && input.WasPressed(Key.Space);
+            var helpRequested = plainSpacePressed || input.WasGesturePressed(GestureIntent.LongPress);
             if (helpRequested && current.TrySpeakCurrentHintOnDemand())
                 return MenuAction.None;
 

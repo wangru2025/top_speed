@@ -5,6 +5,18 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
+## 2026.5.5.1
+### Game Changes
+- Fixed many bugs with the multiplayer server.
+- Added a new way of navigating through message history by using the comma to move to the previous item, period to move to the next item, and left/right brackets are used to navigate between buffers. The separate history screen is still available.
+- Added an ability to copy the current buffer item to the clipboard by pressing ctrl+space, or by going to the history and pressing enter on any message there.
+- Added the ability to reset menu shortcuts to their defaults.
+
+
+### Server Changes
+- Fixed many bugs related to server connection and room deadlocks where players were being stuck in a room after joining multiple times.
+
+
 ## 2026.5.4.3
 ### Game Changes
 - Added the ability to choose which modifier keys are being used when you remap a key in the game. This allows you to either use both modifiers, or the left/right.

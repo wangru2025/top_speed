@@ -109,8 +109,10 @@ namespace TopSpeed.Server.Network
                     return;
 
                 var minimumParticipants = _owner._race.GetMinimumParticipantsToStart(room);
-                if (GetRoomParticipantCount(room) < minimumParticipants)
+                var activeParticipants = _owner.GetActiveParticipantCountForStartBarrier(room);
+                if (activeParticipants < minimumParticipants)
                 {
+                    _owner._startBarrierBlockedInsufficientActive++;
                     _owner.SendProtocolMessage(
                         player,
                         ProtocolMessageCode.Failed,
@@ -144,7 +146,7 @@ namespace TopSpeed.Server.Network
                     room.Id,
                     room.Name,
                     player.Id,
-                    room.PlayerIds.Count,
+                    _owner.GetActiveHumanParticipantCount(room),
                     room.Bots.Count,
                     room.PlayersToStart,
                     minimumParticipants));

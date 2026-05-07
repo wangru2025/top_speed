@@ -1,7 +1,4 @@
 using System.Net;
-using TopSpeed.Localization;
-using TopSpeed.Protocol;
-using TopSpeed.Server.Protocol;
 
 namespace TopSpeed.Server.Network
 {
@@ -9,7 +6,12 @@ namespace TopSpeed.Server.Network
     {
         private void OnPacket(IPEndPoint endPoint, byte[] payload)
         {
-            _session.HandlePacket(endPoint, payload);
+            if (endPoint == null || payload == null || payload.Length == 0)
+                return;
+
+            var key = endPoint.ToString();
+            _endpointEpochIndex.TryGetValue(key, out var endpointEpoch);
+            _commandBus.EnqueuePacket(endPoint, payload, endpointEpoch);
         }
 
         private void RegisterPackets()

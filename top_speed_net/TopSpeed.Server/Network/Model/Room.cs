@@ -40,6 +40,7 @@ namespace TopSpeed.Server.Network
         public byte PlayersToStart { get; set; }
         public uint HostId { get; set; }
         public HashSet<uint> PlayerIds { get; } = new HashSet<uint>();
+        public Dictionary<uint, RoomMemberPresenceState> MemberPresence { get; } = new Dictionary<uint, RoomMemberPresenceState>();
         public List<RoomBot> Bots { get; } = new List<RoomBot>();
         public Dictionary<uint, PlayerLoadout> PendingLoadouts { get; } = new Dictionary<uint, PlayerLoadout>();
         public HashSet<uint> PrepareSkips { get; } = new HashSet<uint>();

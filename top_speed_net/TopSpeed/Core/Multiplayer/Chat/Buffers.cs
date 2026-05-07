@@ -85,16 +85,14 @@ namespace TopSpeed.Core.Multiplayer.Chat
             return items.Count > 0 ? items : EmptyItems;
         }
 
-        public void MoveToNext()
+        public HistoryMoveResult MoveToNext(bool wrapNavigation)
         {
-            Current = Order[(FindCurrentIndex() + 1) % Order.Length];
-            SetCurrentFocusToLatest();
+            return MoveCategory(1, wrapNavigation);
         }
 
-        public void MoveToPrevious()
+        public HistoryMoveResult MoveToPrevious(bool wrapNavigation)
         {
-            Current = Order[(FindCurrentIndex() - 1 + Order.Length) % Order.Length];
-            SetCurrentFocusToLatest();
+            return MoveCategory(-1, wrapNavigation);
         }
 
         public string GetCurrentFocusedItemText()
@@ -158,6 +156,52 @@ namespace TopSpeed.Core.Multiplayer.Chat
                 edgeReached);
         }
 
+        public HistoryMoveResult MoveCurrentItemToFirst()
+        {
+            var items = _items[Current];
+            if (items.Count == 0)
+            {
+                return new HistoryMoveResult(
+                    NoMessagesYetText(),
+                    moved: false,
+                    wrapped: false,
+                    edgeReached: false);
+            }
+
+            var idx = GetNormalizedCurrentFocusIndex(items.Count);
+            var nextIndex = 0;
+            var moved = nextIndex != idx;
+            _focusIndex[Current] = nextIndex;
+            return new HistoryMoveResult(
+                items[nextIndex],
+                moved,
+                wrapped: false,
+                edgeReached: !moved);
+        }
+
+        public HistoryMoveResult MoveCurrentItemToLast()
+        {
+            var items = _items[Current];
+            if (items.Count == 0)
+            {
+                return new HistoryMoveResult(
+                    NoMessagesYetText(),
+                    moved: false,
+                    wrapped: false,
+                    edgeReached: false);
+            }
+
+            var idx = GetNormalizedCurrentFocusIndex(items.Count);
+            var nextIndex = items.Count - 1;
+            var moved = nextIndex != idx;
+            _focusIndex[Current] = nextIndex;
+            return new HistoryMoveResult(
+                items[nextIndex],
+                moved,
+                wrapped: false,
+                edgeReached: !moved);
+        }
+
         public string CategoryLabel()
         {
             return Current switch
@@ -205,6 +249,48 @@ namespace TopSpeed.Core.Multiplayer.Chat
             }
 
             return 0;
+        }
+
+        private HistoryMoveResult MoveCategory(int delta, bool wrapNavigation)
+        {
+            var currentIndex = FindCurrentIndex();
+            var nextIndex = currentIndex;
+            var moved = false;
+            var wrapped = false;
+            var edgeReached = false;
+            if (delta != 0)
+            {
+                if (wrapNavigation)
+                {
+                    var raw = currentIndex + delta;
+                    wrapped = raw < 0 || raw >= Order.Length;
+                    nextIndex = (raw % Order.Length + Order.Length) % Order.Length;
+                    moved = nextIndex != currentIndex;
+                }
+                else
+                {
+                    var candidate = currentIndex + delta;
+                    if (candidate < 0 || candidate >= Order.Length)
+                    {
+                        edgeReached = true;
+                    }
+                    else
+                    {
+                        nextIndex = candidate;
+                        moved = nextIndex != currentIndex;
+                    }
+                }
+            }
+
+            Current = Order[nextIndex];
+            if (moved)
+                SetCurrentFocusToLatest();
+
+            return new HistoryMoveResult(
+                CategoryLabel(),
+                moved,
+                wrapped,
+                edgeReached);
         }
 
         private int GetNormalizedCurrentFocusIndex(int itemCount)

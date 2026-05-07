@@ -37,7 +37,21 @@ jobs:
             throw "info.json was not found at repository root."
           }
 
-          $info = Get-Content $infoPath -Raw | ConvertFrom-Json
+          $rawInfo = Get-Content -LiteralPath $infoPath -Raw -Encoding UTF8
+          if ([string]::IsNullOrWhiteSpace($rawInfo)) {
+            throw "info.json is empty."
+          }
+
+          # Strip BOM / zero-width prefix characters that can break ConvertFrom-Json on some runners.
+          $rawInfo = $rawInfo.TrimStart([char]0xFEFF, [char]0x200B).Trim()
+
+          try {
+            $info = $rawInfo | ConvertFrom-Json -ErrorAction Stop
+          } catch {
+            $previewLength = [Math]::Min(220, $rawInfo.Length)
+            $preview = $rawInfo.Substring(0, $previewLength).Replace("`r", "\r").Replace("`n", "\n")
+            throw "Failed to parse info.json as JSON. $($_.Exception.Message) Preview: $preview"
+          }
           if ($null -eq $info.version -or [string]::IsNullOrWhiteSpace([string]$info.version)) {
             throw "info.json is missing a valid 'version' value."
           }

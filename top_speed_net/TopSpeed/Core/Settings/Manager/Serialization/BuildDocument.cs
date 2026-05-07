@@ -42,7 +42,7 @@ namespace TopSpeed.Core.Settings
                     {
                         Bindings = BuildKeyboardBindings(settings.KeyboardBindings)
                     },
-                    MenuShortcuts = BuildMenuShortcuts(settings.ShortcutKeyBindings),
+                    MenuShortcuts = BuildMenuShortcuts(settings.ShortcutKeyBindings, settings.ShortcutModifierBindings),
                     Controller = new SettingsControllerDocument
                     {
                         Bindings = BuildControllerBindings(settings.ControllerBindings),
@@ -158,9 +158,12 @@ namespace TopSpeed.Core.Settings
             return result;
         }
 
-        private static SettingsMenuShortcutsDocument BuildMenuShortcuts(Dictionary<string, InputKey>? shortcuts)
+        private static SettingsMenuShortcutsDocument BuildMenuShortcuts(
+            Dictionary<string, InputKey>? shortcuts,
+            Dictionary<string, TopSpeed.Shortcuts.ShortcutModifiers>? modifiers)
         {
             var bindings = new List<SettingsMenuShortcutBindingDocument>();
+            var shortcutModifiers = modifiers ?? new Dictionary<string, TopSpeed.Shortcuts.ShortcutModifiers>(StringComparer.Ordinal);
             if (shortcuts != null)
             {
                 foreach (var pair in shortcuts)
@@ -168,10 +171,14 @@ namespace TopSpeed.Core.Settings
                     if (string.IsNullOrWhiteSpace(pair.Key))
                         continue;
 
+                    shortcutModifiers.TryGetValue(pair.Key, out var currentModifiers);
                     bindings.Add(new SettingsMenuShortcutBindingDocument
                     {
                         Id = pair.Key,
-                        Key = (int)pair.Value
+                        Key = (int)pair.Value,
+                        Shift = currentModifiers.Shift,
+                        Control = currentModifiers.Control,
+                        Alt = currentModifiers.Alt
                     });
                 }
             }

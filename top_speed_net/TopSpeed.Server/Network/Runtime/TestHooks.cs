@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
+using LiteNetLib;
 using TopSpeed.Protocol;
 
 namespace TopSpeed.Server.Network
@@ -21,6 +23,7 @@ namespace TopSpeed.Server.Network
         public int PlayerCount { get; set; }
         public int RoomCount { get; set; }
         public int RacingRoomCount { get; set; }
+        public int PreparingRoomCount { get; set; }
         public int CompletedRoomCount { get; set; }
         public int AbortedRoomCount { get; set; }
         public int ActiveRaceParticipantCount { get; set; }
@@ -33,6 +36,13 @@ namespace TopSpeed.Server.Network
         public int AuthorityDropCount { get; set; }
         public int RaceSnapshotSends { get; set; }
         public int StateSyncFramesSent { get; set; }
+        public int StaleEpochDrops { get; set; }
+        public int ReplayGapCount { get; set; }
+        public int EpochRejectCount { get; set; }
+        public int HeartbeatSuspicionCount { get; set; }
+        public int StartBarrierBlockedInsufficientActive { get; set; }
+        public int StartBarrierBlockedMissingReady { get; set; }
+        public int StartBarrierBlockedTrackNotReady { get; set; }
     }
 
     internal sealed partial class RaceServer
@@ -40,11 +50,25 @@ namespace TopSpeed.Server.Network
         internal void InjectPacketForTest(IPEndPoint endPoint, byte[] payload)
         {
             OnPacket(endPoint, payload);
+            lock (_lock)
+            {
+                EnsureServerLoopThreadUnsafe();
+                DrainCommandQueueUnsafe();
+            }
         }
 
         internal void DisconnectPeerForTest(IPEndPoint endPoint)
         {
-            OnPeerDisconnected(endPoint);
+            OnPeerDisconnected(
+                endPoint,
+                DisconnectMapping.FromTransportReason(DisconnectReason.Timeout),
+                DisconnectReason.Timeout,
+                SocketError.TimedOut);
+            lock (_lock)
+            {
+                EnsureServerLoopThreadUnsafe();
+                DrainCommandQueueUnsafe();
+            }
         }
 
         internal ServerPlayerTestSnapshot GetPlayerSnapshotForTest(uint playerId)
@@ -83,6 +107,7 @@ namespace TopSpeed.Server.Network
                 {
                     PlayerCount = _players.Count,
                     RoomCount = _rooms.Count,
+                    PreparingRoomCount = _rooms.Values.Count(room => room.RaceState == RoomRaceState.Preparing),
                     RacingRoomCount = _rooms.Values.Count(room => room.RaceState == RoomRaceState.Racing),
                     CompletedRoomCount = _rooms.Values.Count(room => room.RaceState == RoomRaceState.Completed),
                     AbortedRoomCount = _rooms.Values.Count(room => room.RaceState == RoomRaceState.Aborted),
@@ -95,7 +120,14 @@ namespace TopSpeed.Server.Network
                         _authorityDropsPlayerStarted +
                         _authorityDropsPlayerCrashed,
                     RaceSnapshotSends = _raceSnapshotSends,
-                    StateSyncFramesSent = _stateSyncFramesSent
+                    StateSyncFramesSent = _stateSyncFramesSent,
+                    StaleEpochDrops = _droppedPacketsStaleEpoch,
+                    ReplayGapCount = _replayGapCount,
+                    EpochRejectCount = _epochRejectCount,
+                    HeartbeatSuspicionCount = _heartbeatSuspicionCount,
+                    StartBarrierBlockedInsufficientActive = _startBarrierBlockedInsufficientActive,
+                    StartBarrierBlockedMissingReady = _startBarrierBlockedMissingReady,
+                    StartBarrierBlockedTrackNotReady = _startBarrierBlockedTrackNotReady
                 };
 
                 foreach (var room in _rooms.Values)

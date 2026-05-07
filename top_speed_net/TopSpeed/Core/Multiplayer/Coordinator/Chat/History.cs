@@ -1,5 +1,7 @@
 using TopSpeed.Speech;
 using TopSpeed.Menu;
+using TopSpeed.Input;
+using TopSpeed.Localization;
 
 namespace TopSpeed.Core.Multiplayer
 {
@@ -52,10 +54,11 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void NextChatCategoryCore()
         {
-            _state.Chat.History.MoveToNext();
-            PlayNetworkSound("buffer_switch.ogg");
+            var result = _state.Chat.History.MoveToNext(wrapNavigation: false);
+            if (result.Moved)
+                PlayNetworkSound("buffer_switch.ogg");
             UpdateHistoryScreens();
-            _speech.Speak(_state.Chat.History.CategoryLabel(), SpeechService.SpeakFlag.None);
+            SpeakHistoryNavigationResult(result);
         }
 
         internal void PreviousChatCategory()
@@ -65,10 +68,11 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void PreviousChatCategoryCore()
         {
-            _state.Chat.History.MoveToPrevious();
-            PlayNetworkSound("buffer_switch.ogg");
+            var result = _state.Chat.History.MoveToPrevious(wrapNavigation: false);
+            if (result.Moved)
+                PlayNetworkSound("buffer_switch.ogg");
             UpdateHistoryScreens();
-            _speech.Speak(_state.Chat.History.CategoryLabel(), SpeechService.SpeakFlag.None);
+            SpeakHistoryNavigationResult(result);
         }
 
         internal void NextChatItem()
@@ -78,10 +82,8 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void NextChatItemCore()
         {
-            var result = _state.Chat.History.MoveCurrentItem(1, _menu.IsWrapNavigationEnabled);
-            if (InteractionHints.IsTouchPlatform())
-                PlayChatItemNavigationFeedback(result);
-            _speech.Speak(result.Text, SpeechService.SpeakFlag.None);
+            var result = _state.Chat.History.MoveCurrentItem(1, wrapNavigation: false);
+            SpeakHistoryNavigationResult(result);
         }
 
         internal void PreviousChatItem()
@@ -91,10 +93,54 @@ namespace TopSpeed.Core.Multiplayer
 
         internal void PreviousChatItemCore()
         {
-            var result = _state.Chat.History.MoveCurrentItem(-1, _menu.IsWrapNavigationEnabled);
-            if (InteractionHints.IsTouchPlatform())
-                PlayChatItemNavigationFeedback(result);
-            _speech.Speak(result.Text, SpeechService.SpeakFlag.None);
+            var result = _state.Chat.History.MoveCurrentItem(-1, wrapNavigation: false);
+            SpeakHistoryNavigationResult(result);
+        }
+
+        internal void FirstChatItem()
+        {
+            _chatFlow.FirstItem();
+        }
+
+        internal void FirstChatItemCore()
+        {
+            var result = _state.Chat.History.MoveCurrentItemToFirst();
+            SpeakHistoryNavigationResult(result);
+        }
+
+        internal void LastChatItem()
+        {
+            _chatFlow.LastItem();
+        }
+
+        internal void LastChatItemCore()
+        {
+            var result = _state.Chat.History.MoveCurrentItemToLast();
+            SpeakHistoryNavigationResult(result);
+        }
+
+        internal void CopyFocusedChatItem()
+        {
+            _chatFlow.CopyFocusedItem();
+        }
+
+        internal void CopyFocusedChatItemCore()
+        {
+            CopyHistoryTextToClipboard(_state.Chat.History.GetCurrentFocusedItemText());
+        }
+
+        internal bool TryHandleRaceLoopHistoryShortcuts(IInputService input)
+        {
+            if (input == null)
+                return false;
+
+            return _menu.TryTriggerShortcutAction(MultiplayerBufferFirstItemShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferLastItemShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferPreviousItemShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferNextItemShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferPreviousCategoryShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferNextCategoryShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferCopyFocusedItemShortcutActionId, input);
         }
 
         private void PlayChatItemNavigationFeedback(Chat.HistoryMoveResult result)
@@ -107,6 +153,28 @@ namespace TopSpeed.Core.Multiplayer
                 _menu.TryPlayMenuCue(menuId, MenuFeedbackCue.Wrap);
             else if (result.EdgeReached)
                 _menu.TryPlayMenuCue(menuId, MenuFeedbackCue.Edge);
+        }
+
+        private void SpeakHistoryNavigationResult(Chat.HistoryMoveResult result)
+        {
+            if (InteractionHints.IsTouchPlatform())
+                PlayChatItemNavigationFeedback(result);
+
+            if (!result.Moved && result.EdgeReached)
+                return;
+
+            _speech.Speak(result.Text, SpeechService.SpeakFlag.None);
+        }
+
+        private void CopyHistoryTextToClipboard(string text)
+        {
+            _trySetClipboardText((text ?? string.Empty).Trim());
+            _speech.Speak(LocalizationService.Mark("Copied."));
+        }
+
+        private void CopyHistoryItemFromScreen(string text)
+        {
+            CopyHistoryTextToClipboard(text);
         }
     }
 }

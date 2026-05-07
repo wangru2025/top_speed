@@ -24,7 +24,14 @@ namespace TopSpeed.Network
 
     internal readonly struct ConnectResult
     {
-        private ConnectResult(bool success, string message, MultiplayerSession? session, string? motd, CompatibilityNotice? compatibilityNotice)
+        private ConnectResult(
+            bool success,
+            string message,
+            MultiplayerSession? session,
+            string? motd,
+            CompatibilityNotice? compatibilityNotice,
+            MultiplayerDisconnectReason disconnectReason,
+            MultiplayerConnectionState connectionState)
         {
             Success = success;
             Message = message;
@@ -35,6 +42,8 @@ namespace TopSpeed.Network
             PlayerId = session?.PlayerId ?? 0;
             Motd = motd ?? string.Empty;
             CompatibilityNotice = compatibilityNotice;
+            DisconnectReason = disconnectReason;
+            ConnectionState = connectionState;
         }
 
         public bool Success { get; }
@@ -47,6 +56,8 @@ namespace TopSpeed.Network
         public string Motd { get; }
         public CompatibilityNotice? CompatibilityNotice { get; }
         public bool RequiresCompatibilityConfirmation => CompatibilityNotice.HasValue && CompatibilityNotice.Value.Status == ProtocolCompatStatus.CompatibleDowngrade;
+        public MultiplayerDisconnectReason DisconnectReason { get; }
+        public MultiplayerConnectionState ConnectionState { get; }
 
         public static ConnectResult CreateSuccess(
             NetManager manager,
@@ -66,12 +77,30 @@ namespace TopSpeed.Network
             }
 
             var session = new MultiplayerSession(manager, peer, endPoint, playerId, playerNumber, protocolWelcome?.ResumeToken ?? 0, motd, playerName, incoming);
-            return new ConnectResult(true, LocalizationService.Mark("Connected."), session, motd, BuildCompatibilityNotice(protocolWelcome));
+            session.ApplyDisconnectClassification(MultiplayerDisconnectReason.Unknown, MultiplayerConnectionState.Connected);
+            return new ConnectResult(
+                true,
+                LocalizationService.Mark("Connected."),
+                session,
+                motd,
+                BuildCompatibilityNotice(protocolWelcome),
+                MultiplayerDisconnectReason.Unknown,
+                MultiplayerConnectionState.Connected);
         }
 
-        public static ConnectResult CreateFail(string message)
+        public static ConnectResult CreateFail(
+            string message,
+            MultiplayerDisconnectReason disconnectReason = MultiplayerDisconnectReason.Unknown,
+            MultiplayerConnectionState connectionState = MultiplayerConnectionState.ConnectionLostSuspected)
         {
-            return new ConnectResult(false, message ?? LocalizationService.Mark("Connection failed."), null, null, null);
+            return new ConnectResult(
+                false,
+                message ?? LocalizationService.Mark("Connection failed."),
+                null,
+                null,
+                null,
+                disconnectReason,
+                connectionState);
         }
 
         private static CompatibilityNotice? BuildCompatibilityNotice(PacketProtocolWelcome? welcome)

@@ -61,6 +61,7 @@ namespace TopSpeed.Input
         public string RadioLastFolder { get; set; } = string.Empty;
         public bool RadioShuffle { get; set; }
         public Dictionary<string, Key> ShortcutKeyBindings { get; set; } = new Dictionary<string, Key>(StringComparer.Ordinal);
+        public Dictionary<string, TopSpeed.Shortcuts.ShortcutModifiers> ShortcutModifierBindings { get; set; } = new Dictionary<string, TopSpeed.Shortcuts.ShortcutModifiers>(StringComparer.Ordinal);
         public List<SavedServerEntry> SavedServers { get; set; } = new List<SavedServerEntry>();
 
         public bool UseController
@@ -146,6 +147,7 @@ namespace TopSpeed.Input
             RadioLastFolder = string.Empty;
             RadioShuffle = false;
             ShortcutKeyBindings = new Dictionary<string, Key>(StringComparer.Ordinal);
+            ShortcutModifierBindings = new Dictionary<string, TopSpeed.Shortcuts.ShortcutModifiers>(StringComparer.Ordinal);
             SavedServers = new List<SavedServerEntry>();
         }
 

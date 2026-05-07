@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Key = TopSpeed.Input.InputKey;
 using TopSpeed.Input;
 using TopSpeed.Localization;
+using TopSpeed.Shortcuts;
 
 namespace TopSpeed.Core.Settings
 {
@@ -133,6 +134,7 @@ namespace TopSpeed.Core.Settings
         private static void ApplyMenuShortcuts(DriveSettings settings, SettingsMenuShortcutsDocument? menuShortcuts, List<SettingsIssue> issues)
         {
             settings.ShortcutKeyBindings = new Dictionary<string, Key>(System.StringComparer.Ordinal);
+            settings.ShortcutModifierBindings = new Dictionary<string, ShortcutModifiers>(System.StringComparer.Ordinal);
             if (menuShortcuts?.Bindings == null)
                 return;
 
@@ -166,6 +168,10 @@ namespace TopSpeed.Core.Settings
 
                 var actionId = binding.Id!.Trim();
                 settings.ShortcutKeyBindings[actionId] = (Key)keyValue;
+                settings.ShortcutModifierBindings[actionId] = new ShortcutModifiers(
+                    shift: binding.Shift ?? false,
+                    control: binding.Control ?? false,
+                    alt: binding.Alt ?? false);
             }
         }
     }

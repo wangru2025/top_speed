@@ -58,6 +58,35 @@ namespace TopSpeed.Network
             return buffer;
         }
 
+        public static bool TryReadServerHeartbeat(byte[] data, out PacketServerHeartbeat packet)
+        {
+            packet = new PacketServerHeartbeat();
+            if (data == null || data.Length < 2 + 4 + 4)
+                return false;
+            if (data[0] != ProtocolConstants.Version || data[1] != (byte)Command.ServerHeartbeat)
+                return false;
+
+            var reader = new PacketReader(data);
+            reader.ReadByte();
+            reader.ReadByte();
+            packet.ServerTick = reader.ReadUInt32();
+            packet.LastReceivedClientTick = reader.ReadUInt32();
+            return true;
+        }
+
+        public static byte[] WriteClientHeartbeat(PacketClientHeartbeat packet)
+        {
+            var buffer = WritePacketHeader(Command.ClientHeartbeat, 4 + 8 + 4 + 4);
+            var writer = new PacketWriter(buffer);
+            writer.WriteByte(ProtocolConstants.Version);
+            writer.WriteByte((byte)Command.ClientHeartbeat);
+            writer.WriteUInt32(packet.PlayerId);
+            writer.WriteUInt64(packet.SessionId);
+            writer.WriteUInt32(packet.ClientTick);
+            writer.WriteUInt32(packet.LastReceivedServerTick);
+            return buffer;
+        }
+
         private static ProtocolVer ReadProtocolVer(ref PacketReader reader)
         {
             var year = reader.ReadUInt16();

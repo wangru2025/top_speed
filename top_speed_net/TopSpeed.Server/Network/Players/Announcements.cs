@@ -27,7 +27,7 @@ namespace TopSpeed.Server.Network
                 ? LocalizationService.Translate(LocalizationService.Mark("A player"))
                 : disconnected.Name;
             var normalizedReason = (reason ?? string.Empty).Trim();
-            var text = string.Equals(normalizedReason, "timeout", System.StringComparison.OrdinalIgnoreCase)
+            var text = string.Equals(normalizedReason, "heartbeat_missed", System.StringComparison.OrdinalIgnoreCase)
                 ? LocalizationService.Format(LocalizationService.Mark("{0} has lost connection to the server."), name)
                 : LocalizationService.Format(LocalizationService.Mark("{0} has disconnected from the server."), name);
 

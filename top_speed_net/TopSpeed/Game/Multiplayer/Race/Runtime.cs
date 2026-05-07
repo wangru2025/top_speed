@@ -115,6 +115,9 @@ namespace TopSpeed.Game
 
                 if (!_owner._textInputPromptActive && !_owner._dialogs.HasActiveOverlayDialog && !_owner._choices.HasActiveChoiceDialog)
                 {
+                    if (_owner._multiplayerCoordinator.TryHandleRaceLoopHistoryShortcuts(_owner._input))
+                        return;
+
                     if (_owner._input.WasPressed(TopSpeed.Input.InputKey.Slash))
                     {
                         _owner._multiplayerCoordinator.OpenGlobalChatHotkey();

@@ -130,6 +130,45 @@ public sealed class ServerStressBehaviorTests
         snapshot.AuthorityDropCount.Should().BeGreaterThanOrEqualTo(80);
     }
 
+    [Fact]
+    public void ServerStress_PrepareShouldNotBlockOnSuspendedMember()
+    {
+        using var fixture = new ServerStressFixture(totalPlayers: 2);
+        var clients = fixture.ConnectPlayers();
+        fixture.CreateRoomsAndJoin(clients, playersPerRoom: 2);
+
+        var host = clients[0];
+        var other = clients[1];
+        fixture.Send(host, ClientPacketSerializer.WriteRoomStartRace());
+        fixture.DisconnectWithoutResume(other);
+        fixture.Send(host, ClientPacketSerializer.WriteRoomPlayerReady(CarType.Vehicle1, automaticTransmission: true));
+        fixture.Server.Update(0.25f);
+
+        var snapshot = fixture.Server.GetStressSnapshotForTest();
+        snapshot.RoomCount.Should().Be(1);
+        snapshot.PreparingRoomCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void ServerStress_ClosedRoomIdShouldBeReused()
+    {
+        using var fixture = new ServerStressFixture(totalPlayers: 1);
+        var clients = fixture.ConnectPlayers();
+        var host = clients[0];
+
+        fixture.Send(host, ClientPacketSerializer.WriteRoomCreate("reuse-id-1", GameRoomType.BotsRace, 2));
+        var firstRoomId = fixture.Server.GetPlayerSnapshotForTest(host.PlayerId).RoomId.GetValueOrDefault();
+        firstRoomId.Should().BeGreaterThan(0u);
+
+        fixture.Send(host, ClientPacketSerializer.WriteRoomLeave());
+        fixture.Server.GetStressSnapshotForTest().RoomCount.Should().Be(0);
+
+        fixture.Send(host, ClientPacketSerializer.WriteRoomCreate("reuse-id-2", GameRoomType.BotsRace, 2));
+        var secondRoomId = fixture.Server.GetPlayerSnapshotForTest(host.PlayerId).RoomId.GetValueOrDefault();
+
+        secondRoomId.Should().Be(firstRoomId);
+    }
+
     private static PlayerRaceData BuildRaceData(float x, float y, ushort speed)
     {
         return new PlayerRaceData
@@ -284,6 +323,11 @@ public sealed class ServerStressBehaviorTests
             var resumed = Server.GetPlayerSnapshotForTest(client.PlayerId);
             client.PlayerNumber = resumed.PlayerNumber;
             client.RoomId = resumed.RoomId.GetValueOrDefault(client.RoomId);
+        }
+
+        public void DisconnectWithoutResume(StressClient client)
+        {
+            Server.DisconnectPeerForTest(client.EndPoint);
         }
 
         public void Send(StressClient client, byte[] payload)

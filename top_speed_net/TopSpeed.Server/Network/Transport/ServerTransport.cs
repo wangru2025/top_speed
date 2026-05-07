@@ -1,27 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Net.Sockets;
 using LiteNetLib;
-using TopSpeed.Protocol;
 using TopSpeed.Localization;
+using TopSpeed.Protocol;
 using TopSpeed.Server.Logging;
 
 namespace TopSpeed.Server.Network
 {
     internal sealed class UdpServerTransport : IDisposable
     {
+        private const int DefaultUpdateTimeMs = 1;
+        private const int DefaultPingIntervalMs = 1000;
+        private const int DisconnectTimeoutPaddingMs = 15000;
+
         private readonly Logger _logger;
         private readonly object _peerLock = new object();
         private EventBasedNetListener? _listener;
         private NetManager? _server;
         private readonly Dictionary<string, NetPeer> _peers = new Dictionary<string, NetPeer>(StringComparer.OrdinalIgnoreCase);
-        private CancellationTokenSource? _cts;
-        private Task? _pollTask;
 
         public event Action<IPEndPoint, byte[]>? PacketReceived;
-        public event Action<IPEndPoint>? PeerDisconnected;
+        public event Action<IPEndPoint, TransportDisconnectClassification, DisconnectReason, SocketError>? PeerDisconnected;
+        public event Action<IPEndPoint, SocketError>? NetworkError;
+        public event Action<IPEndPoint, int>? PeerLatencyUpdated;
+        public event Action<IPEndPoint, IPEndPoint>? PeerAddressChanged;
 
         public UdpServerTransport(Logger logger)
         {
@@ -38,26 +42,77 @@ namespace TopSpeed.Server.Network
             _listener.PeerConnectedEvent += peer =>
             {
                 lock (_peerLock)
-                    _peers[GetPeerKey(peer)] = peer;
+                    _peers[GetPeerKey(CreatePeerEndpoint(peer))] = peer;
             };
-            _listener.PeerDisconnectedEvent += (peer, _) =>
+            _listener.PeerAddressChangedEvent += (peer, previousAddress) =>
+            {
+                if (previousAddress == null)
+                    return;
+
+                var oldKey = previousAddress.ToString();
+                var newEndPoint = CreatePeerEndpoint(peer);
+                lock (_peerLock)
+                {
+                    _peers.Remove(oldKey);
+                    _peers[GetPeerKey(newEndPoint)] = peer;
+                }
+
+                PeerAddressChanged?.Invoke(previousAddress, newEndPoint);
+            };
+            _listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
             {
                 var endpoint = CreatePeerEndpoint(peer);
                 lock (_peerLock)
-                    _peers.Remove(GetPeerKey(peer));
-                PeerDisconnected?.Invoke(endpoint);
+                    _peers.Remove(GetPeerKey(endpoint));
+
+                var classification = DisconnectMapping.FromTransportReason(disconnectInfo.Reason);
+                PeerDisconnected?.Invoke(endpoint, classification, disconnectInfo.Reason, disconnectInfo.SocketErrorCode);
+            };
+            _listener.NetworkErrorEvent += (endPoint, socketError) =>
+            {
+                var endpoint = endPoint ?? new IPEndPoint(IPAddress.None, 0);
+                NetworkError?.Invoke(endpoint, socketError);
+            };
+            _listener.NetworkLatencyUpdateEvent += (peer, latency) =>
+            {
+                PeerLatencyUpdated?.Invoke(CreatePeerEndpoint(peer), latency);
             };
             _listener.NetworkReceiveEvent += (peer, reader, _, _) =>
             {
-                var buffer = reader.GetRemainingBytes();
-                reader.Recycle();
-                PacketReceived?.Invoke(CreatePeerEndpoint(peer), buffer);
+                try
+                {
+                    var buffer = reader.GetRemainingBytes();
+                    if (buffer.Length == 0)
+                        return;
+
+                    PacketReceived?.Invoke(CreatePeerEndpoint(peer), buffer);
+                }
+                finally
+                {
+                    reader.Recycle();
+                }
             };
+
+            var disconnectTimeoutMs = Math.Max(
+                (int)ConnectionRecoveryRules.DefaultHeartbeatMissWindow.TotalMilliseconds + DisconnectTimeoutPaddingMs,
+                45000);
 
             _server = new NetManager(_listener)
             {
                 ReuseAddress = true,
-                UpdateTime = 1,
+                UpdateTime = DefaultUpdateTimeMs,
+                PingInterval = DefaultPingIntervalMs,
+                DisconnectTimeout = disconnectTimeoutMs,
+                DisconnectOnUnreachable = false,
+                AllowPeerAddressChange = true,
+                UnsyncedEvents = false,
+                UnsyncedReceiveEvent = false,
+                UnsyncedDeliveryEvent = false,
+                AutoRecycle = false,
+                EnableStatistics = true,
+                UseNativeSockets = false,
+                MtuOverride = 0,
+                MtuDiscovery = false,
                 ChannelsCount = PacketStreams.Count
             };
 
@@ -66,21 +121,38 @@ namespace TopSpeed.Server.Network
                     LocalizationService.Mark("Failed to start transport on port {0}."),
                     port));
 
-            _cts = new CancellationTokenSource();
-            _pollTask = Task.Run(() => PollLoop(_cts.Token));
             _logger.Info(LocalizationService.Format(LocalizationService.Mark("LiteNetLib transport listening on {0}."), port));
+        }
+
+        public void Pump()
+        {
+            try
+            {
+                _server?.PollEvents();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(LocalizationService.Format(
+                    LocalizationService.Mark("LiteNetLib poll failed: {0}"),
+                    ex.Message));
+            }
         }
 
         public void Stop()
         {
-            _cts?.Cancel();
-            _pollTask?.Wait(250);
-            _pollTask = null;
-            _cts?.Dispose();
-            _cts = null;
-
-            _server?.Stop();
+            var server = _server;
             _server = null;
+            try
+            {
+                server?.Stop(sendDisconnectMessages: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(LocalizationService.Format(
+                    LocalizationService.Mark("LiteNetLib stop failed: {0}"),
+                    ex.Message));
+            }
+
             lock (_peerLock)
                 _peers.Clear();
             _listener = null;
@@ -116,28 +188,9 @@ namespace TopSpeed.Server.Network
             }
         }
 
-        private void PollLoop(CancellationToken token)
+        private static string GetPeerKey(IPEndPoint endPoint)
         {
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    _server?.PollEvents();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warning(LocalizationService.Format(
-                        LocalizationService.Mark("LiteNetLib poll failed: {0}"),
-                        ex.Message));
-                }
-
-                Thread.Sleep(1);
-            }
-        }
-
-        private static string GetPeerKey(NetPeer peer)
-        {
-            return $"{peer.Address}:{peer.Port}";
+            return endPoint.ToString();
         }
 
         private static IPEndPoint CreatePeerEndpoint(NetPeer peer)

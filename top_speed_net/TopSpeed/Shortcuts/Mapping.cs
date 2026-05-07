@@ -60,7 +60,7 @@ namespace TopSpeed.Shortcuts
             {
                 _needsInstruction = false;
                 _speech.Speak(LocalizationService.Format(
-                    LocalizationService.Mark("Press the new key for {0}."),
+                    LocalizationService.Mark("Press the new shortcut for {0}."),
                     LocalizationService.Translate(_displayName)));
             }
 
@@ -77,43 +77,49 @@ namespace TopSpeed.Shortcuts
                 if (!_input.WasPressed(key))
                     continue;
 
-                if (_menu.IsShortcutKeyInUse(_groupId, key, _actionId))
+                if (ModifierKeys.TryGetGroup(key, out _))
+                    continue;
+
+                var modifiers = ShortcutModifiers.FromInput(_input);
+                if (_menu.IsShortcutBindingInUse(_groupId, key, modifiers, _actionId))
                 {
-                    _speech.Speak(LocalizationService.Mark("That key is already in use in this shortcut group."));
+                    _speech.Speak(LocalizationService.Mark("That shortcut is already in use in this shortcut group."));
                     return;
                 }
 
                 try
                 {
-                    _menu.SetShortcutBinding(_actionId, key);
+                    _menu.SetShortcutBinding(_actionId, key, modifiers);
                 }
                 catch (InvalidOperationException)
                 {
                     _isActive = false;
-                    _speech.Speak(LocalizationService.Mark("Unable to apply the new shortcut key."));
+                    _speech.Speak(LocalizationService.Mark("Unable to apply the new shortcut."));
                     return;
                 }
                 catch (ArgumentException)
                 {
                     _isActive = false;
-                    _speech.Speak(LocalizationService.Mark("Unable to apply the new shortcut key."));
+                    _speech.Speak(LocalizationService.Mark("Unable to apply the new shortcut."));
                     return;
                 }
 
                 _settings.ShortcutKeyBindings[_actionId] = key;
+                _settings.ShortcutModifierBindings ??= new System.Collections.Generic.Dictionary<string, ShortcutModifiers>(StringComparer.Ordinal);
+                _settings.ShortcutModifierBindings[_actionId] = modifiers;
                 _saveSettings();
                 _isActive = false;
                 _speech.Speak(LocalizationService.Format(
                     LocalizationService.Mark("{0} set to {1}."),
                     LocalizationService.Translate(_displayName),
-                    FormatKey(key)));
+                    FormatBinding(key, modifiers)));
                 return;
             }
         }
 
-        private static string FormatKey(Key key)
+        private static string FormatBinding(Key key, ShortcutModifiers modifiers)
         {
-            return InputDisplayText.Key(key);
+            return ShortcutBindingText.Format(key, modifiers);
         }
     }
 }

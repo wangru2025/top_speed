@@ -113,6 +113,7 @@ namespace TopSpeed.Game
                 _settings,
                 _multiplayerConnector,
                 BeginPromptTextInput,
+                text => _clipboard.TrySetText(text),
                 SaveSettings,
                 EnterMenuState,
                 SetSession,

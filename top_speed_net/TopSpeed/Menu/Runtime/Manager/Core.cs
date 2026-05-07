@@ -65,6 +65,7 @@ namespace TopSpeed.Menu
             string displayName,
             string description,
             Key key,
+            ShortcutModifiers modifiers,
             Action onTrigger,
             Func<bool>? canExecute = null,
             GestureIntent? gestureIntent = null)
@@ -72,12 +73,17 @@ namespace TopSpeed.Menu
             if (gestureIntent.HasValue && MenuInputBindings.IsReservedGesture(gestureIntent.Value))
                 throw new InvalidOperationException($"Gesture intent '{gestureIntent.Value}' is reserved for core menu actions.");
 
-            _shortcutCatalog.RegisterAction(actionId, displayName, description, key, onTrigger, canExecute, gestureIntent);
+            _shortcutCatalog.RegisterAction(actionId, displayName, description, key, modifiers, onTrigger, canExecute, gestureIntent);
         }
 
         public void SetShortcutBinding(string actionId, Key key)
         {
-            _shortcutCatalog.SetBinding(actionId, key);
+            SetShortcutBinding(actionId, key, ShortcutModifiers.None);
+        }
+
+        public void SetShortcutBinding(string actionId, Key key, ShortcutModifiers modifiers)
+        {
+            _shortcutCatalog.SetBinding(actionId, key, modifiers);
         }
 
         public void SetGlobalShortcutActions(IEnumerable<string>? actionIds)
@@ -125,12 +131,31 @@ namespace TopSpeed.Menu
 
         public bool IsShortcutKeyInUse(string groupId, Key key, string ignoredActionId)
         {
-            return _shortcutCatalog.IsKeyInUseInGroup(groupId, key, ignoredActionId);
+            return IsShortcutBindingInUse(groupId, key, ShortcutModifiers.None, ignoredActionId);
+        }
+
+        public bool IsShortcutBindingInUse(string groupId, Key key, ShortcutModifiers modifiers, string ignoredActionId)
+        {
+            return _shortcutCatalog.IsBindingInUseInGroup(groupId, key, modifiers, ignoredActionId);
         }
 
         public void ResetShortcutBindings()
         {
             _shortcutCatalog.ResetBindings();
+        }
+
+        public bool ResetShortcutBindingsInGroup(string groupId)
+        {
+            return _shortcutCatalog.ResetBindingsInGroup(groupId);
+        }
+
+        public bool TryTriggerShortcutAction(string actionId, IInputService input)
+        {
+            if (!_shortcutCatalog.TryResolveTriggeredActionById(input, actionId, out var action))
+                return false;
+
+            action.Trigger();
+            return true;
         }
 
         public void SetClose(string id, Func<CloseEvent, bool>? onClose)

@@ -70,7 +70,7 @@ namespace TopSpeed.Core.Multiplayer
 
             if (!CurrentRoom.InRoom || CurrentRoom.RoomId != roomEvent.RoomId)
                 return false;
-            if (IsStaleEvent(roomEvent.EventSequence))
+            if (IsStaleEvent(roomEvent.EventSequence, roomEvent.RoomId))
                 return false;
             if (roomEvent.RoomVersion != 0 && CurrentRoom.RoomVersion > roomEvent.RoomVersion)
                 return false;
@@ -79,7 +79,7 @@ namespace TopSpeed.Core.Multiplayer
 
             CurrentRoom.RoomVersion = roomEvent.RoomVersion;
             if (roomEvent.EventSequence != 0)
-                AdvanceEventSequence(roomEvent.EventSequence);
+                AdvanceEventSequence(roomEvent.RoomId, roomEvent.EventSequence);
             if (!string.IsNullOrWhiteSpace(roomEvent.RoomName))
                 CurrentRoom.RoomName = roomEvent.RoomName;
             if (roomEvent.HostPlayerId != 0)

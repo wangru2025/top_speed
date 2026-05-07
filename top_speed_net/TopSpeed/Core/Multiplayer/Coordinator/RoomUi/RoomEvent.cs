@@ -10,30 +10,32 @@ namespace TopSpeed.Core.Multiplayer
         {
             public void HandleRoomEvent(
                 RoomEventInfo eventInfo,
-                bool isCreator,
                 uint localPlayerId,
                 bool updatedCurrentRoom,
                 bool localHostChanged)
             {
                 var effects = new List<PacketEffect>();
-                var suppressRemoteRoomCreatedNotice = ShouldSuppressRemoteRoomCreatedNotice(eventInfo, isCreator);
-
-                if (eventInfo.Kind == RoomEventKind.RoomCreated && !isCreator && !suppressRemoteRoomCreatedNotice)
+                if (eventInfo.Kind == RoomEventKind.RoomCreated)
+                {
                     effects.Add(PacketEffect.PlaySound("room_created.ogg"));
+                    var createdText = HistoryText.FromRoomEvent(eventInfo);
+                    if (!string.IsNullOrWhiteSpace(createdText))
+                        effects.Add(PacketEffect.AddRoomEventHistory(createdText));
+                    _owner.DispatchPacketEffects(effects);
+                    return;
+                }
 
-                if (!suppressRemoteRoomCreatedNotice)
+                if (updatedCurrentRoom)
                 {
                     var roomEventText = HistoryText.FromRoomEvent(eventInfo);
                     if (!string.IsNullOrWhiteSpace(roomEventText))
                         effects.Add(PacketEffect.AddRoomEventHistory(roomEventText));
-                }
 
-                if (updatedCurrentRoom)
                     AddCurrentRoomEventEffects(eventInfo, localPlayerId, effects);
-                if (localHostChanged)
-                    AddRoomMenuRebuildEffects(effects);
-                if (updatedCurrentRoom)
+                    if (localHostChanged)
+                        AddRoomMenuRebuildEffects(effects);
                     effects.Add(PacketEffect.RebuildRoomPlayers());
+                }
 
                 _owner.DispatchPacketEffects(effects);
             }
@@ -97,14 +99,6 @@ namespace TopSpeed.Core.Multiplayer
                         effects.Add(PacketEffect.Speak(HistoryText.BotRemoved(roomEvent)));
                         break;
                 }
-            }
-
-            private bool ShouldSuppressRemoteRoomCreatedNotice(RoomEventInfo eventInfo, bool isCreator)
-            {
-                return eventInfo.Kind == RoomEventKind.RoomCreated
-                    && _owner._state.Rooms.CurrentRoom.InRoom
-                    && !isCreator
-                    && _owner._state.Rooms.CurrentRoom.RoomId != eventInfo.RoomId;
             }
         }
     }

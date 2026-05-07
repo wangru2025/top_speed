@@ -19,10 +19,10 @@ namespace TopSpeed.Game
         public SessionReconnector(MultiplayerConnector connector)
         {
             _connector = connector ?? throw new ArgumentNullException(nameof(connector));
-            State = ConnectionLifecycleState.Closed;
+            State = MultiplayerConnectionState.DisconnectedCleanly;
         }
 
-        public ConnectionLifecycleState State { get; private set; }
+        public MultiplayerConnectionState State { get; private set; }
         public bool IsActive => _task != null;
 
         public bool Begin(MultiplayerSession session, bool wasInRace)
@@ -34,7 +34,7 @@ namespace TopSpeed.Game
 
             _wasInRace = wasInRace;
             _cts = new CancellationTokenSource();
-            State = ConnectionLifecycleState.Reconnecting;
+            State = MultiplayerConnectionState.Connecting;
             _task = ReconnectAsync(
                 session.Address.ToString(),
                 session.Port,
@@ -55,7 +55,7 @@ namespace TopSpeed.Game
 
             result = BuildReconnectFailureResult(task);
             wasInRace = _wasInRace;
-            State = result.Success ? ConnectionLifecycleState.Resumed : ConnectionLifecycleState.Closed;
+            State = result.Success ? MultiplayerConnectionState.Connected : result.ConnectionState;
             Clear();
             return true;
         }
@@ -73,7 +73,7 @@ namespace TopSpeed.Game
             {
             }
 
-            State = ConnectionLifecycleState.Closed;
+            State = MultiplayerConnectionState.DisconnectedCleanly;
             Clear();
         }
 

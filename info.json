@@ -1,19 +1,13 @@
 {
-  "version": "2026.5.4.3",
-  "serverVersion": "2026.5.4.2",
+  "version": "2026.5.5.1",
+  "serverVersion": "2026.5.5.1",
   "changes": [
-    "Added the ability to choose which modifier keys are being used when you remap a key in the game. This allows you to either use both modifiers, or the left/right.",
-    "Fixed a critical crash with ZDSR by disabling CET compatibility. The game should no longer crash again when ZDSR is installed.",
-    "Fixed some critical crashes when discovering local servers on the network.",
-    "Android now runs in landscape mode"
+    "Fixed many bugs with the multiplayer server.",
+    "Added a new way of navigating through message history by using the comma to move to the previous item, period to move to the next item, and left/right brackets are used to navigate between buffers. The separate history screen is still available.",
+    "Added an ability to copy the current buffer item to the clipboard by pressing ctrl+space, or by going to the history and pressing enter on any message there.",
+    "Added the ability to reset menu shortcuts to their defaults."
   ],
   "serverChanges": [
-    "Refactored server and made race finish events much more reliable.",
-    "Added reconnect support, when a player loses connection suddenly, there is now a 20 seconds reconnect period before fully disposing the player.",
-    "Fixed player randomization.",
-    "Fixed a regression where protocol version mismatches did not trigger a hard fail.",
-    "Added moderation tools to prevent duplicate names on the server, prevent long names, prevent repeated letters in a name, and control text chat on the server level.",
-    "Added initial support for custom tracks.",
-    "You can now host your own custom tracks on the server, and other people can see them when they enable custom tracks."
+    "Fixed some deadlock bugs with rooms where players would get stuck in a room after a while."
   ]
 }

@@ -29,7 +29,7 @@ namespace TopSpeed.Server.Network
 
         private bool IsPlayerOnlineVisible(PlayerConnection player)
         {
-            return player != null && player.Handshake == HandshakeState.Complete;
+            return player != null && player.Connected && player.Handshake == HandshakeState.Complete;
         }
 
         private PacketOnlinePlayer BuildOnlinePlayerPacket(PlayerConnection player)

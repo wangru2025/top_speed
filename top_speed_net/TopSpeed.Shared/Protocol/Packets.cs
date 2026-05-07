@@ -389,4 +389,18 @@ namespace TopSpeed.Protocol
         public ulong ResumeToken;
         public string Message = string.Empty;
     }
+
+    public sealed class PacketClientHeartbeat
+    {
+        public uint PlayerId;
+        public ulong SessionId;
+        public uint ClientTick;
+        public uint LastReceivedServerTick;
+    }
+
+    public sealed class PacketServerHeartbeat
+    {
+        public uint ServerTick;
+        public uint LastReceivedClientTick;
+    }
 }

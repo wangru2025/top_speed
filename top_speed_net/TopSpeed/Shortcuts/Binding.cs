@@ -6,7 +6,13 @@ namespace TopSpeed.Shortcuts
 {
     internal readonly struct ShortcutBinding
     {
-        public ShortcutBinding(string actionId, string displayName, string description, Key key, Gesture? gestureIntent = null)
+        public ShortcutBinding(
+            string actionId,
+            string displayName,
+            string description,
+            Key key,
+            ShortcutModifiers modifiers,
+            Gesture? gestureIntent = null)
         {
             if (string.IsNullOrWhiteSpace(actionId))
                 throw new ArgumentException("Shortcut action id is required.", nameof(actionId));
@@ -19,6 +25,7 @@ namespace TopSpeed.Shortcuts
             DisplayName = displayName.Trim();
             Description = description.Trim();
             Key = key;
+            Modifiers = modifiers;
             GestureIntent = gestureIntent;
         }
 
@@ -26,6 +33,7 @@ namespace TopSpeed.Shortcuts
         public string DisplayName { get; }
         public string Description { get; }
         public Key Key { get; }
+        public ShortcutModifiers Modifiers { get; }
         public Gesture? GestureIntent { get; }
     }
 }

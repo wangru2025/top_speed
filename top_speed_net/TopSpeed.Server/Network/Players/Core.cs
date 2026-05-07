@@ -26,10 +26,13 @@ namespace TopSpeed.Server.Network
             }
 
             player.Name = validation.NormalizedName;
+            player.MarkPlayerIdentified();
             if (finalizeHandshake)
             {
                 player.Handshake = HandshakeState.Complete;
+                player.MarkSessionReady();
                 _session.SendInitialConnectionState(player);
+                player.MarkActive();
             }
 
             if (!player.ServerPresenceAnnounced)
@@ -39,6 +42,7 @@ namespace TopSpeed.Server.Network
             }
             if (player.RoomId.HasValue && _rooms.TryGetValue(player.RoomId.Value, out var room))
             {
+                SetRoomMemberPresence(room, player.Id, RoomMemberPresenceState.Active);
                 _room.TouchVersion(room);
                 _notify.RoomParticipant(
                     room,
@@ -49,6 +53,7 @@ namespace TopSpeed.Server.Network
                     string.IsNullOrWhiteSpace(player.Name)
                         ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), player.PlayerNumber + 1)
                         : player.Name);
+                _notify.BroadcastRoomState(room);
             }
         }
 

@@ -31,6 +31,21 @@ namespace TopSpeed.Core.Multiplayer
             _owner.PreviousChatItemCore();
         }
 
+        public void FirstItem()
+        {
+            _owner.FirstChatItemCore();
+        }
+
+        public void LastItem()
+        {
+            _owner.LastChatItemCore();
+        }
+
+        public void CopyFocusedItem()
+        {
+            _owner.CopyFocusedChatItemCore();
+        }
+
         public void OpenGlobalChatHotkey()
         {
             _owner.OpenGlobalChatHotkeyCore();

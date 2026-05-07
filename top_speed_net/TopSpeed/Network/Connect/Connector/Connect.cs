@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteNetLib;
@@ -37,6 +38,15 @@ namespace TopSpeed.Network
             NetPeer? connectedPeer = null;
             var disconnected = false;
             var disconnectReason = string.Empty;
+            var disconnectClassification = new ClientDisconnectClassification(
+                MultiplayerDisconnectReason.Unknown,
+                MultiplayerConnectionState.ConnectionLostSuspected,
+                shouldAttemptReconnect: true,
+                LocalizationService.Mark("Connection lost."));
+            var hasDisconnectClassification = false;
+            SocketError? lastNetworkSocketError = null;
+            var latestLatencyMs = 0;
+            MultiplayerSession? activeSession = null;
             var sawProtocolPacketVersionMismatch = false;
             var remotePacketVersion = (byte)0;
 
@@ -45,10 +55,24 @@ namespace TopSpeed.Network
             {
                 disconnected = true;
                 disconnectReason = info.Reason.ToString();
+                disconnectClassification = DisconnectMapping.ForClient(info.Reason);
+                hasDisconnectClassification = true;
                 incoming.Enqueue(new IncomingPacket(
                     Command.Disconnect,
                     new[] { ProtocolConstants.Version, (byte)Command.Disconnect },
-                    DateTime.UtcNow.Ticks));
+                    DateTime.UtcNow.Ticks,
+                    disconnectClassification.Reason,
+                    disconnectClassification.State,
+                    hasDisconnectClassification: true));
+            };
+            listener.NetworkErrorEvent += (_, socketError) =>
+            {
+                lastNetworkSocketError = socketError;
+            };
+            listener.NetworkLatencyUpdateEvent += (_, latency) =>
+            {
+                latestLatencyMs = latency;
+                activeSession?.ApplyTransportPing(latency);
             };
             listener.NetworkReceiveEvent += (_, reader, _, _) =>
             {
@@ -68,6 +92,19 @@ namespace TopSpeed.Network
             var manager = new NetManager(listener)
             {
                 UpdateTime = 1,
+                PingInterval = 1000,
+                DisconnectTimeout = 10000,
+                DisconnectOnUnreachable = false,
+                ReconnectDelay = 500,
+                MaxConnectAttempts = 20,
+                UnsyncedEvents = false,
+                UnsyncedReceiveEvent = false,
+                UnsyncedDeliveryEvent = false,
+                AutoRecycle = false,
+                EnableStatistics = true,
+                MtuOverride = 0,
+                MtuDiscovery = false,
+                UseNativeSockets = false,
                 ChannelsCount = PacketStreams.Count
             };
 
@@ -96,9 +133,26 @@ namespace TopSpeed.Network
                 if (disconnected && connectedPeer == null)
                 {
                     manager.Stop();
-                    return ConnectResult.CreateFail(LocalizationService.Format(
-                        LocalizationService.Mark("Connection failed: {0}"),
-                        disconnectReason));
+                    var baseMessage = hasDisconnectClassification
+                        ? disconnectClassification.Message
+                        : LocalizationService.Format(LocalizationService.Mark("Connection failed: {0}"), disconnectReason);
+                    if (lastNetworkSocketError.HasValue)
+                    {
+                        baseMessage = LocalizationService.Format(
+                            LocalizationService.Mark("{0} Socket error: {1}."),
+                            baseMessage,
+                            lastNetworkSocketError.Value);
+                    }
+
+                    if (hasDisconnectClassification)
+                    {
+                        return ConnectResult.CreateFail(
+                            baseMessage,
+                            disconnectClassification.Reason,
+                            disconnectClassification.State);
+                    }
+
+                    return ConnectResult.CreateFail(baseMessage);
                 }
 
                 if (!protocolHelloSent && connectedPeer != null && connectedPeer.ConnectionState == ConnectionState.Connected)
@@ -132,6 +186,8 @@ namespace TopSpeed.Network
                     protocolWelcome,
                     protocolFailureMessage,
                     disconnectReason,
+                    hasDisconnectClassification ? disconnectClassification : (ClientDisconnectClassification?)null,
+                    lastNetworkSocketError,
                     sanitizedCallSign,
                     endpoint);
 
@@ -143,7 +199,15 @@ namespace TopSpeed.Network
                 protocolFailureMessage = poll.ProtocolFailureMessage;
 
                 if (poll.Result.HasValue)
+                {
+                    if (poll.Result.Value.Success && poll.Result.Value.Session != null)
+                    {
+                        poll.Result.Value.Session.ApplyTransportPing(latestLatencyMs);
+                        activeSession = poll.Result.Value.Session;
+                    }
+
                     return poll.Result.Value;
+                }
 
                 await Task.Delay(10, token).ConfigureAwait(false);
             }
@@ -159,13 +223,21 @@ namespace TopSpeed.Network
                     return ConnectResult.CreateFail(LocalizationService.Format(
                         LocalizationService.Mark("Protocol packet version mismatch. Server uses packet version {0}, client expects {1}. Update your client or server."),
                         remotePacketVersion,
-                        ProtocolConstants.Version));
+                        ProtocolConstants.Version),
+                        MultiplayerDisconnectReason.ProtocolError,
+                        MultiplayerConnectionState.ProtocolError);
                 }
 
-                return ConnectResult.CreateFail(LocalizationService.Mark("No protocol negotiation response from server. The server may be outdated or incompatible."));
+                return ConnectResult.CreateFail(
+                    LocalizationService.Mark("No protocol negotiation response from server. The server may be outdated or incompatible."),
+                    MultiplayerDisconnectReason.ProtocolError,
+                    MultiplayerConnectionState.ProtocolError);
             }
 
-            return ConnectResult.CreateFail(LocalizationService.Mark("No response from server. The server may be offline or unreachable."));
+            return ConnectResult.CreateFail(
+                LocalizationService.Mark("No response from server. The server may be offline or unreachable."),
+                MultiplayerDisconnectReason.ConnectionFailed,
+                MultiplayerConnectionState.ConnectionLostSuspected);
         }
     }
 }

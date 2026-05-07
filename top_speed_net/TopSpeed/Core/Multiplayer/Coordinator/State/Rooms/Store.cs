@@ -8,6 +8,7 @@ namespace TopSpeed.Core.Multiplayer
     {
         private uint _latestRoomEventSequence;
         private uint _latestRoomStateSequence;
+        private uint _latestRoomSequenceRoomId;
 
         public RoomListInfo RoomList = new RoomListInfo();
         public RoomSnapshot CurrentRoom = new RoomSnapshot { InRoom = false, Players = Array.Empty<RoomParticipant>() };
@@ -28,6 +29,7 @@ namespace TopSpeed.Core.Multiplayer
             OnlinePlayers = new OnlineListInfo();
             _latestRoomEventSequence = 0;
             _latestRoomStateSequence = 0;
+            _latestRoomSequenceRoomId = 0;
         }
 
         public RoomStateChange ApplyRoomState(PacketRoomState roomState)
@@ -35,6 +37,14 @@ namespace TopSpeed.Core.Multiplayer
             var change = new RoomStateChange(WasInRoom, LastRoomId, WasHost, CurrentRoom.RoomType);
             if (IsStaleRoomState(roomState))
                 return change.WithApplied(false);
+
+            var nextRoomId = roomState != null && roomState.InRoom ? roomState.RoomId : 0u;
+            if (_latestRoomSequenceRoomId != nextRoomId)
+            {
+                _latestRoomSequenceRoomId = nextRoomId;
+                _latestRoomEventSequence = 0;
+                _latestRoomStateSequence = 0;
+            }
 
             CurrentRoom = RoomMap.ToSnapshot(roomState);
             if (roomState != null && roomState.EventSequence != 0)
@@ -57,14 +67,14 @@ namespace TopSpeed.Core.Multiplayer
 
             if (CurrentRoom.InRoom && CurrentRoom.RoomId == roomRaceStateChanged.RoomId)
             {
-                if (IsStaleEvent(roomRaceStateChanged.EventSequence))
+                if (IsStaleEvent(roomRaceStateChanged.EventSequence, roomRaceStateChanged.RoomId))
                     return new RoomRaceChange(beginLoadout, leaveLoadout, applied: false);
                 if (roomRaceStateChanged.RoomVersion != 0 && CurrentRoom.RoomVersion > roomRaceStateChanged.RoomVersion)
                     return new RoomRaceChange(beginLoadout, leaveLoadout, applied: false);
 
                 var previousRaceState = CurrentRoom.RaceState;
                 if (roomRaceStateChanged.EventSequence != 0)
-                    AdvanceEventSequence(roomRaceStateChanged.EventSequence);
+                    AdvanceEventSequence(roomRaceStateChanged.RoomId, roomRaceStateChanged.EventSequence);
                 CurrentRoom.RoomVersion = roomRaceStateChanged.RoomVersion;
                 CurrentRoom.RaceInstanceId = roomRaceStateChanged.RaceInstanceId;
                 var nextState = RoomRules.NormalizeRaceState(roomRaceStateChanged.State);
@@ -119,21 +129,32 @@ namespace TopSpeed.Core.Multiplayer
             return CurrentRoom.RoomVersion > roomState.RoomVersion;
         }
 
-        private bool IsStaleEvent(uint eventSequence)
+        private bool IsStaleEvent(uint eventSequence, uint roomId)
         {
             if (eventSequence == 0)
                 return false;
             if (!CurrentRoom.InRoom)
+                return false;
+            if (roomId == 0 || CurrentRoom.RoomId != roomId)
+                return false;
+            if (_latestRoomSequenceRoomId != roomId)
                 return false;
             if (_latestRoomEventSequence == 0)
                 return false;
             return PacketValidation.IsStaleSequence(_latestRoomEventSequence, eventSequence);
         }
 
-        private void AdvanceEventSequence(uint eventSequence)
+        private void AdvanceEventSequence(uint roomId, uint eventSequence)
         {
-            if (eventSequence == 0)
+            if (roomId == 0 || eventSequence == 0)
                 return;
+
+            if (_latestRoomSequenceRoomId != roomId)
+            {
+                _latestRoomSequenceRoomId = roomId;
+                _latestRoomEventSequence = 0;
+                _latestRoomStateSequence = 0;
+            }
 
             if (_latestRoomEventSequence < eventSequence)
                 _latestRoomEventSequence = eventSequence;

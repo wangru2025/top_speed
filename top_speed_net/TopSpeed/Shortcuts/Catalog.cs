@@ -37,21 +37,22 @@ namespace TopSpeed.Shortcuts
             string displayName,
             string description,
             Key key,
+            ShortcutModifiers modifiers,
             Action onTrigger,
             Func<bool>? canExecute = null,
             GestureIntent? gestureIntent = null)
         {
-            var action = new ShortcutAction(actionId, displayName, description, key, onTrigger, canExecute, gestureIntent);
+            var action = new ShortcutAction(actionId, displayName, description, key, modifiers, onTrigger, canExecute, gestureIntent);
             _actions[action.Id] = action;
         }
 
-        public void SetBinding(string actionId, Key key)
+        public void SetBinding(string actionId, Key key, ShortcutModifiers modifiers)
         {
             var normalized = NormalizeRequiredId(actionId, nameof(actionId));
             if (!_actions.TryGetValue(normalized, out var action))
                 throw new InvalidOperationException($"Shortcut action '{normalized}' is not registered.");
 
-            action.SetKey(key);
+            action.SetBinding(key, modifiers);
         }
 
         public void SetGlobalActions(IEnumerable<string>? actionIds)
@@ -92,7 +93,7 @@ namespace TopSpeed.Shortcuts
                 if (!_actions.TryGetValue(actionId, out var candidate))
                     continue;
 
-                var pressedByKeyboard = input.WasPressed(candidate.Key);
+                var pressedByKeyboard = IsPressedByKeyboard(input, candidate);
                 var pressedByGesture = candidate.GestureIntent.HasValue &&
                     input.WasGesturePressed(candidate.GestureIntent.Value);
                 if (!pressedByKeyboard && !pressedByGesture)
@@ -105,6 +106,28 @@ namespace TopSpeed.Shortcuts
             }
 
             return false;
+        }
+
+        public bool TryResolveTriggeredActionById(IInputService input, string actionId, out ShortcutAction action)
+        {
+            action = null!;
+            if (input == null || string.IsNullOrWhiteSpace(actionId))
+                return false;
+
+            var normalized = actionId.Trim();
+            if (!_actions.TryGetValue(normalized, out var candidate))
+                return false;
+            if (!candidate.CanExecute())
+                return false;
+
+            var pressedByKeyboard = IsPressedByKeyboard(input, candidate);
+            var pressedByGesture = candidate.GestureIntent.HasValue &&
+                input.WasGesturePressed(candidate.GestureIntent.Value);
+            if (!pressedByKeyboard && !pressedByGesture)
+                return false;
+
+            action = candidate;
+            return true;
         }
 
         public IReadOnlyList<ShortcutGroup> GetGroups()
@@ -159,7 +182,7 @@ namespace TopSpeed.Shortcuts
             return true;
         }
 
-        public bool IsKeyInUseInGroup(string groupId, Key key, string ignoredActionId)
+        public bool IsBindingInUseInGroup(string groupId, Key key, ShortcutModifiers modifiers, string ignoredActionId)
         {
             if (!TryGetGroupActionIds(groupId, out var actionIds))
                 return false;
@@ -174,7 +197,7 @@ namespace TopSpeed.Shortcuts
                     continue;
                 if (!_actions.TryGetValue(actionId, out var action))
                     continue;
-                if (action.Key == key)
+                if (action.Key == key && action.Modifiers.Equals(modifiers))
                     return true;
             }
 
@@ -185,6 +208,27 @@ namespace TopSpeed.Shortcuts
         {
             foreach (var pair in _actions)
                 pair.Value.ResetKey();
+        }
+
+        public bool ResetBindingsInGroup(string groupId)
+        {
+            if (!TryGetGroupActionIds(groupId, out var actionIds))
+                return false;
+            if (actionIds.Count == 0)
+                return false;
+
+            var resetAny = false;
+            for (var i = 0; i < actionIds.Count; i++)
+            {
+                var actionId = actionIds[i];
+                if (!_actions.TryGetValue(actionId, out var action))
+                    continue;
+
+                action.ResetKey();
+                resetAny = true;
+            }
+
+            return resetAny;
         }
 
         private List<string> BuildCandidateActionIds(in ShortcutContext context)
@@ -386,7 +430,15 @@ namespace TopSpeed.Shortcuts
 
         private static ShortcutBinding CreateBinding(ShortcutAction action)
         {
-            return new ShortcutBinding(action.Id, action.DisplayName, action.Description, action.Key, action.GestureIntent);
+            return new ShortcutBinding(action.Id, action.DisplayName, action.Description, action.Key, action.Modifiers, action.GestureIntent);
+        }
+
+        private static bool IsPressedByKeyboard(IInputService input, ShortcutAction candidate)
+        {
+            if (!candidate.Modifiers.MatchesInput(input))
+                return false;
+
+            return input.WasPressed(candidate.Key);
         }
 
         private static string FormatName(string source)

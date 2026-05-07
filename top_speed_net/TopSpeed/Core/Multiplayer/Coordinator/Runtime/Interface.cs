@@ -22,6 +22,11 @@ namespace TopSpeed.Core.Multiplayer
             PreviousChatItem();
         }
 
+        bool IMultiplayerRuntime.TryHandleRaceLoopHistoryShortcuts(Input.IInputService input)
+        {
+            return TryHandleRaceLoopHistoryShortcuts(input);
+        }
+
         void IMultiplayerRuntime.CheckPing()
         {
             CheckCurrentPing();
@@ -35,6 +40,16 @@ namespace TopSpeed.Core.Multiplayer
         void IMultiplayerRuntime.OpenRoomChatHotkey()
         {
             OpenRoomChatHotkey();
+        }
+
+        void IMultiplayerRuntime.StartConnectingSoundPulse()
+        {
+            StartConnectingPulse();
+        }
+
+        void IMultiplayerRuntime.StopConnectingSoundPulse()
+        {
+            StopConnectingPulse();
         }
 
         bool IMultiplayerMenuTouch.HasActiveOverlayQuestion => _questions.HasActiveOverlayQuestion;

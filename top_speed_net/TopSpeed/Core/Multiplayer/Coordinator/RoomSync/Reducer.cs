@@ -28,7 +28,6 @@ namespace TopSpeed.Core.Multiplayer
 
         public RoomEventReduceResult ApplyRoomEvent(RoomEventInfo eventInfo, uint localPlayerId)
         {
-            _state.Rooms.ApplyRoomListEvent(eventInfo);
             var updatedCurrentRoom = _state.Rooms.TryApplyCurrentRoomEvent(
                 eventInfo,
                 localPlayerId,

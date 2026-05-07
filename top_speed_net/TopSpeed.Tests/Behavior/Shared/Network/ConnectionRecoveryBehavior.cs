@@ -63,5 +63,22 @@ namespace TopSpeed.Tests.Behavior.Shared.Network
                 requestedPlayerId: 12,
                 requestedResumeToken: 99).Should().BeFalse();
         }
+
+        [Fact]
+        public void Resume_is_rejected_when_remote_ip_does_not_match()
+        {
+            var suspendedAt = DateTime.UtcNow;
+
+            ConnectionRecoveryRules.CanResume(
+                ConnectionLifecycleState.Suspended,
+                suspendedAt,
+                suspendedAt + TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(20),
+                playerId: 12,
+                resumeToken: 99,
+                requestedPlayerId: 12,
+                requestedResumeToken: 99,
+                remoteIpMatches: false).Should().BeFalse();
+        }
     }
 }

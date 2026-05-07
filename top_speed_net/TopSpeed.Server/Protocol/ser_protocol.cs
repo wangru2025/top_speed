@@ -46,6 +46,35 @@ namespace TopSpeed.Server.Protocol
             return buffer;
         }
 
+        public static bool TryReadClientHeartbeat(byte[] data, out PacketClientHeartbeat packet)
+        {
+            packet = new PacketClientHeartbeat();
+            if (data == null || data.Length < 2 + 4 + 8 + 4 + 4)
+                return false;
+            if (data[0] != ProtocolConstants.Version || data[1] != (byte)Command.ClientHeartbeat)
+                return false;
+
+            var reader = new PacketReader(data);
+            reader.ReadByte();
+            reader.ReadByte();
+            packet.PlayerId = reader.ReadUInt32();
+            packet.SessionId = reader.ReadUInt64();
+            packet.ClientTick = reader.ReadUInt32();
+            packet.LastReceivedServerTick = reader.ReadUInt32();
+            return true;
+        }
+
+        public static byte[] WriteServerHeartbeat(PacketServerHeartbeat packet)
+        {
+            var buffer = WritePacketHeader(Command.ServerHeartbeat, 4 + 4);
+            var writer = new PacketWriter(buffer);
+            writer.WriteByte(ProtocolConstants.Version);
+            writer.WriteByte((byte)Command.ServerHeartbeat);
+            writer.WriteUInt32(packet.ServerTick);
+            writer.WriteUInt32(packet.LastReceivedClientTick);
+            return buffer;
+        }
+
         private static ProtocolVer ReadProtocolVer(ref PacketReader reader)
         {
             var year = reader.ReadUInt16();

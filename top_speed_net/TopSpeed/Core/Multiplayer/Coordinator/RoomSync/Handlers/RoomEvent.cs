@@ -21,13 +21,12 @@ namespace TopSpeed.Core.Multiplayer
                 return;
 
             var session = SessionOrNull();
-            var isCreator = session != null && eventInfo.HostPlayerId == session.PlayerId;
             var localPlayerId = session?.PlayerId ?? 0u;
 
             var result = _roomReducer.ApplyRoomEvent(eventInfo, localPlayerId);
             if (result.UpdatedCurrentRoom)
                 SyncClientStateFromRoomStore();
-            _roomUi.HandleRoomEvent(eventInfo, isCreator, localPlayerId, result.UpdatedCurrentRoom, result.LocalHostChanged);
+            _roomUi.HandleRoomEvent(eventInfo, localPlayerId, result.UpdatedCurrentRoom, result.LocalHostChanged);
         }
     }
 }

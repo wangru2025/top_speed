@@ -14,6 +14,7 @@ namespace TopSpeed.Shortcuts
             string displayName,
             string description,
             Key key,
+            ShortcutModifiers modifiers,
             Action onTrigger,
             Func<bool>? canExecute = null,
             Gesture? gestureIntent = null)
@@ -30,6 +31,8 @@ namespace TopSpeed.Shortcuts
             Description = description.Trim();
             Key = key;
             DefaultKey = key;
+            Modifiers = modifiers;
+            DefaultModifiers = modifiers;
             GestureIntent = gestureIntent;
             DefaultGestureIntent = gestureIntent;
             _onTrigger = onTrigger ?? throw new ArgumentNullException(nameof(onTrigger));
@@ -41,17 +44,21 @@ namespace TopSpeed.Shortcuts
         public string Description { get; }
         public Key Key { get; private set; }
         public Key DefaultKey { get; }
+        public ShortcutModifiers Modifiers { get; private set; }
+        public ShortcutModifiers DefaultModifiers { get; }
         public Gesture? GestureIntent { get; private set; }
         public Gesture? DefaultGestureIntent { get; }
 
-        public void SetKey(Key key)
+        public void SetBinding(Key key, ShortcutModifiers modifiers)
         {
             Key = key;
+            Modifiers = modifiers;
         }
 
         public void ResetKey()
         {
             Key = DefaultKey;
+            Modifiers = DefaultModifiers;
             GestureIntent = DefaultGestureIntent;
         }
 

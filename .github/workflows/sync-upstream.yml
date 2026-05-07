@@ -1,0 +1,99 @@
+name: Sync Upstream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Sync fork main with upstream main
+        id: sync_main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git remote add upstream https://github.com/diamondStar35/top_speed.git
+          git fetch origin main china-release
+          git fetch upstream main
+
+          git checkout -B main origin/main
+
+          before_main="$(git rev-parse HEAD)"
+          git merge --ff-only upstream/main
+          after_main="$(git rev-parse HEAD)"
+
+          if [[ "$before_main" != "$after_main" ]]; then
+            git push origin main
+            echo "main_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge main into china-release
+        id: sync_china
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git show-ref --verify --quiet refs/remotes/origin/china-release; then
+            git checkout -B china-release origin/china-release
+          else
+            git checkout -B china-release origin/main
+          fi
+
+          before_china="$(git rev-parse HEAD)"
+
+          if git merge --no-edit origin/main; then
+            :
+          else
+            keep_files=(
+              "top_speed_net/TopSpeed/Core/Updates/Config.cs"
+              "top_speed_net/TopSpeed/Core/Updates/Models.cs"
+              "top_speed_net/TopSpeed/Core/Updates/Service.cs"
+              "top_speed_net/TopSpeed.Tests/Behavior/Client/Updates/UpdateConfigBehavior.cs"
+              "top_speed_net/TopSpeed.Tests/Behavior/Client/Updates/UpdateServiceBehavior.cs"
+              ".github/workflows/release-build.yml"
+              ".github/workflows/sync-upstream.yml"
+            )
+
+            for file in "${keep_files[@]}"; do
+              if git ls-files --error-unmatch "$file" >/dev/null 2>&1 || [[ -f "$file" ]]; then
+                git checkout --ours -- "$file" || true
+                git add "$file" || true
+              fi
+            done
+
+            unresolved="$(git diff --name-only --diff-filter=U)"
+            if [[ -n "$unresolved" ]]; then
+              echo "Unresolved merge conflicts remain:" >&2
+              echo "$unresolved" >&2
+              exit 1
+            fi
+
+            git commit --no-edit
+          fi
+
+          after_china="$(git rev-parse HEAD)"
+
+          if [[ "$before_china" != "$after_china" ]]; then
+            git push origin china-release
+            echo "china_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "china_updated=false" >> "$GITHUB_OUTPUT"
+          fi

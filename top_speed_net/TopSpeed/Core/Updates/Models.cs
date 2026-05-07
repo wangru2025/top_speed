@@ -9,6 +9,7 @@ namespace TopSpeed.Core.Updates
         public GameVersion Version { get; set; }
         public IReadOnlyList<string> Changes { get; set; } = Array.Empty<string>();
         public string DownloadUrl { get; set; } = string.Empty;
+        public IReadOnlyList<string> DownloadUrls { get; set; } = Array.Empty<string>();
         public long AssetSizeBytes { get; set; }
     }
 

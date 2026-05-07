@@ -26,4 +26,16 @@ public sealed class UpdateConfigBehaviorTests
 
         actual.Should().Be(expectedName);
     }
+
+    [Fact]
+    public void Default_ShouldPreferMirrorAndFallbackToForkGithubRelease()
+    {
+        var config = UpdateConfig.Default;
+
+        config.Sources.Should().HaveCount(2);
+        config.Sources[0].InfoUrl.Should().Be("https://ts.wangru.net/top_speed/info.json");
+        config.Sources[0].LatestReleaseApiUrl.Should().Be("https://ts.wangru.net/top_speed/releases/latest");
+        config.Sources[1].InfoUrl.Should().Be("https://raw.githubusercontent.com/wangru2025/top_speed/china-release/info.json");
+        config.Sources[1].LatestReleaseApiUrl.Should().Be("https://api.github.com/repos/wangru2025/top_speed/releases/latest");
+    }
 }

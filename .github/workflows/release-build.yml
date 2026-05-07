@@ -2,7 +2,7 @@ name: Release Build
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "china-release" ]
     paths-ignore:
       - ".gitignore"
 

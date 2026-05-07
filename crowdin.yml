@@ -4,8 +4,11 @@ files:
     skip_untranslated_files: true
     languages_mapping:
       locale:
+        zh: zh-cn
         zh-CN: zh-cn
+        es: es
         es-ES: es
+        vi: vi
         vi-VN: vi
 
   - source: /top_speed_net/languages/server/messages.pot
@@ -13,5 +16,7 @@ files:
     skip_untranslated_files: true
     languages_mapping:
       locale:
+        zh: zh-cn
         zh-CN: zh-cn
+        vi: vi
         vi-VN: vi

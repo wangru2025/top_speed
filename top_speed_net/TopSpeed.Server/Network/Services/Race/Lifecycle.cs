@@ -13,7 +13,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Race
         {
-            public void AssignRandomBotLoadouts(RaceRoom room)
+            public void AssignRandomBotLoadouts(GameRoom room)
             {
                 foreach (var bot in room.Bots)
                 {
@@ -23,7 +23,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void AnnounceBotsReady(RaceRoom room)
+            public void AnnounceBotsReady(GameRoom room)
             {
                 foreach (var bot in room.Bots.OrderBy(candidate => candidate.PlayerNumber))
                 {
@@ -35,7 +35,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public int GetMinimumParticipantsToStart(RaceRoom room)
+            public int GetMinimumParticipantsToStart(GameRoom room)
             {
                 if (room == null)
                     return 1;
@@ -43,7 +43,7 @@ namespace TopSpeed.Server.Network
                 return 2;
             }
 
-            public void TryStartAfterLoadout(RaceRoom room)
+            public void TryStartAfterLoadout(GameRoom room)
             {
                 if (!room.PreparingRace)
                     return;
@@ -54,7 +54,7 @@ namespace TopSpeed.Server.Network
                 if (activeParticipantsForBarrier < minimumParticipants)
                 {
                     _owner._startBarrierBlockedInsufficientActive++;
-                    TransitionState(room, RoomRaceState.Lobby);
+                    TransitionRaceState(room, RoomRaceState.Lobby);
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
                     room.PrepareSkips.Clear();
@@ -91,7 +91,7 @@ namespace TopSpeed.Server.Network
                 if (activeParticipants < minimumParticipants)
                 {
                     _owner._startBarrierBlockedInsufficientActive++;
-                    TransitionState(room, RoomRaceState.Lobby);
+                    TransitionRaceState(room, RoomRaceState.Lobby);
                     room.RacePaused = false;
                     room.PendingLoadouts.Clear();
                     room.PrepareSkips.Clear();
@@ -105,7 +105,7 @@ namespace TopSpeed.Server.Network
                     return;
                 }
 
-                if (!_owner.EnsureRoomTrackPackageReady(room, activeHumanParticipantIds))
+                if (!_owner.EnsureRoomPackageReady(room, activeHumanParticipantIds))
                 {
                     _owner._startBarrierBlockedTrackNotReady++;
                     _owner._logger.Debug(LocalizationService.Format(
@@ -125,7 +125,7 @@ namespace TopSpeed.Server.Network
                 Start(room);
             }
 
-            public void TransitionState(RaceRoom room, RoomRaceState nextState, RoomRaceAbortReason abortReason = RoomRaceAbortReason.None)
+            public void TransitionRaceState(GameRoom room, RoomRaceState nextState, RoomRaceAbortReason abortReason = RoomRaceAbortReason.None)
             {
                 if (room == null || room.RaceState == nextState)
                     return;
@@ -137,7 +137,7 @@ namespace TopSpeed.Server.Network
                     _owner._notify.RaceAborted(room, abortReason);
             }
 
-            public void Abort(RaceRoom room, RoomRaceAbortReason reason)
+            public void Abort(GameRoom room, RoomRaceAbortReason reason)
             {
                 if (room == null)
                     return;
@@ -162,17 +162,17 @@ namespace TopSpeed.Server.Network
                 foreach (var bot in room.Bots)
                     bot.State = PlayerState.NotReady;
 
-                TransitionState(room, RoomRaceState.Aborted, reason);
+                TransitionRaceState(room, RoomRaceState.Aborted, reason);
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
                 _owner._notify.BroadcastRoomState(room);
             }
 
-            public void Start(RaceRoom room)
+            public void Start(GameRoom room)
             {
                 if (room.RaceStarted)
                     return;
 
-                _owner._room.ShuffleNumbersForRaceStart(room);
+                _owner._room.ShuffleNumbersForGameStart(room);
                 var activePlayerIds = _owner.EnumerateActiveHumanPlayerIds(room)
                     .Where(id => room.PendingLoadouts.ContainsKey(id))
                     .ToList();
@@ -181,7 +181,7 @@ namespace TopSpeed.Server.Network
 
                 RoomEventJournal.ClearForRaceStart(room);
                 room.RaceInstanceId++;
-                TransitionState(room, RoomRaceState.Racing);
+                TransitionRaceState(room, RoomRaceState.Racing);
                 room.RacePaused = false;
                 room.ActiveRaceParticipantIds.Clear();
                 room.RaceResults.Clear();
@@ -247,7 +247,7 @@ namespace TopSpeed.Server.Network
                 }
 
                 InitializeParticipants(room);
-                _owner.SendTrackToRoom(room);
+                _owner.BroadcastSelectedTrackToRoom(room);
                 var startPayload = PacketSerializer.WriteGeneral(Command.StartRace);
                 foreach (var id in activePlayerIds)
                 {
@@ -271,7 +271,7 @@ namespace TopSpeed.Server.Network
                 room.PrepareSkips.Clear();
             }
 
-            public void Stop(RaceRoom room)
+            public void Stop(GameRoom room)
             {
                 _owner._logger.Debug(LocalizationService.Format(
                     LocalizationService.Mark("Stopping race: room={0}, active={1}, trackedResults={2}."),
@@ -286,7 +286,7 @@ namespace TopSpeed.Server.Network
                         room.Id,
                         invariantReason));
                 }
-                TransitionState(room, RoomRaceState.Completed);
+                TransitionRaceState(room, RoomRaceState.Completed);
                 room.RacePaused = false;
                 room.PendingLoadouts.Clear();
                 room.PrepareSkips.Clear();
@@ -337,15 +337,17 @@ namespace TopSpeed.Server.Network
                     string.Join(",", room.RaceResults)));
             }
 
-            private int CountReadyHumans(RaceRoom room)
+            private int CountReadyHumans(GameRoom room)
             {
                 return room.PendingLoadouts.Keys.Count(id => _owner.IsRoomMemberActive(room, id));
             }
 
-            private int CountSkippedHumans(RaceRoom room)
+            private int CountSkippedHumans(GameRoom room)
             {
                 return room.PrepareSkips.Count(id => _owner.IsRoomMemberActive(room, id));
             }
         }
     }
 }
+
+

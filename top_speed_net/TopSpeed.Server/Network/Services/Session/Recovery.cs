@@ -102,7 +102,7 @@ namespace TopSpeed.Server.Network
                     player.MarkInRoom();
                     if (room.PlayerIds.Contains(player.Id))
                     {
-                        _owner.SendTrack(room, player);
+                        _owner.SendSelectedTrackToPlayer(room, player);
                         _owner.SyncMediaTo(room, player);
                         _owner.SyncLiveTo(room, player);
                     }
@@ -197,7 +197,7 @@ namespace TopSpeed.Server.Network
                 return _owner._players.Count <= _owner._config.MaxPlayers;
             }
 
-            private void SendResumeRaceState(PlayerConnection player, RaceRoom room)
+            private void SendResumeRaceState(PlayerConnection player, GameRoom room)
             {
                 if (room == null)
                     return;
@@ -213,7 +213,7 @@ namespace TopSpeed.Server.Network
                 else if (room.RaceState == RoomRaceState.Completed)
                 {
                     _owner._notify.ReplayRoomEventsTo(player, room, afterSequence: 0);
-                    _owner._notify.RaceCompletedTo(player, room);
+                    _owner._notify.SendRaceCompletionTo(player, room);
                 }
                 else if (room.RaceState == RoomRaceState.Aborted)
                 {
@@ -234,3 +234,5 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+
+

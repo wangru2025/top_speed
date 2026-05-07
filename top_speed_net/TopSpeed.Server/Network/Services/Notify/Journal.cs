@@ -5,12 +5,12 @@ namespace TopSpeed.Server.Network
 {
     internal static class RoomEventJournal
     {
-        public static void ClearForRaceStart(RaceRoom room)
+        public static void ClearForRaceStart(GameRoom room)
         {
             room?.EventJournal.Clear();
         }
 
-        public static bool Record(RaceRoom room, Command command, uint sequence, byte[] payload, PacketStream stream)
+        public static bool Record(GameRoom room, Command command, uint sequence, byte[] payload, PacketStream stream)
         {
             if (room == null || payload == null || sequence == 0)
                 return false;
@@ -29,7 +29,7 @@ namespace TopSpeed.Server.Network
             return true;
         }
 
-        public static IEnumerable<RoomEventJournalEntry> ReplayAfter(RaceRoom room, uint afterSequence)
+        public static IEnumerable<RoomEventJournalEntry> ReplayAfter(GameRoom room, uint afterSequence)
         {
             if (room == null)
                 yield break;
@@ -45,3 +45,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

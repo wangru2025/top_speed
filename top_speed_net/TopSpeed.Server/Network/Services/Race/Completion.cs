@@ -20,7 +20,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void UpdateStopState(RaceRoom room)
+            public void UpdateStopState(GameRoom room)
             {
                 if (room == null || room.RaceState != RoomRaceState.Racing)
                     return;
@@ -60,7 +60,7 @@ namespace TopSpeed.Server.Network
                 Stop(room);
             }
 
-            public int CaptureFinishTimeMs(RaceRoom room)
+            public int CaptureFinishTimeMs(GameRoom room)
             {
                 if (room.RaceStartedUtc == default(DateTime))
                     return 0;
@@ -73,7 +73,7 @@ namespace TopSpeed.Server.Network
                 return Math.Max(0, millis);
             }
 
-            public bool TryMarkParticipantFinished(RaceRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
+            public bool TryMarkParticipantFinished(GameRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
             {
                 if (!RaceParticipantFinisher.TryMarkFinished(room, playerId, playerNumber, finishTimeMs, out finishOrder))
                 {
@@ -90,7 +90,7 @@ namespace TopSpeed.Server.Network
                 return true;
             }
 
-            public void MarkParticipantDnf(RaceRoom room, uint playerId, byte playerNumber)
+            public void MarkParticipantDnf(GameRoom room, uint playerId, byte playerNumber)
             {
                 if (room == null)
                     return;
@@ -108,7 +108,7 @@ namespace TopSpeed.Server.Network
                 RaceParticipantFinisher.TryMarkDnf(room, playerId, playerNumber, RaceParticipantLifecycleState.Dnf);
             }
 
-            public void FinalizeUnresolvedParticipantsAsDnf(RaceRoom room)
+            public void FinalizeUnresolvedParticipantsAsDnf(GameRoom room)
             {
                 foreach (var id in room.ActiveRaceParticipantIds)
                 {
@@ -129,7 +129,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void InitializeParticipants(RaceRoom room)
+            public void InitializeParticipants(GameRoom room)
             {
                 room.RaceParticipantResults.Clear();
                 room.RaceResults.Clear();
@@ -141,7 +141,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            private RoomRaceParticipantResult GetOrCreateParticipantResult(RaceRoom room, uint participantId)
+            private RoomRaceParticipantResult GetOrCreateParticipantResult(GameRoom room, uint participantId)
             {
                 if (!room.RaceParticipantResults.TryGetValue(participantId, out var result))
                 {
@@ -162,7 +162,7 @@ namespace TopSpeed.Server.Network
                 return result;
             }
 
-            private byte ResolveParticipantNumber(RaceRoom room, uint participantId)
+            private byte ResolveParticipantNumber(GameRoom room, uint participantId)
             {
                 if (_owner._players.TryGetValue(participantId, out var player))
                     return player.PlayerNumber;
@@ -176,7 +176,7 @@ namespace TopSpeed.Server.Network
                 return 0;
             }
 
-            private static bool TryGetActiveBot(RaceRoom room, uint botId, out RoomBot bot)
+            private static bool TryGetActiveBot(GameRoom room, uint botId, out RoomBot bot)
             {
                 for (var i = 0; i < room.Bots.Count; i++)
                 {
@@ -193,3 +193,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

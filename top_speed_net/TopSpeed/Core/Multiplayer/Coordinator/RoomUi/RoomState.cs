@@ -13,6 +13,9 @@ namespace TopSpeed.Core.Multiplayer
                 if (!change.Applied)
                     return;
 
+                if (_owner._state.Rooms.CurrentRoom.InRoom)
+                    _owner.HandleAuthoritativeRoomGameRulesChanged();
+
                 var effects = new List<PacketEffect>();
 
                 AddRoomJoinLeaveEffects(effects, change.WasInRoom, change.PreviousRoomId);

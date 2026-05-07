@@ -53,8 +53,10 @@ namespace TopSpeed.Core.Multiplayer
         private static string ResolveRoomName(string roomName)
         {
             if (!string.IsNullOrWhiteSpace(roomName))
-                return roomName;
-            return MainRoomName;
+                return string.Equals(roomName.Trim(), MainRoomName, StringComparison.Ordinal)
+                    ? LocalizationService.Translate(MainRoomName)
+                    : roomName;
+            return LocalizationService.Translate(MainRoomName);
         }
 
         private static OnlinePresenceState NormalizePresence(OnlinePresenceState state)

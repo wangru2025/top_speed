@@ -148,7 +148,7 @@ namespace TopSpeed.Server.Network
                     return;
 
                 var roomId = player.RoomId;
-                RaceRoom? room = null;
+                GameRoom? room = null;
                 if (roomId.HasValue)
                     _owner._rooms.TryGetValue(roomId.Value, out room);
 
@@ -191,7 +191,7 @@ namespace TopSpeed.Server.Network
                     reason));
             }
 
-            private void MigrateHostAfterSuspend(RaceRoom room, uint suspendedHostId)
+            private void MigrateHostAfterSuspend(GameRoom room, uint suspendedHostId)
             {
                 foreach (var id in room.PlayerIds.OrderBy(id => id))
                 {
@@ -253,3 +253,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

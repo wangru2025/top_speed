@@ -9,7 +9,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Room
         {
-            public bool TryGetHosted(PlayerConnection player, out RaceRoom room)
+            public bool TryGetHosted(PlayerConnection player, out GameRoom room)
             {
                 room = null!;
                 if (!player.RoomId.HasValue)
@@ -37,29 +37,30 @@ namespace TopSpeed.Server.Network
                 return true;
             }
 
-            public void SetTrackData(RaceRoom room, string trackName)
+            public void SetTrackData(GameRoom room, string trackName)
             {
                 room.TrackName = trackName;
                 room.TrackSelection = TrackPackageRef.BuiltIn(trackName);
                 room.TrackData = TrackLoader.LoadTrack(room.TrackName, room.Laps, _owner._logger);
                 room.TrackSelected = true;
-                _owner.ResetRoomTrackReadiness(room);
+                _owner.ResetRoomPackageReadiness(room);
             }
 
-            public bool SetTrackData(RaceRoom room, TrackPackageRef track)
+            public bool SetTrackData(GameRoom room, TrackPackageRef track)
             {
                 if (track == null || !track.IsCustomPackage)
                     return false;
-                if (!_owner.TryGetTrackPackage(track.Hash, out var package))
+                if (!_owner.TryGetPackage(track.Hash, out var package))
                     return false;
 
                 room.TrackSelection = TrackPackageRef.Custom(package.Ref.TrackId, package.Ref.Version, package.Ref.Hash);
                 room.TrackName = room.TrackSelection.TrackId;
                 room.TrackData = package.TrackData.WithLaps(room.Laps);
                 room.TrackSelected = true;
-                _owner.ResetRoomTrackReadiness(room);
+                _owner.ResetRoomPackageReadiness(room);
                 return true;
             }
         }
     }
 }
+

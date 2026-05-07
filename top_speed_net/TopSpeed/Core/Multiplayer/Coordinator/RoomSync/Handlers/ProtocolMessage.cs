@@ -17,11 +17,21 @@ namespace TopSpeed.Core.Multiplayer
             if (message == null)
                 return;
 
+            var effects = new List<PacketEffect>();
+            if (_state.RoomDrafts.RoomTrackTypeOpenPending && message.Code == ProtocolMessageCode.Failed)
+            {
+                _state.RoomDrafts.RoomTrackTypeOpenPending = false;
+                var authoritativeFlags = NormalizeRoomOptionsGameRulesFlags(_state.Rooms.CurrentRoom.GameRulesFlags);
+                _state.RoomDrafts.RoomOptionsGameRulesFlags = authoritativeFlags;
+                _state.RoomDrafts.RoomOptionsAppliedGameRulesFlags = authoritativeFlags;
+                effects.Add(PacketEffect.RebuildRoomOptions());
+                effects.Add(PacketEffect.RebuildRoomGameRules());
+            }
+
             var localizedMessage = string.IsNullOrWhiteSpace(message.Message)
                 ? string.Empty
                 : LocalizationService.Translate(message.Message);
 
-            var effects = new List<PacketEffect>();
             AddProtocolMessageEffects(message, localizedMessage, effects);
 
             if (!string.IsNullOrWhiteSpace(localizedMessage))

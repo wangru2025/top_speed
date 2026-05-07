@@ -6,7 +6,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed class Live
+        private sealed class Live : ILiveService
         {
             private readonly RaceServer _owner;
 

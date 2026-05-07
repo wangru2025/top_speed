@@ -7,7 +7,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Room
         {
-            public void ControlRace(PlayerConnection player, PacketRoomRaceControl packet)
+            public void HandleRoomControl(PlayerConnection player, PacketRoomRaceControl packet)
             {
                 if (!TryGetHosted(player, out var room))
                     return;
@@ -27,7 +27,7 @@ namespace TopSpeed.Server.Network
                         return;
 
                     case RoomRaceControlAction.Stop:
-                        StopRace(player, room);
+                        StopCurrentGame(player, room);
                         return;
 
                     default:
@@ -36,7 +36,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            private void CancelPrepare(PlayerConnection player, RaceRoom room)
+            private void CancelPrepare(PlayerConnection player, GameRoom room)
             {
                 if (!room.PreparingRace)
                 {
@@ -47,7 +47,7 @@ namespace TopSpeed.Server.Network
                 _owner._race.CancelPrepare(room, player);
             }
 
-            private void SetPaused(PlayerConnection player, RaceRoom room, bool paused)
+            private void SetPaused(PlayerConnection player, GameRoom room, bool paused)
             {
                 if (!room.RaceStarted)
                 {
@@ -69,7 +69,7 @@ namespace TopSpeed.Server.Network
                 _owner._race.SetPaused(room, player, paused);
             }
 
-            private void StopRace(PlayerConnection player, RaceRoom room)
+            private void StopCurrentGame(PlayerConnection player, GameRoom room)
             {
                 if (!room.RaceStarted)
                 {
@@ -82,3 +82,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

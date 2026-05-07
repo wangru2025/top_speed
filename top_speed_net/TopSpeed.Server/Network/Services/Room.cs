@@ -6,7 +6,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed partial class Room
+        private sealed partial class Room : IRoomService
         {
             private readonly RaceServer _owner;
 
@@ -52,35 +52,35 @@ namespace TopSpeed.Server.Network
                 registry.Add("room", Command.TrackPackageUploadBegin, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadTrackPackageUploadBegin(payload, out var begin))
-                        HandleUploadBegin(player, begin);
+                        HandlePackageUploadBegin(player, begin);
                     else
                         _owner.PacketFail(endPoint, Command.TrackPackageUploadBegin);
                 });
                 registry.Add("room", Command.TrackPackageUploadChunk, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadTrackPackageUploadChunk(payload, out var chunk))
-                        HandleUploadChunk(player, chunk);
+                        HandlePackageUploadChunk(player, chunk);
                     else
                         _owner.PacketFail(endPoint, Command.TrackPackageUploadChunk);
                 });
                 registry.Add("room", Command.TrackPackageUploadEnd, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadTrackPackageUploadEnd(payload, out var end))
-                        HandleUploadEnd(player, end);
+                        HandlePackageUploadEnd(player, end);
                     else
                         _owner.PacketFail(endPoint, Command.TrackPackageUploadEnd);
                 });
                 registry.Add("room", Command.TrackPackageReady, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadTrackPackageReady(payload, out var ready))
-                        HandleReady(player, ready);
+                        HandlePackageReady(player, ready);
                     else
                         _owner.PacketFail(endPoint, Command.TrackPackageReady);
                 });
                 registry.Add("room", Command.TrackPackageCatalogRequest, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadTrackPackageCatalogRequest(payload, out var request))
-                        HandleCatalogRequest(player, request);
+                        HandlePackageCatalogRequest(player, request);
                     else
                         _owner.PacketFail(endPoint, Command.TrackPackageCatalogRequest);
                 });
@@ -91,7 +91,7 @@ namespace TopSpeed.Server.Network
                     else
                         _owner.PacketFail(endPoint, Command.RoomSetLaps);
                 });
-                registry.Add("room", Command.RoomStartRace, (player, _, _) => StartRace(player));
+                registry.Add("room", Command.RoomStartRace, (player, _, _) => StartRoomGame(player));
                 registry.Add("room", Command.RoomSetPlayersToStart, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadRoomSetPlayersToStart(payload, out var setPlayers))
@@ -119,7 +119,7 @@ namespace TopSpeed.Server.Network
                 registry.Add("room", Command.RoomRaceControl, (player, payload, endPoint) =>
                 {
                     if (PacketSerializer.TryReadRoomRaceControl(payload, out var control))
-                        ControlRace(player, control);
+                        HandleRoomControl(player, control);
                     else
                         _owner.PacketFail(endPoint, Command.RoomRaceControl);
                 });
@@ -127,4 +127,5 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+
 

@@ -1,5 +1,9 @@
 using System;
 using System.Collections.Generic;
+using TopSpeed.Core;
+using TopSpeed.Core.Multiplayer;
+using TopSpeed.Core.Multiplayer.Chat;
+using TopSpeed.Data;
 using TopSpeed.Localization;
 using TopSpeed.Protocol;
 using TopSpeed.Vehicles;
@@ -56,6 +60,52 @@ namespace TopSpeed.Tests
             LocalizationService.Translate(OfficialVehicleCatalog.Vehicles[0].Name)
                 .Should()
                 .Be("日产 GT-R Nismo");
+        }
+
+        [Fact]
+        public void OnlinePlayers_MainRoom_ShouldTranslate()
+        {
+            using var scope = LocalizationScope.Map(new Dictionary<string, string>
+            {
+                ["main room"] = "主房间"
+            });
+
+            var result = OnlineMap.ToList(new PacketOnlinePlayers
+            {
+                Players = new[]
+                {
+                    new PacketOnlinePlayer
+                    {
+                        PlayerId = 1,
+                        PlayerNumber = 0,
+                        Name = "Shuyue",
+                        PresenceState = OnlinePresenceState.Available,
+                        RoomName = "main room"
+                    }
+                }
+            });
+
+            result.Players.Should().HaveCount(1);
+            result.Players[0].RoomName.Should().Be("主房间");
+        }
+
+        [Fact]
+        public void TrackChangedHistory_ShouldTranslateBuiltInTrackName()
+        {
+            using var scope = LocalizationScope.Map(new Dictionary<string, string>
+            {
+                ["Track changed to {0}."] = "赛道已更改为 {0}。",
+                [TrackList.RaceTracks[0].Display] = "美国"
+            });
+
+            var text = HistoryText.FromRoomEvent(new RoomEventInfo
+            {
+                Kind = RoomEventKind.TrackChanged,
+                Track = TrackPackageRef.BuiltIn(TrackList.RaceTracks[0].Key),
+                TrackName = TrackList.RaceTracks[0].Key
+            });
+
+            text.Should().Be("赛道已更改为 美国。");
         }
 
         private sealed class LocalizationScope : IDisposable

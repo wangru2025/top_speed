@@ -12,7 +12,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldCompleteWhenAllActiveParticipantsResolve()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2);
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2);
         room.ActiveRaceParticipantIds.Add(10);
         room.ActiveRaceParticipantIds.Add(11);
         room.RaceParticipantResults[10] = new RoomRaceParticipantResult
@@ -42,7 +42,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldCompleteWhenDisconnectedParticipantExpiresAsDnf()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2);
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2);
         room.ActiveRaceParticipantIds.Add(10);
         room.ActiveRaceParticipantIds.Add(11);
         room.RaceParticipantResults[10] = new RoomRaceParticipantResult
@@ -66,7 +66,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldKeepReconnectedParticipantPendingBeforeGraceExpiry()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2);
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2);
         room.ActiveRaceParticipantIds.Add(10);
         room.ActiveRaceParticipantIds.Add(11);
         room.RaceParticipantResults[10] = new RoomRaceParticipantResult
@@ -90,7 +90,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldRecordFinishOnce()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2)
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2)
         {
             RaceState = RoomRaceState.Racing
         };
@@ -111,7 +111,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldAssignStableFinishOrder()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2)
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2)
         {
             RaceState = RoomRaceState.Racing
         };
@@ -131,7 +131,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void ServerRoomScenario_ShouldResolveDisconnectAfterGraceAsDnf()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2)
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2)
         {
             RaceState = RoomRaceState.Racing
         };
@@ -157,7 +157,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void RoomEventJournal_ShouldReplayOnlyMissingOrderedEvents()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2)
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2)
         {
             RaceInstanceId = 5
         };
@@ -175,7 +175,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void RoomEventJournal_ShouldRejectNonIncreasingSequences()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2);
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2);
 
         RoomEventJournal.Record(room, Command.RoomRaceStateChanged, 2, new byte[] { 2 }, PacketStream.Room).Should().BeTrue();
         RoomEventJournal.Record(room, Command.RoomRacePlayerFinished, 2, new byte[] { 3 }, PacketStream.Room).Should().BeFalse();
@@ -187,7 +187,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void RoomEventJournal_ShouldClearForNextRaceWithoutResettingRoomSequence()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2)
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2)
         {
             EventSequence = 7
         };
@@ -202,7 +202,7 @@ public sealed class ServerRaceScenarioBehaviorTests
     [Fact]
     public void RaceCompletionInvariants_ShouldRejectDuplicateFinishOrders()
     {
-        var room = new RaceRoom(1, "integration", GameRoomType.PlayersRace, 2);
+        var room = new GameRoom(1, "integration", GameRoomType.PlayersRace, 2);
         room.RaceParticipantResults[10] = new RoomRaceParticipantResult
         {
             PlayerId = 10,
@@ -268,7 +268,7 @@ public sealed class ServerRaceScenarioBehaviorTests
         bot.PhysicsState.Gear.Should().Be(1);
     }
 
-    private static RoomRaceResultStatus[] SnapshotStatuses(RaceRoom room)
+    private static RoomRaceResultStatus[] SnapshotStatuses(GameRoom room)
     {
         var statuses = new RoomRaceResultStatus[room.ActiveRaceParticipantIds.Count];
         var index = 0;
@@ -282,3 +282,4 @@ public sealed class ServerRaceScenarioBehaviorTests
         return statuses;
     }
 }
+

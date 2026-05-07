@@ -5,7 +5,7 @@ namespace TopSpeed.Server.Network
 {
     internal static class RaceParticipantFinisher
     {
-        public static bool TryMarkFinished(RaceRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
+        public static bool TryMarkFinished(GameRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
         {
             finishOrder = 0;
             if (room == null || room.RaceState != RoomRaceState.Racing)
@@ -50,7 +50,7 @@ namespace TopSpeed.Server.Network
         }
 
         public static bool TryMarkDnf(
-            RaceRoom room,
+            GameRoom room,
             uint playerId,
             byte playerNumber,
             RaceParticipantLifecycleState lifecycle)
@@ -82,3 +82,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

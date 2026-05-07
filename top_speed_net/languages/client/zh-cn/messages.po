@@ -4812,12 +4812,12 @@ msgstr "{0} 人已连接。"
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\Core.cs:30
 #, csharp-format
 msgid "{0} player"
-msgstr "{0} 玩家"
+msgstr "{0} 名玩家"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\Core.cs:31
 #, csharp-format
 msgid "{0} players"
-msgstr "{0} 玩家"
+msgstr "{0} 名玩家"
 
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:31
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultFmt.cs:42
@@ -4901,3 +4901,308 @@ msgstr "{0}：用时 {2}，第 {1} 名完赛。"
 #, csharp-format
 msgid "{0}: position {1}, time {2}."
 msgstr "{0}：第 {1} 名，用时 {2}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:58
+msgid "A track upload is already in progress."
+msgstr "已有赛道上传正在进行中。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:25
+msgid "Connection lost. Reconnecting."
+msgstr "连接已丢失。正在重新连接。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadBuild.cs:16
+msgid "Custom track file path is empty."
+msgstr "自定义赛道文件路径为空。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu.cs:131
+msgid "Custom tracks"
+msgstr "自定义赛道"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:50
+msgid "Custom tracks are disabled for this room."
+msgstr "此房间已禁用自定义赛道。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:304
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:307
+msgid "disabled"
+msgstr "禁用"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\TrackPackages\DownloadProgress.cs:46
+msgid "Downloading track..."
+msgstr "正在下载赛道..."
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:303
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:306
+msgid "enabled"
+msgstr "启用"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:115
+msgid "Game rules changed."
+msgstr "游戏规则已更改。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:74
+msgid "Loading custom tracks from server."
+msgstr "正在从服务器加载自定义赛道。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:82
+#, csharp-format
+msgid "Maximum players changed to {0}."
+msgstr "最大玩家数量已更改为 {0}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:56
+msgid "Not connected to a server. Returning to main menu."
+msgstr "当前未连接到服务器。正在返回主菜单。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:77
+#, csharp-format
+msgid "Number of laps changed to {0}."
+msgstr "圈数已更改为 {0}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:118
+msgid "Race paused."
+msgstr "比赛已暂停。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:103
+msgid "Race preparation started."
+msgstr "比赛准备已开始。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:106
+msgid "Race preparation was cancelled."
+msgstr "比赛准备已取消。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:121
+msgid "Race resumed."
+msgstr "比赛已恢复。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:109
+msgid "Race started."
+msgstr "比赛已开始。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:37
+msgid "Reconnected to server."
+msgstr "已重新连接到服务器。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Connection\Reconnector.cs:97
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:42
+msgid "Reconnection failed."
+msgstr "重新连接失败。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:59
+#, csharp-format
+msgid "Room created: {0}."
+msgstr "已创建房间：{0}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:64
+#, csharp-format
+msgid "Room removed: {0}."
+msgstr "房间已移除：{0}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:76
+#, csharp-format
+msgid "Sound asset path escapes the track folder: {0}"
+msgstr "音效资源路径超出了赛道文件夹范围：{0}"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:112
+msgid "The current race was stopped."
+msgstr "当前比赛已停止。"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:13
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Errors.cs:19
+msgid "The selected custom track is invalid."
+msgstr "所选自定义赛道无效。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:72
+#, csharp-format
+msgid "Track changed to {0}."
+msgstr "赛道已更改为 {0}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Payload.cs:23
+msgid "Track data is missing."
+msgstr "赛道数据缺失。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:50
+msgid "Track package upload failed."
+msgstr "赛道包上传失败。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:43
+msgid "Track package uploaded successfully."
+msgstr "赛道包上传成功。"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:23
+msgid "Track source path is missing, so sound assets cannot be resolved."
+msgstr "缺少赛道源路径，因此无法解析音效资源。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:91
+msgid "Track upload canceled because the connection was lost."
+msgstr "由于连接丢失，赛道上传已取消。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:36
+msgid "Track upload canceled."
+msgstr "赛道上传已取消。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:65
+msgid "Unable to prepare custom track upload."
+msgstr "无法准备自定义赛道上传。"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:30
+msgid "Unable to resolve custom track folder path."
+msgstr "无法解析自定义赛道文件夹路径。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Multiplayer.cs:113
+msgid "Upload a local custom track"
+msgstr "上传本地自定义赛道"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:93
+msgid "Upload a local track"
+msgstr "上传本地赛道"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:29
+#, csharp-format
+msgid "Uploaded size: {0}"
+msgstr "已上传大小：{0}"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadProgress.cs:34
+msgid "Uploading track..."
+msgstr "正在上传赛道..."
+
+#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Core.cs:168
+msgid "What's new"
+msgstr "新内容"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:301
+#, csharp-format
+msgid ""
+"Ghost mode is {0}. Custom tracks are {1}. The chosen track is {2}. The game "
+"will run for {3}. This room is limited to {4}."
+msgstr "幽灵模式已{0}。自定义赛道已{1}。所选赛道为 {2}。比赛将进行 {3}。此房间限制为 {4}。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:292
+#, csharp-format
+msgid "{0} lap"
+msgstr "{0} 圈"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:293
+#, csharp-format
+msgid "{0} laps"
+msgstr "{0} 圈"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Check.cs:233
+msgid "Change log file"
+msgstr "更新日志文件"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:94
+#, csharp-format
+msgid "Invalid sound asset path: {0}"
+msgstr "无效的音效资源路径：{0}"
+
+#: D:\top_speed\top_speed_net\TopSpeed.Shared\Protocol\TrackPackages\Build\Assets.cs:88
+#, csharp-format
+msgid "Missing sound asset file: {0}"
+msgstr "缺少音效资源文件：{0}"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Game\Multiplayer\Reconnect.cs:47
+msgid "Reconnection is in progress. Disconnecting now."
+msgstr "正在重新连接。现将立即断开连接。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:95
+msgid "Room host changed."
+msgstr "房主已更换。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options.cs:316
+msgid "When enabled, room hosts can upload and select custom tracks from this server."
+msgstr "启用后，房主可以从此服务器上传并选择自定义赛道。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:47
+msgid "add bot request"
+msgstr "添加机器人请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\Catalog.cs:43
+msgid "custom track list request"
+msgstr "自定义赛道列表请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:37
+msgid "game cancel request"
+msgstr "取消游戏请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:52
+msgid "game rules change request"
+msgstr "游戏规则更改请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:49
+msgid "lap count change request"
+msgstr "圈数更改请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\Online.cs:22
+msgid "online players request"
+msgstr "在线玩家列表请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:51
+msgid "player count change request"
+msgstr "玩家数量更改请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:39
+msgid "race preparation withdrawal"
+msgstr "退出比赛准备"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:38
+msgid "race start request"
+msgstr "开始比赛请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:87
+msgid "ready state"
+msgstr "准备状态"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:48
+msgid "remove bot request"
+msgstr "移除机器人请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:34
+msgid "room create request"
+msgstr "创建房间请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:35
+msgid "room join request"
+msgstr "加入房间请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:36
+msgid "room leave request"
+msgstr "离开房间请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:33
+msgid "room list request"
+msgstr "房间列表请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Actions.cs:46
+msgid "track change request"
+msgstr "赛道更改请求"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:33
+msgid "track upload cancel"
+msgstr "取消赛道上传"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:31
+msgid "track upload chunk"
+msgstr "赛道上传分块"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:32
+msgid "track upload completion"
+msgstr "赛道上传完成"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\TrackPackages\UploadRuntime.cs:30
+msgid "track upload start"
+msgstr "开始赛道上传"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:90
+#, csharp-format
+msgid "{0} changed ready state."
+msgstr "{0} 更改了准备状态。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:49
+#, csharp-format
+msgid "{0} was added to the current room."
+msgstr "{0} 已加入当前房间。"
+
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:54
+#, csharp-format
+msgid "{0} was removed from the current room."
+msgstr "{0} 已从当前房间移除。"

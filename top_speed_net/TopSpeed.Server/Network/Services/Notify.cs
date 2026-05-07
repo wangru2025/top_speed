@@ -4,7 +4,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed partial class Notify
+        private sealed partial class Notify : INotifyService
         {
             private readonly RaceServer _owner;
 

@@ -190,12 +190,12 @@ namespace TopSpeed.Server.Network
                 _owner._notify.ToRoomExcept(room, player.Id, PacketSerializer.WritePlayer(Command.PlayerCrashed, player.Id, player.PlayerNumber), PacketStream.RaceEvent);
             }
 
-            public void MarkFinished(RaceRoom room, PlayerConnection player)
+            public void MarkFinished(GameRoom room, PlayerConnection player)
             {
                 ResolveHumanFinish(room, player, out _);
             }
 
-            private bool TryGetPlayerRoom(PlayerConnection player, out RaceRoom room)
+            private bool TryGetPlayerRoom(PlayerConnection player, out GameRoom room)
             {
                 if (player.RoomId.HasValue && _owner._rooms.TryGetValue(player.RoomId.Value, out var resolvedRoom) && resolvedRoom != null)
                 {
@@ -207,7 +207,7 @@ namespace TopSpeed.Server.Network
                 return false;
             }
 
-            private bool ValidatePacket(RaceRoom room, PlayerConnection player, uint raceInstanceId, uint payloadPlayerId, byte payloadPlayerNumber, ref int dropCounter, string commandName)
+            private bool ValidatePacket(GameRoom room, PlayerConnection player, uint raceInstanceId, uint payloadPlayerId, byte payloadPlayerNumber, ref int dropCounter, string commandName)
             {
                 if (!PacketValidation.IsValidPlayerId(payloadPlayerId)
                     || !PacketValidation.IsValidPlayerNumber(payloadPlayerNumber)
@@ -256,3 +256,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

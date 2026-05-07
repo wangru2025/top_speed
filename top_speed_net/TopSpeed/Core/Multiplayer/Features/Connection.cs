@@ -1,6 +1,6 @@
 namespace TopSpeed.Core.Multiplayer
 {
-    internal sealed class ConnectionFlow
+    internal sealed class ConnectionFlow : IConnectionFlow
     {
         private readonly MultiplayerCoordinator _owner;
 

@@ -70,7 +70,7 @@ namespace TopSpeed.Core.Multiplayer.Chat
                 case RoomEventKind.TrackChanged:
                     return LocalizationService.Format(
                         LocalizationService.Mark("Track changed to {0}."),
-                        roomEvent.TrackName);
+                        ResolveTrackName(roomEvent.Track, roomEvent.TrackName));
 
                 case RoomEventKind.LapsChanged:
                     return LocalizationService.Format(
@@ -139,6 +139,14 @@ namespace TopSpeed.Core.Multiplayer.Chat
             if (!string.IsNullOrWhiteSpace(roomName))
                 return roomName.Trim();
             return LocalizationService.Translate(LocalizationService.Mark("game room"));
+        }
+
+        private static string ResolveTrackName(TrackPackageRef track, string trackName)
+        {
+            var display = MultiplayerCoordinator.FormatTrackDisplayName(track, trackName);
+            return string.IsNullOrWhiteSpace(display)
+                ? LocalizationService.Translate(LocalizationService.Mark("Unknown"))
+                : display;
         }
     }
 }

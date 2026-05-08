@@ -105,6 +105,7 @@
     </NativeReference>
     <NativeReference Include="..\TopSpeed\ThirdParty\ios\libprism.a" Condition="Exists('..\TopSpeed\ThirdParty\ios\libprism.a')">
       <Kind>Static</Kind>
+      <Frameworks>AVFoundation Foundation</Frameworks>
       <SmartLink>false</SmartLink>
       <ForceLoad>true</ForceLoad>
     </NativeReference>

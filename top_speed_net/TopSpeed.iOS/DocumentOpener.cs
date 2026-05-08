@@ -33,11 +33,14 @@ internal sealed class IosDocumentOpener : IDocumentOpener
                 return false;
             }
 
-            if (!UIApplication.SharedApplication.OpenUrl(url))
+            var application = UIApplication.SharedApplication;
+            if (!application.CanOpenUrl(url))
             {
                 errorMessage = "iOS could not open this document type.";
                 return false;
             }
+
+            application.OpenUrl(url, new UIApplicationOpenUrlOptions(), null);
 
             return true;
         }

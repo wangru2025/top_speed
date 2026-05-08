@@ -92,6 +92,14 @@ namespace TS.Sdl
             return SDL_PollEvent(out value);
         }
 
+        public static bool IsMainThread()
+        {
+            if (!IsAvailable)
+                return false;
+
+            return SDL_IsMainThread();
+        }
+
         public static ulong GetTicksNs()
         {
             if (!IsAvailable)
@@ -132,6 +140,10 @@ namespace TS.Sdl
         [DllImport(LibraryName, EntryPoint = "SDL_PollEvent", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         private static extern bool SDL_PollEvent(out Event value);
+
+        [DllImport(LibraryName, EntryPoint = "SDL_IsMainThread", CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        private static extern bool SDL_IsMainThread();
 
         [DllImport(LibraryName, EntryPoint = "SDL_GetTicksNS", CallingConvention = CallingConvention.Cdecl)]
         private static extern ulong SDL_GetTicksNS();

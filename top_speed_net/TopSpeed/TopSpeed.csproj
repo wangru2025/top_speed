@@ -1,11 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <MobileHostBuild Condition="'$(MobileHostBuild)' == '' and ('$(AndroidHostBuild)' == 'true' or '$(IOSHostBuild)' == 'true')">true</MobileHostBuild>
+    <MobileHostOutputSubdir Condition="'$(AndroidHostBuild)' == 'true'">android-host</MobileHostOutputSubdir>
+    <MobileHostOutputSubdir Condition="'$(IOSHostBuild)' == 'true'">ios-host</MobileHostOutputSubdir>
+    <MobileHostOutputSubdir Condition="'$(MobileHostOutputSubdir)' == ''">mobile-host</MobileHostOutputSubdir>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseCurrentRuntimeIdentifier>false</UseCurrentRuntimeIdentifier>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(AndroidHostBuild)' != 'true'">net10.0</TargetFramework>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(AndroidHostBuild)' != 'true' and '$(OS)' == 'Windows_NT'">net10.0-windows</TargetFramework>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(AndroidHostBuild)' != 'true' and '$(OS)' != 'Windows_NT'">net10.0</TargetFramework>
-    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(TargetFramework)' == 'net10.0-windows' and '$(AndroidHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(MobileHostBuild)' != 'true'">net10.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(MobileHostBuild)' != 'true' and '$(OS)' == 'Windows_NT'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(MobileHostBuild)' != 'true' and '$(OS)' != 'Windows_NT'">net10.0</TargetFramework>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(TargetFramework)' == 'net10.0-windows' and '$(MobileHostBuild)' != 'true'">win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <!--
@@ -18,19 +25,19 @@
     <AssemblyName>TopSpeed</AssemblyName>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(AndroidHostBuild)' == 'true'">
+  <PropertyGroup Condition="'$(MobileHostBuild)' == 'true'">
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RuntimeIdentifier></RuntimeIdentifier>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <SelfContained>false</SelfContained>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputPath>bin\$(Configuration)\net10.0\android-host\</OutputPath>
+    <OutputPath>bin\$(Configuration)\net10.0\$(MobileHostOutputSubdir)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(AndroidHostBuild)' != 'true'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(MobileHostBuild)' != 'true'">
     <PlatformTarget>x64</PlatformTarget>
     <RuntimeIdentifiers>linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
   </PropertyGroup>
@@ -95,15 +102,15 @@
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(AndroidHostBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(MobileHostBuild)' != 'true'">
     <PackageReference Include="Eto.Forms" Version="2.8.3" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'linux-x64' and '$(AndroidHostBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'linux-x64' and '$(MobileHostBuild)' != 'true'">
     <PackageReference Include="Eto.Platform.Gtk" Version="2.8.3" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(AndroidHostBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(MobileHostBuild)' != 'true'">
     <PackageReference Include="Eto.Platform.Mac64" Version="2.8.3" />
   </ItemGroup>
 
@@ -123,11 +130,13 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
     <Compile Remove="AndroidLauncher.cs" />
+    <Compile Remove="IOSLauncher.cs" />
+    <Compile Remove="MobileLauncher.cs" />
     <Compile Remove="Window\Eto\**\*.cs" />
     <Compile Remove="Window\Sdl\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(AndroidHostBuild)' == 'true'">
+  <ItemGroup Condition="'$(MobileHostBuild)' == 'true'">
     <Compile Remove="Program.cs" />
     <Compile Remove="Window\Eto\**\*.cs" />
   </ItemGroup>
@@ -331,7 +340,7 @@
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Get-ChildItem -LiteralPath '$(PublishDir)' -Directory | Where-Object Name -Match '^[a-z]{2}(-[A-Za-z0-9]+)?\z' | Remove-Item -Recurse -Force&quot;" />
   </Target>
 
-  <Target Name="CopyUpdaterNet10" AfterTargets="Build" Condition="('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows') and '$(RuntimeIdentifier)' != '' and '$(AndroidHostBuild)' != 'true'">
+  <Target Name="CopyUpdaterNet10" AfterTargets="Build" Condition="('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows') and '$(RuntimeIdentifier)' != '' and '$(MobileHostBuild)' != 'true'">
     <PropertyGroup>
       <_UpdaterProjectPath>$(MSBuildThisFileDirectory)../Updater/Updater.csproj</_UpdaterProjectPath>
       <_UpdaterOutputPath>$([System.IO.Path]::GetFullPath('$(OutDir)'))</_UpdaterOutputPath>
@@ -349,7 +358,7 @@
     <Copy SourceFiles="@(_UpdaterPublishedFiles)" DestinationFiles="@(_UpdaterPublishedFiles->'$(_UpdaterOutputPath)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="PublishUpdaterNet10" AfterTargets="Publish" Condition="('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows') and '$(RuntimeIdentifier)' != '' and '$(AndroidHostBuild)' != 'true'">
+  <Target Name="PublishUpdaterNet10" AfterTargets="Publish" Condition="('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows') and '$(RuntimeIdentifier)' != '' and '$(MobileHostBuild)' != 'true'">
     <PropertyGroup>
       <_UpdaterProjectPath>$(MSBuildThisFileDirectory)../Updater/Updater.csproj</_UpdaterProjectPath>
       <_PublishDestinationPath>$([System.IO.Path]::GetFullPath('$(PublishDir)'))</_PublishDestinationPath>
@@ -380,7 +389,7 @@
     <Message Importance="high" Text="Created macOS app bundle at $(MacAppBundleDir)" />
   </Target>
 
-  <Target Name="ValidateNet10RuntimeIdentifier" BeforeTargets="Build;Publish" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == '' and '$(AndroidHostBuild)' != 'true'">
+  <Target Name="ValidateNet10RuntimeIdentifier" BeforeTargets="Build;Publish" Condition="'$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == '' and '$(MobileHostBuild)' != 'true'">
     <Error Text="net10.0 must be built/published with a runtime identifier (linux-x64, osx-x64, or osx-arm64)." />
   </Target>
 

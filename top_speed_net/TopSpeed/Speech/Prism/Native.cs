@@ -12,6 +12,9 @@ namespace TopSpeed.Speech.Prism
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("ANDROID")))
                 return new AndroidMethods();
 
+            if (IsIOS())
+                return new MacMethods();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return new WindowsMethods();
 
@@ -22,6 +25,15 @@ namespace TopSpeed.Speech.Prism
                 return new MacMethods();
 
             throw new PlatformNotSupportedException("Prism is not configured for this platform.");
+        }
+
+        private static bool IsIOS()
+        {
+#if NET10_0_OR_GREATER
+            return OperatingSystem.IsIOS();
+#else
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Create("IOS"));
+#endif
         }
 
         public static Config ConfigInit() => Methods.ConfigInit();

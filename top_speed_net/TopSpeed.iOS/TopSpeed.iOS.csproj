@@ -1,0 +1,139 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">ios-arm64</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TopSpeed.iOS</RootNamespace>
+    <AssemblyName>TopSpeed.iOS</AssemblyName>
+    <ApplicationId>com.topspeed.game</ApplicationId>
+    <ApplicationVersion>2026050601</ApplicationVersion>
+    <ApplicationDisplayVersion>2026.5.6.1</ApplicationDisplayVersion>
+    <MtouchLink>SdkOnly</MtouchLink>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <ArchiveOnBuild>true</ArchiveOnBuild>
+    <BuildIpa>true</BuildIpa>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CodesignKey Condition="'$(CodesignKey)' == '' and '$(IOS_CODESIGN_KEY)' != ''">$(IOS_CODESIGN_KEY)</CodesignKey>
+    <CodesignProvision Condition="'$(CodesignProvision)' == '' and '$(IOS_CODESIGN_PROVISION)' != ''">$(IOS_CODESIGN_PROVISION)</CodesignProvision>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RepoDocsDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\docs\'))</RepoDocsDir>
+    <RepoDocsRenderScript>$([System.IO.Path]::Combine('$(RepoDocsDir)', 'render_docs.py'))</RepoDocsRenderScript>
+    <TopSpeedIosHostOutputDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\TopSpeed\bin\$(Configuration)\net10.0\ios-host\'))</TopSpeedIosHostOutputDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Concentus" Version="1.1.7" />
+    <PackageReference Include="LiteNetLib" Version="1.3.1" />
+    <PackageReference Include="GetText.NET" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TopSpeed">
+      <HintPath>$(TopSpeedIosHostOutputDir)TopSpeed.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="TopSpeed.Shared">
+      <HintPath>$(TopSpeedIosHostOutputDir)TopSpeed.Shared.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="TS.Audio">
+      <HintPath>$(TopSpeedIosHostOutputDir)TS.Audio.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="TS.Sdl">
+      <HintPath>$(TopSpeedIosHostOutputDir)TS.Sdl.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SteamAudio.NET">
+      <HintPath>$(TopSpeedIosHostOutputDir)SteamAudio.NET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SoundFlow">
+      <HintPath>$(TopSpeedIosHostOutputDir)SoundFlow.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SoundFlow.Codecs.FFMpeg">
+      <HintPath>$(TopSpeedIosHostOutputDir)SoundFlow.Codecs.FFMpeg.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <BundleResource Include="..\Sounds\**\*">
+      <Link>Sounds/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </BundleResource>
+    <BundleResource Include="..\Tracks\**\*">
+      <Link>Tracks/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </BundleResource>
+    <BundleResource Include="..\Vehicles\**\*">
+      <Link>Vehicles/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </BundleResource>
+    <BundleResource Include="..\languages\client\**\*">
+      <Link>languages/client/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </BundleResource>
+    <BundleResource Include="..\languages\server\**\*">
+      <Link>languages/server/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </BundleResource>
+    <BundleResource Include="$(RepoDocsDir)changes.html">
+      <Link>docs/changes.html</Link>
+    </BundleResource>
+    <BundleResource Include="$(RepoDocsDir)game-guide.html">
+      <Link>docs/game-guide.html</Link>
+    </BundleResource>
+    <BundleResource Include="$(RepoDocsDir)track-creation-guide.html">
+      <Link>docs/track-creation-guide.html</Link>
+    </BundleResource>
+    <BundleResource Include="$(RepoDocsDir)vehicle-physics-and-creation-guide.html">
+      <Link>docs/vehicle-physics-and-creation-guide.html</Link>
+    </BundleResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <NativeReference Include="..\TopSpeed\ThirdParty\ios\SDL3.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\TopSpeed\ThirdParty\ios\libprism.a" Condition="Exists('..\TopSpeed\ThirdParty\ios\libprism.a')">
+      <Kind>Static</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\TopSpeed\ThirdParty\ios\libphonon.a">
+      <Kind>Static</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\SoundFlow\Src\Backends\MiniAudio\runtimes\ios-arm64\native\miniaudio.framework">
+      <Kind>Framework</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\SoundFlow\Codecs\SoundFlow.Codecs.FFMpeg\runtimes\ios-arm64\native\soundflow-ffmpeg.framework">
+      <Kind>Framework</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+  </ItemGroup>
+
+  <Target Name="BuildTopSpeedIosHost" BeforeTargets="PrepareForBuild">
+    <MSBuild
+      Projects="..\TopSpeed\TopSpeed.csproj"
+      Targets="Restore;Build"
+      Properties="Configuration=$(Configuration);IOSHostBuild=true;BaseIntermediateOutputPath=obj/iOSHost/"
+      RemoveProperties="RuntimeIdentifier;RuntimeIdentifiers;TargetFramework;PlatformTarget" />
+  </Target>
+
+  <Target Name="RenderAndIncludeDocsAssets" BeforeTargets="PrepareForBuild" Condition="Exists('$(RepoDocsRenderScript)')">
+    <Exec Command="python &quot;$(RepoDocsRenderScript)&quot; --all" ContinueOnError="WarnAndContinue" />
+  </Target>
+</Project>

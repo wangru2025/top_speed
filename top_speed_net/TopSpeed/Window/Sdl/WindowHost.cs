@@ -179,6 +179,11 @@ namespace TopSpeed.Windowing.Sdl
             if (_initialized)
                 return;
 
+#if NET10_0_OR_GREATER
+            if (OperatingSystem.IsIOS() && !SdlRuntime.IsMainThread())
+                throw new InvalidOperationException("SDL initialization on iOS must run on the main thread.");
+#endif
+
             SdlRuntime.SetMainReady();
             if (!SdlRuntime.InitSubSystem(RequiredInit) && (SdlRuntime.WasInit(RequiredInit) & RequiredInit) != RequiredInit)
                 throw new InvalidOperationException($"Unable to initialize SDL runtime: {SdlRuntime.GetError()}");
@@ -198,7 +203,7 @@ namespace TopSpeed.Windowing.Sdl
 
         private void PumpEvents()
         {
-            var routeControllerEvents = OperatingSystem.IsAndroid();
+            var routeControllerEvents = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
             while (SdlRuntime.PollEvent(out var value))
             {
                 if (routeControllerEvents && ControllerEvents.TryConvert(value, out var controllerEvent) && controllerEvent.Source != ControllerEventSource.Sensor)
@@ -307,7 +312,7 @@ namespace TopSpeed.Windowing.Sdl
         private static GestureOptions BuildGestureOptions()
         {
             var options = new GestureOptions();
-            if (OperatingSystem.IsAndroid())
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
             {
                 options.SwipeMinDistance = 0.06f;
                 options.SwipeMinVelocity = 0.3f;

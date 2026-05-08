@@ -21,6 +21,7 @@ public sealed class AppDelegate : UIApplicationDelegate
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
+        IOSLauncher.MarkMainThread();
         IOSLauncher.SetAssetRoot(NSBundle.MainBundle.ResourcePath);
 
         _motionSteering = new IosMotionSteeringSource();

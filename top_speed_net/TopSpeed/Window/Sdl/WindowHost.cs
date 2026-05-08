@@ -180,7 +180,7 @@ namespace TopSpeed.Windowing.Sdl
                 return;
 
 #if NET10_0_OR_GREATER
-            if (OperatingSystem.IsIOS() && !SdlRuntime.IsMainThread())
+            if (OperatingSystem.IsIOS() && !IOSLauncher.IsOnMainThread())
                 throw new InvalidOperationException("SDL initialization on iOS must run on the main thread.");
 #endif
 

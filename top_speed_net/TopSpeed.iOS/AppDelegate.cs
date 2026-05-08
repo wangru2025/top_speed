@@ -98,6 +98,9 @@ public sealed class AppDelegate : UIApplicationDelegate
                 return;
 
             var hostWindow = CreateAlertWindow();
+            if (hostWindow == null)
+                return;
+
             hostWindow.WindowLevel = UIWindowLevel.Alert + 1;
             var rootController = new UIViewController();
             hostWindow.RootViewController = rootController;
@@ -130,14 +133,15 @@ public sealed class AppDelegate : UIApplicationDelegate
         });
     }
 
-    private static UIWindow CreateAlertWindow()
+    private static UIWindow? CreateAlertWindow()
     {
         var windowScene = UIApplication.SharedApplication.ConnectedScenes
             .OfType<UIWindowScene>()
-            .FirstOrDefault(scene => scene.ActivationState == UISceneActivationState.ForegroundActive);
-        if (windowScene != null)
-            return new UIWindow(windowScene);
+            .OrderByDescending(scene => scene.ActivationState == UISceneActivationState.ForegroundActive)
+            .FirstOrDefault();
+        if (windowScene == null)
+            return null;
 
-        return new UIWindow(UIScreen.MainScreen.Bounds);
+        return new UIWindow(windowScene);
     }
 }

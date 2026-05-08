@@ -24,7 +24,7 @@ jobs:
       changes_md: ${{ steps.release_info.outputs.changes_md }}
       server_changes_md: ${{ steps.release_info.outputs.server_changes_md }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -140,7 +140,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -190,7 +190,7 @@ jobs:
           "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -230,7 +230,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -292,7 +292,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -349,7 +349,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -410,7 +410,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -434,7 +434,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -514,21 +514,30 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
           path: ${{ steps.package_android.outputs.artifact_paths }}
 
-  build_ios:
-    name: Build iOS arm64 (unsigned)
+  ios_build:
+    name: Build iOS ${{ matrix.target_name }}
     needs: metadata
     runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: arm64
+            runtime_id: ios-arm64
+            required_xcode: "26.3"
+            workload_set_version: "10.0.202"
+            artifact_name: release-assets-ios-arm64
     defaults:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -542,29 +551,146 @@ jobs:
           install-java: "false"
           java-version: "21"
 
-      - name: Install iOS workload
-        run: dotnet workload install ios
-
-      - name: Select Xcode 26
+      - name: Select required Xcode
         shell: bash
         run: |
           set -euo pipefail
 
-          # .NET iOS workload 26.4 currently requires Xcode 26.4 specifically.
-          # Prefer Xcode 26.4, and only fall back to any 26.x if 26.4 is unavailable.
-          xcode_path="$(ls -d /Applications/Xcode_26.4*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+          xcode_path="$(ls -d /Applications/Xcode_${{ matrix.required_xcode }}*.app 2>/dev/null | grep -viE 'beta|rc|release_candidate' | sort -V | tail -n 1 || true)"
           if [[ -z "$xcode_path" ]]; then
-            xcode_path="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+            xcode_path="$(ls -d /Applications/Xcode_${{ matrix.required_xcode }}*.app 2>/dev/null | sort -V | tail -n 1 || true)"
           fi
           if [[ -z "$xcode_path" ]]; then
-            echo "No Xcode 26 installation found on this runner." >&2
-            ls -1 /Applications | grep '^Xcode' || true
+            echo "Required Xcode ${{ matrix.required_xcode }} was not found." >&2
+            echo "Installed Xcode apps:" >&2
+            ls -1 /Applications | grep '^Xcode' | sort >&2 || true
             exit 1
           fi
 
           echo "Selected Xcode path: $xcode_path"
           sudo xcode-select -s "$xcode_path/Contents/Developer"
           xcodebuild -version
+
+      - name: Install iOS workload set
+        run: dotnet workload install ios --version ${{ matrix.workload_set_version }}
+
+      - name: Print iOS toolchain versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet --info
+          dotnet workload --info
+          xcrun --sdk iphoneos --show-sdk-version
+          xcrun clang --version
+          xcrun ld -v
+
+      - name: Validate native iOS dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          prism="TopSpeed/ThirdParty/ios/libprism.a"
+          phonon="TopSpeed/ThirdParty/ios/libphonon.a"
+          sdl_framework="TopSpeed/ThirdParty/ios/SDL3.xcframework/ios-arm64/SDL3.framework/SDL3"
+          miniaudio_framework="SoundFlow/Src/Backends/MiniAudio/runtimes/ios-arm64/native/miniaudio.framework/miniaudio"
+          ffmpeg_framework="SoundFlow/Codecs/SoundFlow.Codecs.FFMpeg/runtimes/ios-arm64/native/soundflow-ffmpeg.framework/soundflow-ffmpeg"
+
+          for dep in "$prism" "$phonon" "$sdl_framework" "$miniaudio_framework" "$ffmpeg_framework"; do
+            test -f "$dep"
+            file "$dep"
+          done
+
+      - name: Build and package iOS target
+        id: package_ios
+        shell: bash
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p artifacts/ios
+
+          dotnet restore TopSpeed.iOS/TopSpeed.iOS.csproj -p:RuntimeIdentifier=${{ matrix.runtime_id }}
+          dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
+            --configuration Release \
+            --framework net10.0-ios \
+            --runtime ${{ matrix.runtime_id }} \
+            -p:ArchiveOnBuild=true \
+            -p:BuildIpa=true \
+            -p:EnableCodeSigning=false \
+            -bl:artifacts/ios/ios-publish.binlog
+
+          ipa_name="TopSpeed-ios-arm64-Release-v-$VERSION.ipa"
+          ipa_path="$(find TopSpeed.iOS/bin/Release/net10.0-ios -type f -name '*.ipa' | sort | head -n 1)"
+          if [[ -z "$ipa_path" ]]; then
+            echo "No IPA produced for runtime '${{ matrix.runtime_id }}'." >&2
+            exit 1
+          fi
+
+          cp "$ipa_path" "$ipa_name"
+
+          temp_extract_dir="$(mktemp -d)"
+          unzip -qq "$ipa_name" -d "$temp_extract_dir"
+          app_dir="$(find "$temp_extract_dir/Payload" -maxdepth 1 -type d -name '*.app' | head -n 1)"
+          if [[ -z "$app_dir" ]]; then
+            echo "IPA does not contain a valid .app bundle in Payload/." >&2
+            exit 1
+          fi
+          test -f "$app_dir/Frameworks/miniaudio.framework/miniaudio"
+          test -f "$app_dir/Frameworks/soundflow-ffmpeg.framework/soundflow-ffmpeg"
+          app_bundle_name="$(basename "$app_dir")"
+          python scripts/build/verify_docs.py --archive "$ipa_name" --prefix "Payload/$app_bundle_name/docs"
+          rm -rf "$temp_extract_dir"
+
+          {
+            echo "artifact_paths<<EOF"
+            echo "top_speed_net/$ipa_name"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact_name }}
+          if-no-files-found: error
+          path: ${{ steps.package_ios.outputs.artifact_paths }}
+
+      - name: Upload iOS diagnostics artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-diagnostics-${{ matrix.target_name }}
+          if-no-files-found: warn
+          path: |
+            top_speed_net/artifacts/ios/*.binlog
+
+  ios_sign:
+    name: Sign iOS ${{ matrix.target_name }}
+    needs:
+      - metadata
+      - ios_build
+    if: ${{ false }}
+    runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: arm64
+            build_artifact_name: release-assets-ios-arm64
+            signed_artifact_name: release-assets-ios-arm64-signed
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Download iOS build artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ matrix.build_artifact_name }}
+          path: signing-input
 
       # - name: Prepare iOS signing certificate
       #   shell: bash
@@ -573,7 +699,6 @@ jobs:
       #     IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
       #   run: |
       #     set -euo pipefail
-      #     # Decode certificate and import to keychain for signed IPA builds.
       #     echo "$IOS_CERT_P12_B64" | base64 --decode > ios-signing-cert.p12
       #     security create-keychain -p "" build.keychain
       #     security default-keychain -s build.keychain
@@ -590,56 +715,10 @@ jobs:
       #     mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
       #     echo "$IOS_PROVISION_B64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/top_speed.mobileprovision"
 
-      - name: Build and package iOS target (unsigned)
-        id: package_ios
-        shell: bash
-        env:
-          VERSION: ${{ needs.metadata.outputs.version }}
-        run: |
-          set -euo pipefail
-
-          dotnet restore TopSpeed.iOS/TopSpeed.iOS.csproj -p:RuntimeIdentifier=ios-arm64
-
-          dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
-            --configuration Release \
-            --framework net10.0-ios \
-            --runtime ios-arm64 \
-            -p:ArchiveOnBuild=true \
-            -p:BuildIpa=true \
-            -p:EnableCodeSigning=false
-
-          # For signed IPA builds later, use signing settings and provisioning:
-          # dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
-          #   --configuration Release \
-          #   --framework net10.0-ios \
-          #   --runtime ios-arm64 \
-          #   -p:ArchiveOnBuild=true \
-          #   -p:BuildIpa=true \
-          #   -p:EnableCodeSigning=true \
-          #   -p:CodesignKey="$IOS_CODESIGN_KEY" \
-          #   -p:CodesignProvision="$IOS_CODESIGN_PROVISION"
-
-          ipa_name="TopSpeed-ios-arm64-Release-v-$VERSION.ipa"
-          ipa_path="$(find TopSpeed.iOS/bin/Release/net10.0-ios -type f -name '*.ipa' | sort | head -n 1)"
-          if [[ -z "$ipa_path" ]]; then
-            echo "No IPA produced for iOS arm64 release." >&2
-            exit 1
-          fi
-
-          cp "$ipa_path" "$ipa_name"
-
-          {
-            echo "artifact_paths<<EOF"
-            echo "top_speed_net/$ipa_name"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Upload iOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-assets-ios-arm64
-          if-no-files-found: error
-          path: ${{ steps.package_ios.outputs.artifact_paths }}
+      # - name: Sign IPA
+      #   run: |
+      #     echo "Signing implementation goes here."
+      #     ls -la signing-input
 
   release:
     name: Publish Release
@@ -649,18 +728,18 @@ jobs:
       - build_mac
       - build_linux
       - build_android
-      - build_ios
+      - ios_build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: release-assets-*
           path: release-assets

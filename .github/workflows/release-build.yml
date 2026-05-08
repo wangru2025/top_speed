@@ -19,12 +19,12 @@ jobs:
       game_zip_mac_arm64: ${{ steps.release_info.outputs.game_zip_mac_arm64 }}
       game_apk_android_arm64: ${{ steps.release_info.outputs.game_apk_android_arm64 }}
       game_apk_android_arm32: ${{ steps.release_info.outputs.game_apk_android_arm32 }}
-      # game_ipa_ios_arm64: ${{ steps.release_info.outputs.game_ipa_ios_arm64 }}
+      game_ipa_ios_arm64: ${{ steps.release_info.outputs.game_ipa_ios_arm64 }}
       android_version_code: ${{ steps.release_info.outputs.android_version_code }}
       changes_md: ${{ steps.release_info.outputs.changes_md }}
       server_changes_md: ${{ steps.release_info.outputs.server_changes_md }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -110,7 +110,7 @@ jobs:
           "game_zip_mac_arm64=TopSpeed-mac-arm64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "game_apk_android_arm64=TopSpeed-android-arm64-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "game_apk_android_arm32=TopSpeed-android-arm-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          # "game_ipa_ios_arm64=TopSpeed-ios-arm64-Release-v-$version.ipa" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_ipa_ios_arm64=TopSpeed-ios-arm64-Release-v-$version.ipa" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "android_version_code=$androidVersionCode" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           $changes | Out-File -FilePath $env:GITHUB_OUTPUT -Append
@@ -140,7 +140,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -190,7 +190,7 @@ jobs:
           "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -230,7 +230,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -292,7 +292,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -349,7 +349,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -410,7 +410,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
@@ -434,7 +434,7 @@ jobs:
       run:
         working-directory: top_speed_net
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -514,15 +514,251 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           if-no-files-found: error
           path: ${{ steps.package_android.outputs.artifact_paths }}
 
-  # build_ios:
-  #   iOS build matrix is temporarily disabled.
-  #   Re-enable the iOS job once signing and provisioning are available.
+  build_ios:
+    name: Build iOS ${{ matrix.target_name }}
+    needs: metadata
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: arm64
+            runtime_id: ios-arm64
+            required_xcode: "26.3"
+            workload_set_version: "10.0.203"
+            artifact_name: release-assets-ios-arm64
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "false"
+          java-version: "21"
+
+      - name: Select required Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          exact_dot_zero="/Applications/Xcode_${{ matrix.required_xcode }}.0.app"
+          exact_plain="/Applications/Xcode_${{ matrix.required_xcode }}.app"
+          xcode_path=""
+
+          if [[ -d "$exact_plain" ]]; then
+            xcode_path="$exact_plain"
+          elif [[ -d "$exact_dot_zero" ]]; then
+            xcode_path="$exact_dot_zero"
+          else
+            xcode_path="$(ls -d /Applications/Xcode_${{ matrix.required_xcode }}*.app 2>/dev/null | grep -viE 'beta|rc|release_candidate' | sort -V | tail -n 1 || true)"
+            if [[ -z "$xcode_path" ]]; then
+              xcode_path="$(ls -d /Applications/Xcode_${{ matrix.required_xcode }}*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+            fi
+          fi
+
+          if [[ -z "$xcode_path" ]]; then
+            echo "Required Xcode ${{ matrix.required_xcode }} was not found." >&2
+            echo "Installed Xcode apps:" >&2
+            ls -1 /Applications | grep '^Xcode' | sort >&2 || true
+            exit 1
+          fi
+
+          canonical_xcode_path="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$xcode_path")"
+          plain_xcode_path="$exact_plain"
+          echo "Selected Xcode path: $xcode_path"
+          echo "Canonical Xcode path: $canonical_xcode_path"
+          if [[ ! -d "$plain_xcode_path" ]]; then
+            echo "Creating canonical plain Xcode path '$plain_xcode_path' -> '$canonical_xcode_path'"
+            if [[ -e "$plain_xcode_path" && ! -d "$plain_xcode_path" ]]; then
+              sudo rm -f "$plain_xcode_path"
+            fi
+            sudo ln -s "$canonical_xcode_path" "$plain_xcode_path"
+          fi
+
+          developer_dir="$plain_xcode_path/Contents/Developer"
+          sudo xcode-select -s "$developer_dir"
+          xcodebuild -version
+
+          # .NET iOS 26.2 workloads sometimes resolve Xcode as /Applications/Xcode_<ver>.0.app.
+          # Ensure that alias exists to avoid xcrun clang++ lookup failures.
+          xcode_alias_path="/Applications/Xcode_${{ matrix.required_xcode }}.0.app"
+          if [[ ! -e "$xcode_alias_path" ]]; then
+            echo "Creating Xcode alias '$xcode_alias_path' -> '$plain_xcode_path'"
+            sudo ln -s "$plain_xcode_path" "$xcode_alias_path"
+          fi
+
+          alias_developer_dir="$xcode_alias_path/Contents/Developer"
+
+          macos_sdk_dir="$developer_dir/Platforms/MacOSX.platform/Developer/SDKs"
+          if [[ ! -e "$macos_sdk_dir/MacOSX.sdk" ]]; then
+            latest_macos_sdk="$(ls -d "$macos_sdk_dir"/MacOSX*.sdk 2>/dev/null | sort -V | tail -n 1 || true)"
+            if [[ -z "$latest_macos_sdk" ]]; then
+              echo "No MacOSX*.sdk found in '$macos_sdk_dir'." >&2
+              exit 1
+            fi
+            echo "MacOSX.sdk alias is missing; creating symlink to '$latest_macos_sdk'."
+            sudo ln -s "$latest_macos_sdk" "$macos_sdk_dir/MacOSX.sdk"
+          fi
+
+          alias_macos_sdk_dir="$alias_developer_dir/Platforms/MacOSX.platform/Developer/SDKs"
+          if [[ -d "$alias_macos_sdk_dir" && ! -e "$alias_macos_sdk_dir/MacOSX.sdk" ]]; then
+            alias_latest_macos_sdk="$(ls -d "$alias_macos_sdk_dir"/MacOSX*.sdk 2>/dev/null | sort -V | tail -n 1 || true)"
+            if [[ -n "$alias_latest_macos_sdk" ]]; then
+              echo "Alias MacOSX.sdk is missing; creating symlink to '$alias_latest_macos_sdk'."
+              sudo ln -s "$alias_latest_macos_sdk" "$alias_macos_sdk_dir/MacOSX.sdk"
+            fi
+          fi
+
+          "$developer_dir/usr/bin/xcodebuild" -sdk "$macos_sdk_dir/MacOSX.sdk" -find clang++
+          "$alias_developer_dir/usr/bin/xcodebuild" -sdk "$alias_macos_sdk_dir/MacOSX.sdk" -find clang++
+          ls -ld "$plain_xcode_path" "$xcode_alias_path"
+          /usr/bin/xcrun --kill-cache || true
+          /usr/bin/xcrun --find clang++
+
+          # .NET iOS/Mac build selection checks can prefer stale Settings.plist paths.
+          rm -f "$HOME/Library/Preferences/Xamarin/Settings.plist" || true
+          rm -f "$HOME/Library/Preferences/maui/Settings.plist" || true
+
+          # Force .NET/Xamarin target resolution to this exact Xcode.
+          echo "DEVELOPER_DIR=$developer_dir" >> "$GITHUB_ENV"
+          echo "MD_APPLE_SDK_ROOT=$plain_xcode_path" >> "$GITHUB_ENV"
+          echo "xcrun_nocache=true" >> "$GITHUB_ENV"
+
+      - name: Install iOS workload set
+        run: dotnet workload install ios --version ${{ matrix.workload_set_version }}
+
+      - name: Print iOS toolchain versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet --info
+          dotnet workload --info
+          xcrun --sdk iphoneos --show-sdk-version
+          xcrun clang --version
+          xcrun ld -v
+
+      - name: Validate native iOS dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          prism="TopSpeed/ThirdParty/ios/libprism.a"
+          phonon="TopSpeed/ThirdParty/ios/libphonon.a"
+          sdl_framework="TopSpeed/ThirdParty/ios/SDL3.xcframework/ios-arm64/SDL3.framework/SDL3"
+          miniaudio_framework="SoundFlow/Src/Backends/MiniAudio/runtimes/ios-arm64/native/miniaudio.framework/miniaudio"
+          ffmpeg_framework="SoundFlow/Codecs/SoundFlow.Codecs.FFMpeg/runtimes/ios-arm64/native/soundflow-ffmpeg.framework/soundflow-ffmpeg"
+
+          for dep in "$prism" "$phonon" "$sdl_framework" "$miniaudio_framework" "$ffmpeg_framework"; do
+            test -f "$dep"
+            file "$dep"
+          done
+
+      - name: Build and package iOS target
+        id: package_ios
+        shell: bash
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p artifacts/ios
+
+          dotnet restore TopSpeed.iOS/TopSpeed.iOS.csproj -p:RuntimeIdentifier=${{ matrix.runtime_id }}
+          dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
+            --configuration Release \
+            --framework net10.0-ios \
+            --runtime ${{ matrix.runtime_id }} \
+            -p:ArchiveOnBuild=true \
+            -p:BuildIpa=true \
+            -p:EnableCodeSigning=false \
+            -bl:artifacts/ios/ios-publish.binlog
+
+          ipa_name="TopSpeed-ios-arm64-Release-v-$VERSION.ipa"
+          ipa_path="$(find TopSpeed.iOS/bin/Release/net10.0-ios -type f -name '*.ipa' | sort | head -n 1)"
+          if [[ -z "$ipa_path" ]]; then
+            echo "No IPA produced for runtime '${{ matrix.runtime_id }}'." >&2
+            exit 1
+          fi
+
+          cp "$ipa_path" "$ipa_name"
+
+          temp_extract_dir="$(mktemp -d)"
+          unzip -qq "$ipa_name" -d "$temp_extract_dir"
+          app_dir="$(find "$temp_extract_dir/Payload" -maxdepth 1 -type d -name '*.app' | head -n 1)"
+          if [[ -z "$app_dir" ]]; then
+            echo "IPA does not contain a valid .app bundle in Payload/." >&2
+            exit 1
+          fi
+          test -f "$app_dir/Frameworks/miniaudio.framework/miniaudio"
+          test -f "$app_dir/Frameworks/soundflow-ffmpeg.framework/soundflow-ffmpeg"
+          app_bundle_name="$(basename "$app_dir")"
+          python scripts/build/verify_docs.py --archive "$ipa_name" --prefix "Payload/$app_bundle_name/docs"
+          rm -rf "$temp_extract_dir"
+
+          {
+            echo "artifact_paths<<EOF"
+            echo "top_speed_net/$ipa_name"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact_name }}
+          if-no-files-found: error
+          path: ${{ steps.package_ios.outputs.artifact_paths }}
+
+      - name: Upload iOS diagnostics artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-diagnostics-${{ matrix.target_name }}
+          if-no-files-found: warn
+          path: |
+            top_speed_net/artifacts/ios/*.binlog
+
+      # Signing path (kept commented for later use):
+      # - name: Prepare iOS signing certificate
+      #   shell: bash
+      #   env:
+      #     IOS_CERT_P12_B64: ${{ secrets.IOS_CERT_P12_B64 }}
+      #     IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+      #   run: |
+      #     set -euo pipefail
+      #     echo "$IOS_CERT_P12_B64" | base64 --decode > ios-signing-cert.p12
+      #     security create-keychain -p "" build.keychain
+      #     security default-keychain -s build.keychain
+      #     security unlock-keychain -p "" build.keychain
+      #     security import ios-signing-cert.p12 -k build.keychain -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+      #     security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+      # - name: Install iOS provisioning profile
+      #   shell: bash
+      #   env:
+      #     IOS_PROVISION_B64: ${{ secrets.IOS_PROVISION_B64 }}
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+      #     echo "$IOS_PROVISION_B64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/top_speed.mobileprovision"
+
+      # - name: Sign IPA
+      #   run: |
+      #     echo "Signing implementation goes here."
 
   release:
     name: Publish Release
@@ -532,18 +768,18 @@ jobs:
       - build_mac
       - build_linux
       - build_android
-      # - build_ios
+      - build_ios
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: release-assets-*
           path: release-assets
@@ -553,14 +789,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          find release-assets -type f \( -name '*.zip' -o -name '*.apk' \) | sort
+          find release-assets -type f \( -name '*.zip' -o -name '*.apk' -o -name '*.ipa' \) | sort
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_win }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_linux }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_mac_x64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_mac_arm64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm32 }}"
-          # test -f "release-assets/${{ needs.metadata.outputs.game_ipa_ios_arm64 }}"
+          test -f "release-assets/${{ needs.metadata.outputs.game_ipa_ios_arm64 }}"
           test -f "release-assets/TopSpeed.Server-win-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
           test -f "release-assets/TopSpeed.Server-linux-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
           test -f "release-assets/TopSpeed.Server-linux-arm64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
@@ -650,4 +886,4 @@ jobs:
           files: |
             release-assets/**/*.zip
             release-assets/**/*.apk
-            # release-assets/**/*.ipa
+            release-assets/**/*.ipa

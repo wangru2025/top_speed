@@ -19,7 +19,7 @@ jobs:
       game_zip_mac_arm64: ${{ steps.release_info.outputs.game_zip_mac_arm64 }}
       game_apk_android_arm64: ${{ steps.release_info.outputs.game_apk_android_arm64 }}
       game_apk_android_arm32: ${{ steps.release_info.outputs.game_apk_android_arm32 }}
-      # game_ipa_ios_arm64: ${{ steps.release_info.outputs.game_ipa_ios_arm64 }}
+      game_ipa_ios_arm64: ${{ steps.release_info.outputs.game_ipa_ios_arm64 }}
       android_version_code: ${{ steps.release_info.outputs.android_version_code }}
       changes_md: ${{ steps.release_info.outputs.changes_md }}
       server_changes_md: ${{ steps.release_info.outputs.server_changes_md }}
@@ -110,7 +110,7 @@ jobs:
           "game_zip_mac_arm64=TopSpeed-mac-arm64-Release-v-$version.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "game_apk_android_arm64=TopSpeed-android-arm64-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "game_apk_android_arm32=TopSpeed-android-arm-Release-v-$version.apk" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          # "game_ipa_ios_arm64=TopSpeed-ios-arm64-Release-v-$version.ipa" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "game_ipa_ios_arm64=TopSpeed-ios-arm64-Release-v-$version.ipa" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "android_version_code=$androidVersionCode" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "changes_md<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           $changes | Out-File -FilePath $env:GITHUB_OUTPUT -Append
@@ -520,9 +520,105 @@ jobs:
           if-no-files-found: error
           path: ${{ steps.package_android.outputs.artifact_paths }}
 
-  # build_ios:
-  #   iOS build matrix is temporarily disabled.
-  #   Re-enable the iOS job once signing and provisioning are available.
+  build_ios:
+    name: Build iOS arm64 (unsigned)
+    needs: metadata
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "false"
+          java-version: "21"
+
+      - name: Install iOS workload
+        run: dotnet workload install ios
+
+      # - name: Prepare iOS signing certificate
+      #   shell: bash
+      #   env:
+      #     IOS_CERT_P12_B64: ${{ secrets.IOS_CERT_P12_B64 }}
+      #     IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+      #   run: |
+      #     set -euo pipefail
+      #     # Decode certificate and import to keychain for signed IPA builds.
+      #     echo "$IOS_CERT_P12_B64" | base64 --decode > ios-signing-cert.p12
+      #     security create-keychain -p "" build.keychain
+      #     security default-keychain -s build.keychain
+      #     security unlock-keychain -p "" build.keychain
+      #     security import ios-signing-cert.p12 -k build.keychain -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+      #     security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+      # - name: Install iOS provisioning profile
+      #   shell: bash
+      #   env:
+      #     IOS_PROVISION_B64: ${{ secrets.IOS_PROVISION_B64 }}
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+      #     echo "$IOS_PROVISION_B64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/top_speed.mobileprovision"
+
+      - name: Build and package iOS target (unsigned)
+        id: package_ios
+        shell: bash
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          dotnet restore TopSpeed.iOS/TopSpeed.iOS.csproj -p:RuntimeIdentifier=ios-arm64
+
+          dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
+            --configuration Release \
+            --framework net10.0-ios \
+            --runtime ios-arm64 \
+            -p:ArchiveOnBuild=true \
+            -p:BuildIpa=true \
+            -p:EnableCodeSigning=false
+
+          # For signed IPA builds later, use signing settings and provisioning:
+          # dotnet publish TopSpeed.iOS/TopSpeed.iOS.csproj \
+          #   --configuration Release \
+          #   --framework net10.0-ios \
+          #   --runtime ios-arm64 \
+          #   -p:ArchiveOnBuild=true \
+          #   -p:BuildIpa=true \
+          #   -p:EnableCodeSigning=true \
+          #   -p:CodesignKey="$IOS_CODESIGN_KEY" \
+          #   -p:CodesignProvision="$IOS_CODESIGN_PROVISION"
+
+          ipa_name="TopSpeed-ios-arm64-Release-v-$VERSION.ipa"
+          ipa_path="$(find TopSpeed.iOS/bin/Release/net10.0-ios -type f -name '*.ipa' | sort | head -n 1)"
+          if [[ -z "$ipa_path" ]]; then
+            echo "No IPA produced for iOS arm64 release." >&2
+            exit 1
+          fi
+
+          cp "$ipa_path" "$ipa_name"
+
+          {
+            echo "artifact_paths<<EOF"
+            echo "top_speed_net/$ipa_name"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-ios-arm64
+          if-no-files-found: error
+          path: ${{ steps.package_ios.outputs.artifact_paths }}
 
   release:
     name: Publish Release
@@ -532,7 +628,7 @@ jobs:
       - build_mac
       - build_linux
       - build_android
-      # - build_ios
+      - build_ios
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -553,14 +649,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          find release-assets -type f \( -name '*.zip' -o -name '*.apk' \) | sort
+          find release-assets -type f \( -name '*.zip' -o -name '*.apk' -o -name '*.ipa' \) | sort
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_win }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_linux }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_mac_x64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_zip_mac_arm64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm64 }}"
           test -f "release-assets/${{ needs.metadata.outputs.game_apk_android_arm32 }}"
-          # test -f "release-assets/${{ needs.metadata.outputs.game_ipa_ios_arm64 }}"
+          test -f "release-assets/${{ needs.metadata.outputs.game_ipa_ios_arm64 }}"
           test -f "release-assets/TopSpeed.Server-win-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
           test -f "release-assets/TopSpeed.Server-linux-x64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
           test -f "release-assets/TopSpeed.Server-linux-arm64-Release-v-${{ needs.metadata.outputs.server_version }}.zip"
@@ -650,4 +746,4 @@ jobs:
           files: |
             release-assets/**/*.zip
             release-assets/**/*.apk
-            # release-assets/**/*.ipa
+            release-assets/**/*.ipa

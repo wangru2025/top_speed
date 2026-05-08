@@ -550,14 +550,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          mapfile -t xcode_candidates < <(ls -d /Applications/Xcode_26*.app 2>/dev/null || true)
-          if [[ ${#xcode_candidates[@]} -eq 0 ]]; then
+          xcode_path="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+          if [[ -z "$xcode_path" ]]; then
             echo "No Xcode 26 installation found on this runner." >&2
             ls -1 /Applications | grep '^Xcode' || true
             exit 1
           fi
 
-          xcode_path="$(printf '%s\n' "${xcode_candidates[@]}" | sort -V | tail -n 1)"
           sudo xcode-select -s "$xcode_path/Contents/Developer"
           xcodebuild -version
 

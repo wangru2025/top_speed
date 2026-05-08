@@ -32,10 +32,19 @@ jobs:
           git fetch origin main china-release
           git fetch upstream main
 
-          git checkout -B main origin/main
+          git checkout -B main upstream/main
 
-          before_main="$(git rev-parse HEAD)"
-          git merge --ff-only upstream/main
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            git checkout origin/main -- .github/workflows
+          fi
+
+          after_main="$(git rev-parse HEAD)"
+          if ! git diff --quiet; then
+            git add .github/workflows
+            git commit -m "Preserve fork workflows"
+          fi
+
+          before_main="$(git rev-parse origin/main)"
           after_main="$(git rev-parse HEAD)"
 
           if [[ "$before_main" != "$after_main" ]]; then

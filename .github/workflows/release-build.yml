@@ -523,7 +523,7 @@ jobs:
   build_ios:
     name: Build iOS arm64 (unsigned)
     needs: metadata
-    runs-on: macos-latest
+    runs-on: macos-26
     defaults:
       run:
         working-directory: top_speed_net
@@ -544,6 +544,22 @@ jobs:
 
       - name: Install iOS workload
         run: dotnet workload install ios
+
+      - name: Select Xcode 26
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t xcode_candidates < <(ls -d /Applications/Xcode_26*.app 2>/dev/null || true)
+          if [[ ${#xcode_candidates[@]} -eq 0 ]]; then
+            echo "No Xcode 26 installation found on this runner." >&2
+            ls -1 /Applications | grep '^Xcode' || true
+            exit 1
+          fi
+
+          xcode_path="$(printf '%s\n' "${xcode_candidates[@]}" | sort -V | tail -n 1)"
+          sudo xcode-select -s "$xcode_path/Contents/Developer"
+          xcodebuild -version
 
       # - name: Prepare iOS signing certificate
       #   shell: bash

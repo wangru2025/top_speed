@@ -90,17 +90,8 @@
     <AndroidAsset Include="..\languages\server\**\*">
       <Link>languages/server/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
-    <AndroidAsset Include="$(RepoDocsDir)changes.html">
-      <Link>docs/changes.html</Link>
-    </AndroidAsset>
-    <AndroidAsset Include="$(RepoDocsDir)game-guide.html">
-      <Link>docs/game-guide.html</Link>
-    </AndroidAsset>
-    <AndroidAsset Include="$(RepoDocsDir)track-creation-guide.html">
-      <Link>docs/track-creation-guide.html</Link>
-    </AndroidAsset>
-    <AndroidAsset Include="$(RepoDocsDir)vehicle-physics-and-creation-guide.html">
-      <Link>docs/vehicle-physics-and-creation-guide.html</Link>
+    <AndroidAsset Include="$(RepoDocsDir)**\*.html">
+      <Link>docs/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
   </ItemGroup>
 

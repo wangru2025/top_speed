@@ -6,7 +6,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed class Chat
+        private sealed class Chat : IChatService
         {
             private readonly RaceServer _owner;
 

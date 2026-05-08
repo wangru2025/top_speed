@@ -11,7 +11,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Room
         {
-            public void CompactNumbers(RaceRoom room)
+            public void CompactNumbers(GameRoom room)
             {
                 if (room == null || room.RaceStarted || room.PreparingRace)
                     return;
@@ -31,59 +31,13 @@ namespace TopSpeed.Server.Network
 
                 var changedPlayers = new List<PlayerConnection>();
                 var changedBots = new List<RoomBot>();
-                var next = 0;
-
-                for (var i = 0; i < humans.Count; i++)
-                {
-                    var expected = (byte)next++;
-                    if (humans[i].PlayerNumber == expected)
-                        continue;
-
-                    humans[i].PlayerNumber = expected;
-                    changedPlayers.Add(humans[i]);
-                }
-
-                for (var i = 0; i < bots.Count; i++)
-                {
-                    var expected = (byte)next++;
-                    if (bots[i].PlayerNumber == expected)
-                        continue;
-
-                    bots[i].PlayerNumber = expected;
-                    changedBots.Add(bots[i]);
-                }
+                ApplyAssignedNumbers(humans, bots, static index => (byte)index, changedPlayers, changedBots);
 
                 if (changedPlayers.Count == 0 && changedBots.Count == 0)
                     return;
 
                 TouchVersion(room);
-
-                for (var i = 0; i < changedPlayers.Count; i++)
-                {
-                    var changed = changedPlayers[i];
-                    _owner.SendStream(changed, PacketSerializer.WritePlayerNumber(changed.Id, changed.PlayerNumber), PacketStream.Control);
-                    _owner._notify.RoomParticipant(
-                        room,
-                        RoomEventKind.ParticipantStateChanged,
-                        changed.Id,
-                        changed.PlayerNumber,
-                        changed.State,
-                        string.IsNullOrWhiteSpace(changed.Name)
-                            ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), changed.PlayerNumber + 1)
-                            : changed.Name);
-                }
-
-                for (var i = 0; i < changedBots.Count; i++)
-                {
-                    var changed = changedBots[i];
-                    _owner._notify.RoomParticipant(
-                        room,
-                        RoomEventKind.ParticipantStateChanged,
-                        changed.Id,
-                        changed.PlayerNumber,
-                        changed.State,
-                        FormatBotDisplayName(changed));
-                }
+                PublishNumberChanges(room, changedPlayers, changedBots);
 
                 _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
                 var changedCount = changedPlayers.Count + changedBots.Count;
@@ -97,7 +51,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ShuffleNumbersForRaceStart(RaceRoom room)
+            public void ShuffleNumbersForGameStart(GameRoom room)
             {
                 if (room == null || room.RaceStarted)
                     return;
@@ -124,11 +78,33 @@ namespace TopSpeed.Server.Network
 
                 var changedPlayers = new List<PlayerConnection>();
                 var changedBots = new List<RoomBot>();
-                var next = 0;
+                ApplyAssignedNumbers(humans, bots, index => slots[index], changedPlayers, changedBots);
 
+                if (changedPlayers.Count == 0 && changedBots.Count == 0)
+                    return;
+
+                TouchVersion(room);
+                PublishNumberChanges(room, changedPlayers, changedBots);
+
+                _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
+                _owner._logger.Debug(LocalizationService.Format(
+                    LocalizationService.Mark("Room game-start numbers shuffled: room={0}, players={1}, bots={2}."),
+                    room.Id,
+                    changedPlayers.Count,
+                    changedBots.Count));
+            }
+
+            private static void ApplyAssignedNumbers(
+                IReadOnlyList<PlayerConnection> humans,
+                IReadOnlyList<RoomBot> bots,
+                System.Func<int, byte> resolveAssignedNumber,
+                ICollection<PlayerConnection> changedPlayers,
+                ICollection<RoomBot> changedBots)
+            {
+                var next = 0;
                 for (var i = 0; i < humans.Count; i++)
                 {
-                    var expected = slots[next++];
+                    var expected = resolveAssignedNumber(next++);
                     if (humans[i].PlayerNumber == expected)
                         continue;
 
@@ -138,19 +114,17 @@ namespace TopSpeed.Server.Network
 
                 for (var i = 0; i < bots.Count; i++)
                 {
-                    var expected = slots[next++];
+                    var expected = resolveAssignedNumber(next++);
                     if (bots[i].PlayerNumber == expected)
                         continue;
 
                     bots[i].PlayerNumber = expected;
                     changedBots.Add(bots[i]);
                 }
+            }
 
-                if (changedPlayers.Count == 0 && changedBots.Count == 0)
-                    return;
-
-                TouchVersion(room);
-
+            private void PublishNumberChanges(GameRoom room, IReadOnlyList<PlayerConnection> changedPlayers, IReadOnlyList<RoomBot> changedBots)
+            {
                 for (var i = 0; i < changedPlayers.Count; i++)
                 {
                     var changed = changedPlayers[i];
@@ -161,9 +135,7 @@ namespace TopSpeed.Server.Network
                         changed.Id,
                         changed.PlayerNumber,
                         changed.State,
-                        string.IsNullOrWhiteSpace(changed.Name)
-                            ? LocalizationService.Format(LocalizationService.Mark("Player {0}"), changed.PlayerNumber + 1)
-                            : changed.Name);
+                        BuildRoomParticipantName(changed));
                 }
 
                 for (var i = 0; i < changedBots.Count; i++)
@@ -177,14 +149,8 @@ namespace TopSpeed.Server.Network
                         changed.State,
                         FormatBotDisplayName(changed));
                 }
-
-                _owner._notify.RoomLifecycle(room, RoomEventKind.RoomSummaryUpdated);
-                _owner._logger.Debug(LocalizationService.Format(
-                    LocalizationService.Mark("Room race-start numbers shuffled: room={0}, players={1}, bots={2}."),
-                    room.Id,
-                    changedPlayers.Count,
-                    changedBots.Count));
             }
         }
     }
 }
+

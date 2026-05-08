@@ -4,7 +4,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed class Runtime
+        private sealed class Runtime : IRuntimeService
         {
             private readonly RaceServer _owner;
 

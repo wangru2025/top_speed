@@ -18,6 +18,8 @@ namespace TopSpeed.Core.Multiplayer
         public byte RoomOptionsLaps = 1;
         public byte RoomOptionsPlayersToStart = 2;
         public uint RoomOptionsGameRulesFlags;
+        public uint RoomOptionsAppliedGameRulesFlags;
+        public bool RoomTrackTypeOpenPending;
         public bool RoomTrackCatalogOpenPending;
         public bool RoomTrackUploadReturnToCatalog;
         public PacketTrackPackageCatalogEntry[] RoomTrackCatalog = System.Array.Empty<PacketTrackPackageCatalogEntry>();

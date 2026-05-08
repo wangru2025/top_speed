@@ -2,7 +2,7 @@ using TopSpeed.Protocol;
 
 namespace TopSpeed.Core.Multiplayer
 {
-    internal sealed class ChatFlow
+    internal sealed class ChatFlow : IChatFlow
     {
         private readonly MultiplayerCoordinator _owner;
 

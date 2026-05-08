@@ -7,7 +7,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Notify
         {
-            public void ToRoom(RaceRoom room, byte[] payload, PacketStream stream)
+            public void ToRoom(GameRoom room, byte[] payload, PacketStream stream)
             {
                 if (room == null || payload == null)
                     return;
@@ -35,7 +35,7 @@ namespace TopSpeed.Server.Network
                 _owner.SendStream(player, payload, stream, delivery);
             }
 
-            public void ToRoom(RaceRoom room, byte[] payload, PacketStream stream, PacketDeliveryKind delivery)
+            public void ToRoom(GameRoom room, byte[] payload, PacketStream stream, PacketDeliveryKind delivery)
             {
                 if (room == null || payload == null)
                     return;
@@ -47,7 +47,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ToRoomExcept(RaceRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream)
+            public void ToRoomExcept(GameRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream)
             {
                 if (room == null || payload == null)
                     return;
@@ -61,7 +61,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ToRoomExcept(RaceRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream, PacketDeliveryKind delivery)
+            public void ToRoomExcept(GameRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream, PacketDeliveryKind delivery)
             {
                 if (room == null || payload == null)
                     return;
@@ -75,7 +75,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ToHost(RaceRoom room, byte[] payload, PacketStream stream)
+            public void ToHost(GameRoom room, byte[] payload, PacketStream stream)
             {
                 if (room == null || payload == null || room.HostId == 0)
                     return;
@@ -111,7 +111,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ToActiveRacers(RaceRoom room, byte[] payload, PacketStream stream)
+            public void ToActiveRacers(GameRoom room, byte[] payload, PacketStream stream)
             {
                 if (room == null || payload == null)
                     return;
@@ -123,7 +123,7 @@ namespace TopSpeed.Server.Network
                 }
             }
 
-            public void ReplayRoomEventsTo(PlayerConnection player, RaceRoom room, uint afterSequence)
+            public void ReplayRoomEventsTo(PlayerConnection player, GameRoom room, uint afterSequence)
             {
                 if (player == null || room == null)
                     return;
@@ -142,7 +142,7 @@ namespace TopSpeed.Server.Network
                 SendRoomState(player, room);
             }
 
-            public void ProtocolToRoom(RaceRoom room, string text)
+            public void ProtocolToRoom(GameRoom room, string text)
             {
                 var payload = BuildProtocolMessage(ProtocolMessageCode.Ok, text);
                 if (payload == null)
@@ -150,7 +150,7 @@ namespace TopSpeed.Server.Network
                 ToRoom(room, payload, PacketStream.Chat);
             }
 
-            public void ProtocolToRoomExcept(RaceRoom room, uint exceptPlayerId, string text)
+            public void ProtocolToRoomExcept(GameRoom room, uint exceptPlayerId, string text)
             {
                 var payload = BuildProtocolMessage(ProtocolMessageCode.Ok, text);
                 if (payload == null)
@@ -166,7 +166,7 @@ namespace TopSpeed.Server.Network
                 ToLobby(payload, PacketStream.Direct);
             }
 
-            public void ProtocolToHost(RaceRoom room, ProtocolMessageCode code, string text)
+            public void ProtocolToHost(GameRoom room, ProtocolMessageCode code, string text)
             {
                 var payload = BuildProtocolMessage(code, text);
                 if (payload == null)
@@ -203,7 +203,7 @@ namespace TopSpeed.Server.Network
                 return player != null && player.Connected && player.Handshake == HandshakeState.Complete;
             }
 
-            private static uint NextEventSequence(RaceRoom room)
+            private static uint NextEventSequence(GameRoom room)
             {
                 if (room == null)
                     return 0;
@@ -214,10 +214,11 @@ namespace TopSpeed.Server.Network
                 return room.EventSequence;
             }
 
-            private static uint CurrentEventSequence(RaceRoom room)
+            private static uint CurrentEventSequence(GameRoom room)
             {
                 return room?.EventSequence ?? 0;
             }
         }
     }
 }
+

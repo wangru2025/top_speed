@@ -8,7 +8,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Race
         {
-            public bool ResolveHumanFinish(RaceRoom room, PlayerConnection player, out byte finishOrder)
+            public bool ResolveHumanFinish(GameRoom room, PlayerConnection player, out byte finishOrder)
             {
                 player.State = PlayerState.Finished;
                 var raceDistance = RaceServer.GetRaceDistance(room);
@@ -18,13 +18,13 @@ namespace TopSpeed.Server.Network
                 return ResolveParticipantFinish(room, player.Id, player.PlayerNumber, CaptureFinishTimeMs(room), out finishOrder);
             }
 
-            public bool ResolveBotFinish(RaceRoom room, RoomBot bot, float finishY, out byte finishOrder)
+            public bool ResolveBotFinish(GameRoom room, RoomBot bot, float finishY, out byte finishOrder)
             {
                 ServerBotFinish.StopMotion(bot, finishY);
                 return ResolveParticipantFinish(room, bot.Id, bot.PlayerNumber, CaptureFinishTimeMs(room), out finishOrder);
             }
 
-            private bool ResolveParticipantFinish(RaceRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
+            private bool ResolveParticipantFinish(GameRoom room, uint playerId, byte playerNumber, int finishTimeMs, out byte finishOrder)
             {
                 finishOrder = 0;
                 if (!TryMarkParticipantFinished(room, playerId, playerNumber, finishTimeMs, out finishOrder))
@@ -68,3 +68,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

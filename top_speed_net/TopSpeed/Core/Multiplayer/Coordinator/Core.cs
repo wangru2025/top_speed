@@ -48,10 +48,10 @@ namespace TopSpeed.Core.Multiplayer
         private readonly Action<int, bool> _setLocalMultiplayerLoadout;
         private readonly RuntimeLifetime _lifetime;
         private readonly RoomPacketReducer _roomReducer;
-        private readonly ConnectionFlow _connectionFlow;
-        private readonly RoomsFlow _roomsFlow;
-        private readonly SavedServersFlow _savedServersFlow;
-        private readonly ChatFlow _chatFlow;
+        private readonly IConnectionFlow _connectionFlow;
+        private readonly IRoomsFlow _roomsFlow;
+        private readonly ISavedServersFlow _savedServersFlow;
+        private readonly IChatFlow _chatFlow;
 
         public QuestionDialog Questions => _questions;
 

@@ -24,7 +24,7 @@ namespace TopSpeed.Server.Network
                 _owner.SendStream(player, PacketSerializer.WriteRoomList(list), PacketStream.Query);
             }
 
-            public void SendRoomState(PlayerConnection player, RaceRoom? room)
+            public void SendRoomState(PlayerConnection player, GameRoom? room)
             {
                 if (room == null)
                 {
@@ -67,7 +67,7 @@ namespace TopSpeed.Server.Network
                 }), PacketStream.Query);
             }
 
-            public void SendRoomGet(PlayerConnection player, RaceRoom? room)
+            public void SendRoomGet(PlayerConnection player, GameRoom? room)
             {
                 if (room == null)
                 {
@@ -103,7 +103,7 @@ namespace TopSpeed.Server.Network
                 }), PacketStream.Query);
             }
 
-            public void BroadcastRoomState(RaceRoom room)
+            public void BroadcastRoomState(GameRoom room)
             {
                 if (room == null)
                     return;
@@ -113,7 +113,7 @@ namespace TopSpeed.Server.Network
                         SendRoomState(player, room);
             }
 
-            public void RoomLifecycle(RaceRoom room, RoomEventKind kind)
+            public void RoomLifecycle(GameRoom room, RoomEventKind kind)
             {
                 var evt = CreateRoomEvent(room, kind);
                 var payload = PacketSerializer.WriteRoomEvent(evt);
@@ -127,7 +127,7 @@ namespace TopSpeed.Server.Network
                 ToRoom(room, payload, PacketStream.Room);
             }
 
-            public void RoomParticipant(RaceRoom room, RoomEventKind kind, uint playerId, byte playerNumber, PlayerState state, string name)
+            public void RoomParticipant(GameRoom room, RoomEventKind kind, uint playerId, byte playerNumber, PlayerState state, string name)
             {
                 var evt = CreateRoomEvent(room, kind);
                 evt.SubjectPlayerId = playerId;
@@ -140,7 +140,7 @@ namespace TopSpeed.Server.Network
                 ToRoom(room, payload, PacketStream.Room);
             }
 
-            private PacketRoomSummary BuildRoomSummary(RaceRoom room)
+            private PacketRoomSummary BuildRoomSummary(GameRoom room)
             {
                 return new PacketRoomSummary
                 {
@@ -155,7 +155,7 @@ namespace TopSpeed.Server.Network
                 };
             }
 
-            private PacketRoomPlayer[] BuildRoomPlayers(RaceRoom room)
+            private PacketRoomPlayer[] BuildRoomPlayers(GameRoom room)
             {
                 return room.PlayerIds
                     .Where(id => _owner._players.ContainsKey(id))
@@ -180,7 +180,7 @@ namespace TopSpeed.Server.Network
                     .ToArray();
             }
 
-            private PacketRoomEvent CreateRoomEvent(RaceRoom room, RoomEventKind kind)
+            private PacketRoomEvent CreateRoomEvent(GameRoom room, RoomEventKind kind)
             {
                 return new PacketRoomEvent
                 {
@@ -210,3 +210,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

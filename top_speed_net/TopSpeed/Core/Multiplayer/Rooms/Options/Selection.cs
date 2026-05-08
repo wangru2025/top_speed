@@ -1,0 +1,113 @@
+using System;
+using TopSpeed.Localization;
+using TopSpeed.Protocol;
+
+namespace TopSpeed.Core.Multiplayer
+{
+    internal sealed partial class MultiplayerCoordinator
+    {
+        private int GetRoomOptionsLapsIndex()
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            var laps = _state.RoomDrafts.RoomOptionsLaps < 1 ? (byte)1 : _state.RoomDrafts.RoomOptionsLaps;
+            return Math.Max(0, Math.Min(LapCountOptions.Length - 1, laps - 1));
+        }
+
+        private void SetRoomOptionsLaps(byte laps)
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            if (laps < 1 || laps > 16)
+                return;
+            _state.RoomDrafts.RoomOptionsLaps = laps;
+        }
+
+        private int GetRoomOptionsPlayersToStartIndex()
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            var playersToStart = _state.RoomDrafts.RoomOptionsPlayersToStart < 2 ? (byte)2 : _state.RoomDrafts.RoomOptionsPlayersToStart;
+            return Math.Max(0, Math.Min(RoomCapacityOptions.Length - 1, playersToStart - 2));
+        }
+
+        private void SetRoomOptionsPlayersToStart(byte playersToStart)
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            if (_state.Rooms.CurrentRoom.RoomType == GameRoomType.OneOnOne)
+            {
+                _state.RoomDrafts.RoomOptionsPlayersToStart = 2;
+                return;
+            }
+
+            if (playersToStart < 2 || playersToStart > ProtocolConstants.MaxRoomPlayersToStart)
+                return;
+
+            _state.RoomDrafts.RoomOptionsPlayersToStart = playersToStart;
+        }
+
+        private void OpenRoomGameRulesMenu()
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            RebuildRoomGameRulesMenu();
+            _menu.Push(MultiplayerMenuKeys.RoomGameRules);
+        }
+
+        private bool GetRoomOptionsGhostModeEnabled()
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            return (_state.RoomDrafts.RoomOptionsGameRulesFlags & (uint)RoomGameRules.GhostMode) != 0u;
+        }
+
+        private void SetRoomOptionsGhostModeEnabled(bool enabled)
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            var flags = NormalizeRoomOptionsGameRulesFlags(_state.RoomDrafts.RoomOptionsGameRulesFlags);
+            if (enabled)
+                flags |= (uint)RoomGameRules.GhostMode;
+            else
+                flags &= ~(uint)RoomGameRules.GhostMode;
+
+            _state.RoomDrafts.RoomOptionsGameRulesFlags = flags;
+        }
+
+        private bool GetRoomOptionsCustomTracksEnabled()
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            return (_state.RoomDrafts.RoomOptionsGameRulesFlags & (uint)RoomGameRules.CustomTracks) != 0u;
+        }
+
+        private bool IsCurrentRoomCustomTracksEnabled()
+        {
+            var authoritativeFlags = NormalizeRoomOptionsGameRulesFlags(_state.Rooms.CurrentRoom.GameRulesFlags);
+            return (authoritativeFlags & (uint)RoomGameRules.CustomTracks) != 0u;
+        }
+
+        private void SetRoomOptionsCustomTracksEnabled(bool enabled)
+        {
+            if (!_state.RoomDrafts.RoomOptionsDraftActive)
+                BeginRoomOptionsDraft();
+
+            var flags = NormalizeRoomOptionsGameRulesFlags(_state.RoomDrafts.RoomOptionsGameRulesFlags);
+            if (enabled)
+                flags |= (uint)RoomGameRules.CustomTracks;
+            else
+                flags &= ~(uint)RoomGameRules.CustomTracks;
+
+            _state.RoomDrafts.RoomOptionsGameRulesFlags = flags;
+        }
+    }
+}

@@ -6,7 +6,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed class Media
+        private sealed class Media : IMediaService
         {
             private readonly RaceServer _owner;
 

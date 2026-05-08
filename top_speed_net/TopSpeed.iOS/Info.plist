@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>Top Speed</string>
+    <key>CFBundleExecutable</key>
+    <string>TopSpeed.iOS</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.topspeed.game</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>Top Speed</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>2026.5.6.1</string>
+    <key>CFBundleVersion</key>
+    <string>2026050601</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>NSMotionUsageDescription</key>
+    <string>Top Speed uses motion sensors for steering controls.</string>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+  </dict>
+</plist>

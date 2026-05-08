@@ -29,6 +29,8 @@ namespace TopSpeed.Core.Multiplayer
             _state.RoomDrafts.RoomOptionsLaps = 1;
             _state.RoomDrafts.RoomOptionsPlayersToStart = 2;
             _state.RoomDrafts.RoomOptionsGameRulesFlags = 0;
+            _state.RoomDrafts.RoomOptionsAppliedGameRulesFlags = 0;
+            _state.RoomDrafts.RoomTrackTypeOpenPending = false;
             _state.RoomDrafts.RoomTrackCatalogOpenPending = false;
             _state.RoomDrafts.RoomTrackUploadReturnToCatalog = false;
             _state.RoomDrafts.RoomTrackCatalog = System.Array.Empty<PacketTrackPackageCatalogEntry>();

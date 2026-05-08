@@ -5,7 +5,7 @@ namespace TopSpeed.Server.Network
 {
     internal static class RaceCompletionInvariants
     {
-        public static bool TryValidateTerminalResults(RaceRoom room, out string reason)
+        public static bool TryValidateTerminalResults(GameRoom room, out string reason)
         {
             reason = string.Empty;
             if (room == null)
@@ -43,3 +43,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

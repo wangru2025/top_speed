@@ -20,7 +20,7 @@ namespace TopSpeed.Server.Network
                 {
                     _owner._notify.SendRoomState(player, room);
                     if (room.RaceState == RoomRaceState.Completed)
-                        _owner._notify.RaceCompletedTo(player, room);
+                        _owner._notify.SendRaceCompletionTo(player, room);
                     else if (room.RaceState == RoomRaceState.Aborted)
                         _owner._notify.ReplayRoomEventsTo(player, room, afterSequence: 0);
                 }
@@ -39,7 +39,7 @@ namespace TopSpeed.Server.Network
                 _owner._notify.SendRoomGet(player, room);
             }
 
-            public uint TouchVersion(RaceRoom room)
+            public uint TouchVersion(GameRoom room)
             {
                 if (room == null)
                     return 0;
@@ -50,7 +50,7 @@ namespace TopSpeed.Server.Network
                 return room.Version;
             }
 
-            public int FindFreeNumber(RaceRoom room)
+            public int FindFreeNumber(GameRoom room)
             {
                 for (var i = 0; i < room.PlayersToStart; i++)
                 {
@@ -65,3 +65,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

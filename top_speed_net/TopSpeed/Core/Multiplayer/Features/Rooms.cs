@@ -2,7 +2,7 @@ using TopSpeed.Protocol;
 
 namespace TopSpeed.Core.Multiplayer
 {
-    internal sealed class RoomsFlow
+    internal sealed class RoomsFlow : IRoomsFlow
     {
         private readonly MultiplayerCoordinator _owner;
 

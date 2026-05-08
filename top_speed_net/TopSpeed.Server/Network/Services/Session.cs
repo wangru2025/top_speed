@@ -3,7 +3,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private sealed partial class Session
+        private sealed partial class Session : ISessionService
         {
             private readonly RaceServer _owner;
 

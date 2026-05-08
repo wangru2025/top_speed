@@ -27,6 +27,13 @@ namespace TopSpeed.Core.Multiplayer
 
                 if (updatedCurrentRoom)
                 {
+                    if (eventInfo.Kind == RoomEventKind.GameRulesChanged)
+                    {
+                        _owner.HandleAuthoritativeRoomGameRulesChanged();
+                        effects.Add(PacketEffect.RebuildRoomOptions());
+                        effects.Add(PacketEffect.RebuildRoomGameRules());
+                    }
+
                     var roomEventText = HistoryText.FromRoomEvent(eventInfo);
                     if (!string.IsNullOrWhiteSpace(roomEventText))
                         effects.Add(PacketEffect.AddRoomEventHistory(roomEventText));

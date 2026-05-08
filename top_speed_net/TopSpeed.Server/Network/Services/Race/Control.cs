@@ -9,7 +9,7 @@ namespace TopSpeed.Server.Network
     {
         private sealed partial class Race
         {
-            public void CancelPrepare(RaceRoom room, PlayerConnection host)
+            public void CancelPrepare(GameRoom room, PlayerConnection host)
             {
                 if (room == null || !room.PreparingRace)
                     return;
@@ -31,7 +31,7 @@ namespace TopSpeed.Server.Network
                 foreach (var bot in room.Bots)
                     bot.State = PlayerState.NotReady;
 
-                TransitionState(room, RoomRaceState.Lobby);
+                TransitionRaceState(room, RoomRaceState.Lobby);
                 _owner._notify.ProtocolToRoomExcept(
                     room,
                     host.Id,
@@ -43,7 +43,7 @@ namespace TopSpeed.Server.Network
                 _owner._notify.BroadcastRoomState(room);
             }
 
-            public void SetPaused(RaceRoom room, PlayerConnection host, bool paused)
+            public void SetPaused(GameRoom room, PlayerConnection host, bool paused)
             {
                 if (room == null || !room.RaceStarted)
                     return;
@@ -64,7 +64,7 @@ namespace TopSpeed.Server.Network
                 _owner._notify.BroadcastRoomState(room);
             }
 
-            public void StopWithoutResults(RaceRoom room, PlayerConnection host)
+            public void StopWithoutResults(GameRoom room, PlayerConnection host)
             {
                 if (room == null || !room.RaceStarted)
                     return;
@@ -119,7 +119,7 @@ namespace TopSpeed.Server.Network
                     };
                 }
 
-                TransitionState(room, RoomRaceState.Lobby);
+                TransitionRaceState(room, RoomRaceState.Lobby);
                 _owner._notify.ProtocolToRoomExcept(
                     room,
                     host.Id,
@@ -133,3 +133,4 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+

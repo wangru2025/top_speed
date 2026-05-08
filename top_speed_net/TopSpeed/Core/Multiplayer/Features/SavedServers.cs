@@ -1,6 +1,6 @@
 namespace TopSpeed.Core.Multiplayer
 {
-    internal sealed class SavedServersFlow
+    internal sealed class SavedServersFlow : ISavedServersFlow
     {
         private readonly MultiplayerCoordinator _owner;
 

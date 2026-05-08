@@ -29,18 +29,18 @@ namespace TopSpeed.Server.Network
         private readonly ServerCommandBus _commandBus = new ServerCommandBus();
         private readonly UdpServerTransport _transport;
         private readonly ServerPktReg _pktReg;
-        private readonly Session _session;
-        private readonly Runtime _runtime;
-        private readonly Room _room;
-        private readonly Race _race;
-        private readonly Media _media;
-        private readonly Live _live;
-        private readonly Chat _chat;
-        private readonly Notify _notify;
+        private readonly ISessionService _session;
+        private readonly IRuntimeService _runtime;
+        private readonly IRoomService _room;
+        private readonly IRaceService _race;
+        private readonly IMediaService _media;
+        private readonly ILiveService _live;
+        private readonly IChatService _chat;
+        private readonly INotifyService _notify;
         private readonly Dictionary<uint, PlayerConnection> _players = new Dictionary<uint, PlayerConnection>();
         private readonly Dictionary<string, uint> _endpointIndex = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, uint> _endpointEpochIndex = new ConcurrentDictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<uint, RaceRoom> _rooms = new Dictionary<uint, RaceRoom>();
+        private readonly Dictionary<uint, GameRoom> _rooms = new Dictionary<uint, GameRoom>();
         private readonly Dictionary<string, PackageRecord> _trackPackageCache = new Dictionary<string, PackageRecord>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<uint, PackageUploadSession> _trackPackageUploads = new Dictionary<uint, PackageUploadSession>();
         private readonly Faker _faker = new Faker();
@@ -57,7 +57,7 @@ namespace TopSpeed.Server.Network
         private int _authorityDropsPlayerData;
         private int _authorityDropsPlayerStarted;
         private int _authorityDropsPlayerCrashed;
-        private int _joinDeniedRaceInProgress;
+        private int _joinDeniedGameInProgress;
         private int _roomMutationDenied;
         private int _raceSnapshotSends;
         private int _stateSyncFramesSent;
@@ -112,4 +112,5 @@ namespace TopSpeed.Server.Network
         }
     }
 }
+
 

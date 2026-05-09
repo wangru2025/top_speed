@@ -12,15 +12,15 @@ namespace TopSpeed.Menu
                 new CheckBox(LocalizationService.Mark("Enable HRTF audio"),
                     () => _settings.HrtfAudio,
                     value => _settingsActions.UpdateSetting(() => _settings.HrtfAudio = value),
-                    hint: HintToggle(LocalizationService.Mark("When checked, Three-D audio uses HRTF spatialization for more realistic positioning."))),
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, Three-D audio uses HRTF spatialization for more realistic positioning."))),
                 new CheckBox(LocalizationService.Mark("Stereo widening for own car"),
                     () => _settings.StereoWidening,
                     value => _settingsActions.UpdateSetting(() => _settings.StereoWidening = value),
-                    hint: HintToggle(LocalizationService.Mark("Accessibility option for clearer left-right cues with HRTF. It attenuates the opposite ear for your own car sounds only."))),
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("Accessibility option for clearer left-right cues with HRTF. It attenuates the opposite ear for your own car sounds only."))),
                 new CheckBox(LocalizationService.Mark("Automatic audio device format"),
                     () => _settings.AutoDetectAudioDeviceFormat,
                     value => _settingsActions.UpdateSetting(() => _settings.AutoDetectAudioDeviceFormat = value),
-                    hint: HintToggle(LocalizationService.Mark("When checked, the game uses the device channel count and sample rate. Restart required.")))
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, the game uses the device channel count and sample rate. Restart required.")))
             };
 
             return BackMenu("options_audio", items);

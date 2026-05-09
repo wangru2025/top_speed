@@ -14,8 +14,9 @@ namespace TopSpeed.Menu
             string? nextMenuId = null,
             Action? onActivate = null,
             bool suppressPostActivateAnnouncement = false,
-            string? hint = null)
-            : base(text, getValue, setValue, onChanged, action, nextMenuId, onActivate, suppressPostActivateAnnouncement, hint)
+            string? hint = null,
+            Func<string?>? hintProvider = null)
+            : base(text, getValue, setValue, onChanged, action, nextMenuId, onActivate, suppressPostActivateAnnouncement, hint, hintProvider)
         {
         }
 

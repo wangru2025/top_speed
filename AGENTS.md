@@ -143,7 +143,7 @@ The script requires GNU gettext (`xgettext`) on `PATH`. It walks every `*.cs` in
   - `PascalCase` for types, methods, properties.
   - `camelCase` for locals and parameters.
   - `_camelCase` for private fields.
-- Prefer narrow ownership by folder/module over large mixed-purpose files.
+- Prefer narrow ownership by folder/module over large mixed-purpose files. Never use large files unless it's absolutely necessary and unavoidable.
 - Inside a responsibility folder, prefer short responsibility-based type names (e.g. `Services/Room/Membership.cs`, not `Services/Room/RoomMembershipService.cs`).
 - Do not use dotted filenames like `RoomStore.Apply.cs`. Use folders (`State/Rooms/Apply.cs`) instead.
 - Partial classes are acceptable when they are already the local pattern and the split is coherent. Do not use partials to hide unrelated behavior.

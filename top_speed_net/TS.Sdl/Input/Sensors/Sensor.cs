@@ -6,7 +6,7 @@ namespace TS.Sdl.Input
 {
     public sealed class Sensor : IDisposable
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
         private IntPtr _handle;
 
         private Sensor(IntPtr handle)

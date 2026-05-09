@@ -5,7 +5,7 @@ namespace TS.Sdl.Input
 {
     public static class Keyboard
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
         private const string PropType = "SDL.textinput.type";
         private const string PropCapitalization = "SDL.textinput.capitalization";
         private const string PropAutoCorrect = "SDL.textinput.autocorrect";

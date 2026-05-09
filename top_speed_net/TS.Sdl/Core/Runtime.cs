@@ -7,7 +7,7 @@ namespace TS.Sdl
 {
     public static class Runtime
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static bool IsAvailable => Library.EnsureLoaded();
 

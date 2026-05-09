@@ -6,7 +6,7 @@ namespace TS.Sdl.Platform
 {
     public static class Android
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
         private static readonly NativePermissionCallback PermissionCallbackDelegate = PermissionCallback;
 
         public static bool RequestPermission(string permission, Action<AndroidPermissionResult> callback)

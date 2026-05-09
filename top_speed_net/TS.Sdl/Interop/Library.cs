@@ -8,6 +8,9 @@ namespace TS.Sdl.Interop
     {
         private const int RtldNow = 2;
         private const int RtldGlobal = 0x100;
+        private static readonly OSPlatform AndroidPlatform = OSPlatform.Create("ANDROID");
+        private static readonly OSPlatform IosPlatform = OSPlatform.Create("IOS");
+        private static readonly OSPlatform MacCatalystPlatform = OSPlatform.Create("MACCATALYST");
 
         private static readonly object Sync = new object();
         private static bool _attempted;
@@ -70,6 +73,17 @@ namespace TS.Sdl.Interop
                 };
             }
 
+            if (IsIosLike())
+            {
+                return new[]
+                {
+                    new Candidate(Path.Combine(baseDir, "Frameworks", "SDL3.framework", "SDL3"), true, Path.Combine("Frameworks", "SDL3.framework", "SDL3")),
+                    new Candidate(Path.Combine(baseDir, "SDL3.framework", "SDL3"), true, Path.Combine("SDL3.framework", "SDL3")),
+                    new Candidate("SDL3.framework/SDL3", false, "system:SDL3.framework/SDL3"),
+                    new Candidate("SDL3", false, "system:SDL3")
+                };
+            }
+
             var shortName = GetShortLibraryName(fileName);
             return new[]
             {
@@ -84,6 +98,8 @@ namespace TS.Sdl.Interop
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return "SDL3.dll";
+            if (IsIosLike())
+                return "SDL3.framework/SDL3";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return "libSDL3.dylib";
             if (IsAndroid())
@@ -144,7 +160,7 @@ namespace TS.Sdl.Interop
 
         private static string? GetDlError()
         {
-            var pointer = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            var pointer = IsApplePlatform()
                 ? DlerrorMac()
                 : IsAndroid()
                     ? DlerrorAndroid()
@@ -175,7 +191,7 @@ namespace TS.Sdl.Interop
 
         private static IntPtr Dlopen(string fileName, int flags)
         {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            return IsApplePlatform()
                 ? DlopenMac(fileName, flags)
                 : IsAndroid()
                     ? DlopenAndroid(fileName, flags)
@@ -184,7 +200,17 @@ namespace TS.Sdl.Interop
 
         private static bool IsAndroid()
         {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Create("ANDROID"));
+            return RuntimeInformation.IsOSPlatform(AndroidPlatform);
+        }
+
+        private static bool IsIosLike()
+        {
+            return RuntimeInformation.IsOSPlatform(IosPlatform) || RuntimeInformation.IsOSPlatform(MacCatalystPlatform);
+        }
+
+        private static bool IsApplePlatform()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || IsIosLike();
         }
 
         private readonly struct Candidate

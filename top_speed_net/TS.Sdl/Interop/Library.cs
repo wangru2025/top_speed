@@ -118,6 +118,7 @@ namespace TS.Sdl.Interop
                 {
                     new Candidate(Path.Combine(baseDir, "Frameworks", "SDL3.framework", "SDL3"), true, Path.Combine("Frameworks", "SDL3.framework", "SDL3")),
                     new Candidate(Path.Combine(baseDir, "SDL3.framework", "SDL3"), true, Path.Combine("SDL3.framework", "SDL3")),
+                    new Candidate("@rpath/SDL3.framework/SDL3", false, "system:@rpath/SDL3.framework/SDL3"),
                     new Candidate("SDL3.framework/SDL3", false, "system:SDL3.framework/SDL3"),
                     new Candidate("SDL3", false, "system:SDL3")
                 };
@@ -138,7 +139,7 @@ namespace TS.Sdl.Interop
             if (OperatingSystem.IsWindows())
                 return "SDL3.dll";
             if (IsIosLike())
-                return "SDL3.framework/SDL3";
+                return "@rpath/SDL3.framework/SDL3";
             if (OperatingSystem.IsMacOS())
                 return "libSDL3.dylib";
             if (IsAndroid())
@@ -204,6 +205,7 @@ namespace TS.Sdl.Interop
                 return false;
 
             return string.Equals(libraryName, SdlImportName, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(libraryName, "@rpath/SDL3.framework/SDL3", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(libraryName, "SDL3.framework/SDL3", StringComparison.OrdinalIgnoreCase);
         }
 

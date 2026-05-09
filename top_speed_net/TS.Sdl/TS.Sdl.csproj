@@ -11,4 +11,8 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IOSHostBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);TS_SDL_IOS_FRAMEWORK</DefineConstants>
+  </PropertyGroup>
 </Project>

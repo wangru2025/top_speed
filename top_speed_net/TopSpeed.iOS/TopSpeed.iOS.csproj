@@ -98,7 +98,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <NativeReference Include="..\TopSpeed\ThirdParty\ios\SDL3.xcframework">
+    <NativeReference Include="..\TopSpeed\ThirdParty\ios\SDL3.xcframework\ios-arm64\SDL3.framework" Condition="Exists('..\TopSpeed\ThirdParty\ios\SDL3.xcframework\ios-arm64\SDL3.framework\SDL3')">
+      <Kind>Framework</Kind>
+      <SmartLink>false</SmartLink>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\TopSpeed\ThirdParty\ios\SDL3.xcframework" Condition="!Exists('..\TopSpeed\ThirdParty\ios\SDL3.xcframework\ios-arm64\SDL3.framework\SDL3')">
       <Kind>Framework</Kind>
       <SmartLink>false</SmartLink>
       <ForceLoad>true</ForceLoad>

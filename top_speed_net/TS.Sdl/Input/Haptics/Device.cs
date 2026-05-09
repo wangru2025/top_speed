@@ -5,7 +5,7 @@ namespace TS.Sdl.Input
 {
     public sealed partial class HapticDevice : IDisposable
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
         private IntPtr _handle;
         private bool _rumbleInitialized;
 

@@ -6,7 +6,7 @@ namespace TS.Sdl.Dialogs
 {
     public static class FileDialogs
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static void ShowOpenFile(Action<FileDialogResult> callback, IntPtr window, DialogFileFilter[]? filters = null, string? defaultLocation = null, bool allowMany = false)
         {

@@ -5,7 +5,7 @@ namespace TS.Sdl.Video
 {
     public static class Window
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static IntPtr Create(string title, int width, int height, WindowFlags flags = WindowFlags.None)
         {

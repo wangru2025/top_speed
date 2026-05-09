@@ -5,6 +5,11 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
+## 2026.5.9.1
+### Game Changes
+- Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files). The fix is in the SoundFlow native FFmpeg wrapper: tail-of-stream codec/demuxer hiccups are now reported as graceful end-of-stream instead of as fatal decoder errors, so the radio source's `Seek(0)`+retry path recovers cleanly.
+
+
 ## 2026.5.5.1
 ### Game Changes
 - Fixed many bugs with the multiplayer server.

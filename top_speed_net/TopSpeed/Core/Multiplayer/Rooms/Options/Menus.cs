@@ -31,7 +31,7 @@ namespace TopSpeed.Core.Multiplayer
                 () => GetRoomOptionsTrackText(),
                 MenuAction.None,
                 onActivate: OpenRoomTrackTypeMenu,
-                hint: InteractionHints.ForPlatform(
+                hintProvider: () => InteractionHints.ForPlatform(
                     LocalizationService.Mark("Change the track used during the race."),
                     LocalizationService.Mark("Press ENTER to change."),
                     LocalizationService.Mark("Swipe up to change."))));
@@ -40,7 +40,7 @@ namespace TopSpeed.Core.Multiplayer
                 LapCountOptions,
                 GetRoomOptionsLapsIndex,
                 value => SetRoomOptionsLaps((byte)(value + 1)),
-                hint: InteractionHints.ForPlatform(
+                hintProvider: () => InteractionHints.ForPlatform(
                     LocalizationService.Mark("Choose the number of laps for this room."),
                     LocalizationService.Mark("Use LEFT or RIGHT to change."),
                     LocalizationService.Mark("Swipe left or right with two fingers to change."))));
@@ -49,7 +49,7 @@ namespace TopSpeed.Core.Multiplayer
                 RoomCapacityOptions,
                 GetRoomOptionsPlayersToStartIndex,
                 value => SetRoomOptionsPlayersToStart((byte)(value + 2)),
-                hint: InteractionHints.ForPlatform(
+                hintProvider: () => InteractionHints.ForPlatform(
                     LocalizationService.Mark("Select the player capacity for this room. The host can start with fewer players than the specified maximum players, so this is not a hard requirement."),
                     LocalizationService.Mark("Use LEFT or RIGHT to change."),
                     LocalizationService.Mark("Swipe left or right with two fingers to change.")))

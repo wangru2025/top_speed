@@ -7,6 +7,7 @@ namespace TopSpeed.Menu
     {
         private readonly string _text;
         private readonly Func<string>? _textProvider;
+        private readonly Func<string?>? _hintProvider;
         private readonly MenuItemAction[] _actions;
         public string? Hint { get; }
 
@@ -30,6 +31,7 @@ namespace TopSpeed.Menu
             bool suppressPostActivateAnnouncement = false,
             string? hint = null,
             MenuItemFlags flags = MenuItemFlags.None,
+            Func<string?>? hintProvider = null,
             params MenuItemAction[] actions)
         {
             _text = text;
@@ -39,6 +41,7 @@ namespace TopSpeed.Menu
             OnActivate = onActivate;
             SuppressPostActivateAnnouncement = suppressPostActivateAnnouncement;
             Hint = hint;
+            _hintProvider = hintProvider;
             Flags = flags;
             Hidden = (flags & MenuItemFlags.Hidden) != 0;
             _actions = actions ?? Array.Empty<MenuItemAction>();
@@ -52,6 +55,7 @@ namespace TopSpeed.Menu
             bool suppressPostActivateAnnouncement = false,
             string? hint = null,
             MenuItemFlags flags = MenuItemFlags.None,
+            Func<string?>? hintProvider = null,
             params MenuItemAction[] actions)
         {
             _text = string.Empty;
@@ -61,6 +65,7 @@ namespace TopSpeed.Menu
             OnActivate = onActivate;
             SuppressPostActivateAnnouncement = suppressPostActivateAnnouncement;
             Hint = hint;
+            _hintProvider = hintProvider;
             Flags = flags;
             Hidden = (flags & MenuItemFlags.Hidden) != 0;
             _actions = actions ?? Array.Empty<MenuItemAction>();
@@ -106,9 +111,11 @@ namespace TopSpeed.Menu
 
         public virtual string? GetHintText()
         {
-            var translatedHint = string.IsNullOrWhiteSpace(Hint)
-                ? null
-                : LocalizationService.Translate(Hint);
+            var translatedHint = _hintProvider != null
+                ? _hintProvider()
+                : string.IsNullOrWhiteSpace(Hint)
+                    ? null
+                    : LocalizationService.Translate(Hint);
 
             if (HasActions)
             {

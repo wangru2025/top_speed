@@ -21,7 +21,7 @@ namespace TopSpeed.Menu
         private MenuItem BuildSpeechBackendItem()
         {
             var backends = GetSelectableSpeechBackends();
-            var hint = HintAdjust(LocalizationService.Mark("Choose which speech backend to prefer. Automatic lets Prism pick the best available backend."));
+            var hintProvider = HintAdjustProvider(LocalizationService.Mark("Choose which speech backend to prefer. Automatic lets Prism pick the best available backend."));
 
             if (backends.Count == 0)
             {
@@ -30,7 +30,7 @@ namespace TopSpeed.Menu
                         LocalizationService.Mark("Speech backend: {0}"),
                         LocalizationService.Translate(LocalizationService.Mark("automatic"))),
                     MenuAction.None,
-                    hint: hint);
+                    hintProvider: hintProvider);
             }
 
             var values = new List<string>(backends.Count + 1)
@@ -46,7 +46,7 @@ namespace TopSpeed.Menu
                 values,
                 () => GetSpeechBackendIndex(backends),
                 value => _settingsActions.SetSpeechBackend(value == 0 ? null : backends[value - 1].Id),
-                hint: hint);
+                hintProvider: hintProvider);
         }
 
         private List<MenuItem> BuildSpeechItems()
@@ -58,7 +58,7 @@ namespace TopSpeed.Menu
                     LocalizationService.Mark("Interrupt screen reader speech"),
                     () => _settings.ScreenReaderInterrupt,
                     value => _settingsActions.SetScreenReaderInterrupt(value),
-                    hint: HintToggle(LocalizationService.Mark("When checked, new spoken messages interrupt the current screen reader speech. Menu titles and usage hints are not affected."))),
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, new spoken messages interrupt the current screen reader speech. Menu titles and usage hints are not affected."))),
                 BuildSpeechModeItem()
             };
 
@@ -72,7 +72,7 @@ namespace TopSpeed.Menu
                 LocalizationService.Mark("Recalibrate screen reader rate"),
                 MenuAction.None,
                 onActivate: _settingsActions.RecalibrateScreenReaderRate,
-                hint: HintStart(LocalizationService.Mark("Measure your screen-reader speaking speed again so usage hints and delayed speech timings stay accurate."))));
+                hintProvider: HintStartProvider(LocalizationService.Mark("Measure your screen-reader speaking speed again so usage hints and delayed speech timings stay accurate."))));
             return items;
         }
 
@@ -104,7 +104,7 @@ namespace TopSpeed.Menu
                 },
                 () => (int)_settings.SpeechMode,
                 value => _settingsActions.SetSpeechMode((SpeechOutputMode)value),
-                hint: HintAdjust(LocalizationService.Mark("Choose whether spoken messages use speech only, braille only, or speech with braille.")));
+                hintProvider: HintAdjustProvider(LocalizationService.Mark("Choose whether spoken messages use speech only, braille only, or speech with braille.")));
         }
 
         private MenuItem BuildSpeechVoiceItem()
@@ -118,7 +118,7 @@ namespace TopSpeed.Menu
                         LocalizationService.Mark("Voice: {0}"),
                         voiceName),
                     MenuAction.None,
-                    hint: HintAdjust(LocalizationService.Mark("Select which voice the current speech backend should use.")));
+                    hintProvider: HintAdjustProvider(LocalizationService.Mark("Select which voice the current speech backend should use.")));
             }
 
             var values = new List<string>(voices.Count);
@@ -130,7 +130,7 @@ namespace TopSpeed.Menu
                 values,
                 () => GetSpeechVoiceIndex(voices),
                 value => _settingsActions.SetSpeechVoice(voices[value].Index),
-                hint: HintAdjust(LocalizationService.Mark("Select which voice the current speech backend should use.")));
+                hintProvider: HintAdjustProvider(LocalizationService.Mark("Select which voice the current speech backend should use.")));
         }
 
         private MenuItem BuildSpeechRateItem()
@@ -140,7 +140,7 @@ namespace TopSpeed.Menu
                 "0-100",
                 () => (int)System.Math.Round(_settings.SpeechRate * 100f),
                 value => _settingsActions.SetSpeechRate(value / 100f),
-                hint: HintSlider(LocalizationService.Mark("Adjust the speech rate for the current backend.")));
+                hintProvider: HintSliderProvider(LocalizationService.Mark("Adjust the speech rate for the current backend.")));
         }
 
         private bool SupportsVoiceSelection()

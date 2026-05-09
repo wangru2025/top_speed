@@ -111,6 +111,21 @@ dotnet publish top_speed_net/TopSpeed/TopSpeed.csproj -c Release -f net10.0     
 - Android: `top_speed_net/scripts/build/android.sh <version> <android_version_code> <apk_arm64> <apk_arm32>`.
 - iOS: `dotnet publish top_speed_net/TopSpeed.iOS/TopSpeed.iOS.csproj -c Release -f net10.0-ios -r ios-arm64`. Codesigning is driven by the `IOS_CODESIGN_KEY` / `IOS_CODESIGN_PROVISION` environment variables.
 
+### Native audio backends (`top_speed_net/SoundFlow/`)
+
+The audio engine is the `SoundFlow` git submodule pinned to a specific commit on `https://github.com/diamondStar35/SoundFlow`. Managed C# code lives under `top_speed_net/SoundFlow/Src/` and `top_speed_net/SoundFlow/Codecs/`; native code lives under `top_speed_net/SoundFlow/Native/{ffmpeg-codec,miniaudio-backend,webrtc-audio-processing}/` and is shipped as pre-built per-RID binaries in `top_speed_net/SoundFlow/Codecs/SoundFlow.Codecs.FFMpeg/runtimes/<rid>/native/` and `top_speed_net/SoundFlow/Src/Backends/SoundFlow.Backends.MiniAudio/runtimes/<rid>/native/`.
+
+Rules when fixing audio bugs:
+- Fix the root cause in the SoundFlow submodule (managed `.cs` under `Src/` / `Codecs/`, or native `.c` / `CMakeLists.txt` under `Native/`). Do not patch around it in `top_speed_net/TopSpeed/...` or `top_speed_net/TS.Audio/...`.
+- Land the SoundFlow change as a PR against `https://github.com/diamondStar35/SoundFlow` (`master`). Once merged, the **separate** runtimes-refresh step (below) is what makes the fix visible on disk for non-managed changes.
+- Bump the SoundFlow submodule pointer in `top_speed_net` in a separate commit on the consuming branch; the existing pre-commit version-sync hook still applies.
+
+Refreshing the bundled native runtimes (only required when `Native/**` changed):
+- The build is **not** part of `dotnet build` — `Codecs/SoundFlow.Codecs.FFMpeg/SoundFlow.Codecs.FFMpeg.csproj` and the MiniAudio backend csproj just glob the `runtimes/<rid>/native/*` files into the package output.
+- Source of truth for the FFmpeg native lib is `top_speed_net/SoundFlow/Native/ffmpeg-codec/CMakeLists.txt` (downloads FFmpeg 8.0 + LAME 3.100 via `ExternalProject_Add`, requires CMake ≥ 3.24, NASM, YASM, and a working host toolchain). The output `libsoundflow-ffmpeg.{so,dll,dylib}` lands in `build/runtimes/<rid>/native/` and must be copied into `Codecs/SoundFlow.Codecs.FFMpeg/runtimes/<rid>/native/` before commit.
+- Per-RID rebuilds for all officially supported runtimes are produced by the `Build FFmpeg Codec Integration` workflow (`SoundFlow/.github/workflows/build-ffmpeg.yml`, `workflow_dispatch` only). Trigger it from the SoundFlow Actions tab against the branch carrying the native fix, download the artifacts, and commit them to the same SoundFlow branch as a separate "Update runtimes" commit.
+- Do not commit only one platform's binary alongside a `Native/**` source change — the binaries must stay consistent across RIDs. If a partial refresh is unavoidable, call it out explicitly in the PR description.
+
 ### Localization templates
 
 Regenerate `.pot` files after touching translatable strings:

@@ -1,111 +1,197 @@
 # Repository Guidelines
 
+Top Speed is an audio-only racing game written in C# (.NET 10). The repo hosts a desktop/mobile client, a dedicated multiplayer server, shared protocol/data libraries, audio bindings, a self-updater, and a unified test project. This document is the contract for agents working in this repository: keep it in sync with the actual code.
+
 ## Project Structure & Module Organization
-`top_speed_net/` contains the main solution, [TopSpeed.sln](top_speed/top_speed_net/TopSpeed.sln).
 
-Core projects:
-- `TopSpeed/`: client game. Primary targets are `net472` and `net10.0-windows`/platform-specific `net10.0` builds.
-- `TopSpeed.Server/`: dedicated server runtime on `net8.0`.
-- `TopSpeed.Shared/`: shared protocol, localization, track/data contracts, and common helpers.
-- `TS.Audio/`, `MiniAudioExNET/`, `SteamAudio.NET/`, `CrossSpeak/`: audio, native wrappers, and screen-reader integration.
-- `TopSpeed.Tests/`: test project covering shared/client logic. This project is active and part of the solution.
+The .NET solution lives at [`top_speed_net/TopSpeed.sln`](top_speed_net/TopSpeed.sln). All paths below are relative to the repository root.
 
-Assets and data:
-- `top_speed_net/Sounds/`
-- `top_speed_net/Tracks/`
-- `top_speed_net/Vehicles/`
-- `top_speed_net/languages/client/`
-- `top_speed_net/languages/server/`
+### Solution projects
 
-Supporting material:
-- `.github/workflows/dev-build.yml`
-- `docs/`
+- `top_speed_net/TopSpeed/` — client game. Conditional `TargetFramework`: `net10.0-windows` on Windows, `net10.0` on Linux/macOS, `Library` for mobile host builds (`AndroidHostBuild=true` / `IOSHostBuild=true`).
+- `top_speed_net/TopSpeed.Server/` — dedicated server, `net10.0`. Publish profiles are selected via `-p:ServerPublishProfile=...` (see [Build, test & publish](#build-test--publish)).
+- `top_speed_net/TopSpeed.Shared/` — shared protocol, localization, vehicle/track data, physics, runtime helpers. Targets `netstandard2.0` so it can be referenced from every client/server/mobile target without conditional compilation.
+- `top_speed_net/TopSpeed.Tests/` — unified xUnit test project (`net10.0-windows`) covering shared, server, and client logic. Uses xUnit + FluentAssertions + FsCheck + Verify. Tests are part of the solution and must build clean.
+- `top_speed_net/TopSpeed.Android/` — Android host (`net10.0-android`). Builds via [`top_speed_net/scripts/build/android.sh`](top_speed_net/scripts/build/android.sh).
+- `top_speed_net/TopSpeed.iOS/` — iOS host (`net10.0-ios`). Not in the .sln; built directly via `dotnet publish` or release CI.
+- `top_speed_net/TS.Audio/` — audio engine wrapper (mixer, buses, effects, DSP) on `net10.0`.
+- `top_speed_net/TS.Sdl/` — SDL bindings used by the client/test harness (`net10.0`).
+- `top_speed_net/SteamAudio.NET/` — Steam Audio bindings + native loader (managed `net10.0`).
+- `top_speed_net/Updater/` — standalone updater. `TargetFrameworks=net472;net10.0` so the legacy `net472` updater can run on Windows hosts that lack newer runtimes.
+- `top_speed_net/SoundFlow/` — git submodule providing the audio engine source (`https://github.com/diamondStar35/SoundFlow`).
 
-## Current Architecture
+### Server architecture (`top_speed_net/TopSpeed.Server/Network/`)
 
-### Server
-The server is no longer expected to grow through large `RaceServer` partials. `RaceServer` is the host/facade; behavior is split under `TopSpeed.Server/Network/Services/`.
+`RaceServer` (defined in `Network/Server.cs`) is the host/facade; behavior is split under `Network/Services/`:
 
-Current server boundaries:
-- `Services/Session/`: handshake, packet ingress, disconnect lifecycle, session-level messaging.
-- `Services/Room/`: room membership, host actions, readiness, numbering, bots, lobby state.
-- `Services/Race/`: prepare/start/stop, participant finish handling, race completion.
-- `Services/Notify/`: outbound room/race packet emission.
-- `Services/Runtime.cs`: network/runtime scheduling.
-- `Services/Chat.cs`, `Live.cs`, `Media.cs`: side channels, not room/race authority.
+- `Services/Session/` — handshake, packet ingress, disconnect lifecycle, recovery, session-level messaging.
+- `Services/Room/` — membership, host actions, readiness, numbering, bots, lobby state, track/vehicle/track-package selection.
+- `Services/Race/` — prepare/start/stop, simulation, snapshots, bots, participant finish, race completion.
+- `Services/Notify/` — outbound room/race packet emission and journaling.
+- `Services/Runtime.cs` — network/runtime scheduling.
+- `Services/Chat.cs`, `Live.cs`, `Media.cs` — side channels; not room/race authority.
 
-Rule: room ownership stays in `Room`, race ownership stays in `Race`, and packet emission stays in `Notify`. Do not reintroduce room/race logic directly into the server root.
+Rule: room ownership stays in `Room`, race ownership stays in `Race`, packet emission stays in `Notify`. Do not reintroduce room/race logic into `RaceServer`/`Server.cs` or into `Program.cs`. Partial files for `RaceServer` are acceptable (the class is already `partial`); use them only to keep the host/facade thin.
 
-### Client Multiplayer
-Client multiplayer is split into state, dispatch, runtime, and UI reactions.
+### Client multiplayer (`top_speed_net/TopSpeed/`)
 
-Current client boundaries:
-- `TopSpeed/Game/Multiplayer/Dispatch/`: packet registration, decoding, and routing.
-- `TopSpeed/Game/Multiplayer/Race/`: multiplayer race runtime and binding state.
-- `TopSpeed/Core/Multiplayer/Coordinator/State/Rooms/`: authoritative room store and room drafts.
-- `TopSpeed/Core/Multiplayer/Coordinator/RoomSync/Handlers/`: packet-to-store reducers.
-- `TopSpeed/Core/Multiplayer/Coordinator/RoomUi/`: room UI/menu/speech reactions after store changes.
-- `TopSpeed/Core/Multiplayer/Domain/Rooms/` and `Domain/Online/`: multiplayer domain models.
+Multiplayer is split into state, dispatch, runtime, and UI reactions:
 
-Rule: packet handlers update store/runtime state first; menu/speech effects happen second. Avoid mixing room state mutation with UI side effects in the same method.
+- `Game/Multiplayer/Dispatch/` — packet registration, decoding, and routing.
+- `Game/Multiplayer/Race/` — multiplayer race runtime and binding state.
+- `Core/Multiplayer/Coordinator/State/Rooms/` — authoritative room store and room drafts.
+- `Core/Multiplayer/Coordinator/RoomSync/Handlers/` — packet-to-store reducers.
+- `Core/Multiplayer/Coordinator/RoomUi/` — room UI/menu/speech reactions after store changes.
+- `Core/Multiplayer/Domain/Rooms/` and `Domain/Online/` — multiplayer domain models.
 
-### Menu, Dialog, and Localization
-- Menu items and screen titles should be fed through `LocalizationService.Mark(...)` at the source.
-- Shared announcement/rendering helpers should translate user-facing text centrally instead of depending on callers to pre-translate everything.
-- Input/control display text should go through shared formatters, not raw enum `ToString()` output.
+Rule: packet handlers update store/runtime state first; menu/speech effects happen second. Do not mix room state mutation with UI side effects in the same method.
 
-## Build, Test, and Development Commands
-From repository root:
-- `dotnet restore top_speed_net/TopSpeed.sln`
-- `dotnet build top_speed_net/TopSpeed.sln -c Debug`
-- `dotnet build top_speed_net/TopSpeed.sln -c Release`
-- `dotnet test top_speed_net/TopSpeed.Tests/TopSpeed.Tests.csproj -c Debug --no-build`
+### Menu, dialog, and localization
 
-Common publish commands:
-- Server: `dotnet publish top_speed_net/TopSpeed.Server/TopSpeed.Server.csproj -c Release -p:ServerPublishProfile=ReleaseWinX64`
-- Client Windows/net10: `dotnet publish top_speed_net/TopSpeed/TopSpeed.csproj -c Release -f net10.0-windows -r win-x64`
+- Menu items and screen titles must be fed through `LocalizationService.Mark(...)` at the source (see `TopSpeed.Shared/Localization/LocalizationService.cs`).
+- Shared announcement/rendering helpers translate user-facing text centrally; do not require callers to pre-translate.
+- Input/control display text goes through shared formatters, not raw enum `ToString()` output.
+- Translatable strings are extracted into `top_speed_net/languages/client/messages.pot` and `.../server/messages.pot` and synced via Crowdin (see `crowdin.yml`).
 
-Translation templates:
-- `powershell -ExecutionPolicy Bypass -File top_speed_net/languages/Generate-Templates.ps1`
+### Assets, data, and other top-level paths
 
-## Coding Style & Naming Conventions
-- Language: C#, 4-space indentation.
+- `top_speed_net/Sounds/`, `top_speed_net/Tracks/`, `top_speed_net/Vehicles/` — checked-in game content.
+- `top_speed_net/languages/{client,server}/` — gettext `.pot` templates and per-locale `.po` translations.
+- `top_speed_net/scripts/build/` — per-platform release scripts (`windows.ps1`, `linux.sh`, `macos.sh`, `android.sh`, `verify_docs.py`).
+- `.github/workflows/release-build.yml` — CI release pipeline (Windows/Linux/macOS/Android/iOS); uses `.github/actions/setup-build-env` to provision .NET 10, Python 3, and (optionally) Java/Temurin.
+- `.github/workflows/{crowdin-sync,locale-auto-merge,discussion-telegram}.yml` — localization + community automation.
+- `.githooks/` — repo-managed git hooks (see [Git hooks](#git-hooks)).
+- `docs/` — player-facing guides (`game-guide.md`, `track-creation-guide.md`, `vehicle-physics-and-creation-guide.md`, `testing.md`, `changes.md`).
+- `installer/` — Inno Setup script (`TSPEED.ISS`) and installer art used by Windows release packaging.
+- `original/` — preserved upstream C++ source (Visual Studio 2008). Reference only — do not extend.
+- `info.json` — release metadata: `version`, `serverVersion`, and human-readable `changes` / `serverChanges` arrays consumed by the release workflow.
+
+## Build, test & publish
+
+All commands assume the repository root unless noted.
+
+### Build & test
+
+```bash
+dotnet restore top_speed_net/TopSpeed.sln
+dotnet build   top_speed_net/TopSpeed.sln -c Debug
+dotnet build   top_speed_net/TopSpeed.sln -c Release
+dotnet test    top_speed_net/TopSpeed.Tests/TopSpeed.Tests.csproj -c Debug --no-build
+```
+
+Notes:
+- The test project targets `net10.0-windows` and therefore only runs on Windows. The release CI's Windows job (`top_speed_net/scripts/build/windows.ps1`) runs `dotnet test ... --framework net10.0-windows` as part of the build gate.
+- `top_speed_net/Directory.Build.props` excludes `obj/**` from default item discovery; do not assume it appears in glob results.
+- `top_speed_net/NuGet.Config` clears Visual Studio fallback package folders. Use the standard NuGet feed; do not check in package binaries.
+
+### Publish — server
+
+```bash
+dotnet publish top_speed_net/TopSpeed.Server/TopSpeed.Server.csproj \
+    -c Release -p:ServerPublishProfile=ReleaseWinX64
+```
+
+Supported `ServerPublishProfile` values (defined in `TopSpeed.Server.csproj`): `ReleaseWinX64`, `ReleaseLinuxX64`, `ReleaseLinuxArm64`, `ReleaseLinuxArm32`, `ReleaseLinuxMuslX64`, `ReleaseLinuxMuslArm64`, `ReleaseLinuxX86FrameworkDependent`, `ReleaseMacX64`, `ReleaseMacArm64`. Output goes to `TopSpeed.Server/bin/Publish/<rid>/`.
+
+### Publish — desktop client
+
+```bash
+# Windows
+dotnet publish top_speed_net/TopSpeed/TopSpeed.csproj -c Release -f net10.0-windows -r win-x64
+# Linux
+dotnet publish top_speed_net/TopSpeed/TopSpeed.csproj -c Release -f net10.0          -r linux-x64
+# macOS (arm64)
+dotnet publish top_speed_net/TopSpeed/TopSpeed.csproj -c Release -f net10.0          -r osx-arm64 -p:UseNativeAotUpdater=true
+```
+
+`-p:UseTrimmedUpdater=true` and `-p:UseNativeAotUpdater=true` toggle which updater build is shipped with the client; release scripts in `top_speed_net/scripts/build/` document the per-platform combinations.
+
+### Publish — mobile
+
+- Android: `top_speed_net/scripts/build/android.sh <version> <android_version_code> <apk_arm64> <apk_arm32>`.
+- iOS: `dotnet publish top_speed_net/TopSpeed.iOS/TopSpeed.iOS.csproj -c Release -f net10.0-ios -r ios-arm64`. Codesigning is driven by the `IOS_CODESIGN_KEY` / `IOS_CODESIGN_PROVISION` environment variables.
+
+### Localization templates
+
+Regenerate `.pot` files after touching translatable strings:
+
+```bash
+pwsh -NoLogo -NoProfile -File top_speed_net/languages/Generate-Templates.ps1
+```
+
+The script requires GNU gettext (`xgettext`) on `PATH`. It walks every `*.cs` in the client and server trees (excluding `bin/` and `obj/`).
+
+## Coding style & naming
+
+- Language: C#, 4-space indentation, `Nullable=enable`, `LangVersion=latest`. Match the surrounding file's style — do not reformat unrelated code.
 - Naming:
   - `PascalCase` for types, methods, properties.
   - `camelCase` for locals and parameters.
-  - `_fieldName` for private fields.
-- Prefer narrow ownership by folder/module, not large mixed-purpose files.
-- Prefer short, responsibility-based type names inside a responsibility folder. Do not add redundant suffixes like `RoomService` inside `Services/Room`.
-- Do not use dotted filenames like `RoomStore.Apply.cs`. Use folders instead, for example `State/Rooms/Apply.cs`.
+  - `_camelCase` for private fields.
+- Prefer narrow ownership by folder/module over large mixed-purpose files.
+- Inside a responsibility folder, prefer short responsibility-based type names (e.g. `Services/Room/Membership.cs`, not `Services/Room/RoomMembershipService.cs`).
+- Do not use dotted filenames like `RoomStore.Apply.cs`. Use folders (`State/Rooms/Apply.cs`) instead.
 - Partial classes are acceptable when they are already the local pattern and the split is coherent. Do not use partials to hide unrelated behavior.
+- Place imports/`using`s at the top of files; do not nest them inside types or methods.
 - Prefer shared formatting/translation helpers for repeated user-facing text paths.
+- Do not use `dynamic`, reflection, or string-keyed lookups to dodge the type system; understand the type and access it directly.
 
-## Testing Guidelines
-- Minimum gate: `dotnet build top_speed_net/TopSpeed.sln -c Debug` must pass with 0 errors.
-- Preferred gate for logic changes: also run `dotnet test top_speed_net/TopSpeed.Tests/TopSpeed.Tests.csproj -c Debug --no-build`.
-- For gameplay/network changes, do runtime smoke testing:
+## Testing guidelines
+
+- **Minimum gate:** `dotnet build top_speed_net/TopSpeed.sln -c Debug` must build with 0 errors.
+- **Preferred gate for logic changes (Windows):** also run `dotnet test top_speed_net/TopSpeed.Tests/TopSpeed.Tests.csproj -c Debug --no-build`.
+- Test layout under `top_speed_net/TopSpeed.Tests/`:
+  - `Behavior/{Shared,Server,Client}` — feature-level behavior tests.
+  - `Invariants/{Shared,Architecture}` — protocol and architectural invariants.
+  - `Regression/{Shared,Client}` — locked-in fixes for past bugs.
+  - `Harness/{Shared,Client}` — fakes, builders, in-memory transports.
+- For gameplay/network changes, runtime smoke test on a real client+server:
   - menu navigation and spoken output,
   - race loop behavior,
   - multiplayer connect/join/leave,
   - room prepare/start/finish/result flow,
   - disconnect/quit cleanup.
-- For localization changes, regenerate templates and verify the affected `msgid` entries in `languages/client/messages.pot` or `languages/server/messages.pot`.
+- For localization changes, regenerate `.pot` templates and verify the affected `msgid` entries in `top_speed_net/languages/client/messages.pot` or `.../server/messages.pot`.
 
-## Commit & Pull Request Guidelines
-- Use focused imperative subjects, for example:
+## Git hooks
+
+`.githooks/pre-commit` enforces a **client version sync** check: it parses `top_speed_net/TopSpeed.Shared/Protocol/VersionInfo.cs` (`ReleaseVersionInfo.{ClientYear,ClientMonth,ClientDay,ClientRevision}`) and requires `info.json`'s `version` field to equal `Year.Month.Day.Revision`. It also strict-parses every staged `*.json` file via `System.Text.Json` (no comments, no trailing commas).
+
+The hook requires PowerShell 7 (`pwsh`) or Windows PowerShell on `PATH`. Enable hooks once per clone with **either** of:
+
+```bash
+git config core.hooksPath .githooks
+# or
+ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
+
+When you bump `ReleaseVersionInfo`, also bump `info.json#version` (and add a `changes` entry); when you bump `ReleaseServerVersionInfo`, bump `info.json#serverVersion` (and add a `serverChanges` entry).
+
+## Versioning & release metadata
+
+- Version format is `YYYY.M.D.R` for both client and server (`R` is a same-day revision counter). The release workflow rejects any other format.
+- `info.json#changes` and `info.json#serverChanges` are arrays of human-readable bullets surfaced in release notes; keep them user-visible (no internal jargon).
+- `docs/changes.md` is the long-form changelog; keep new releases prepended at the top.
+- Pushing to `main`/`master` triggers `.github/workflows/release-build.yml`, which builds and uploads per-platform artifacts named `TopSpeed-<rid>-Release-v-<version>.{zip,apk,ipa}`.
+
+## Commit & pull request guidelines
+
+- Use focused imperative subjects, e.g.:
   - `Fix dialog title localization`
   - `Refactor multiplayer room store`
   - `Add localized input display text`
 - Keep one concern per commit.
 - When behavior changes, include the user-visible effect in the commit body or PR description.
-- PRs should include:
+- PRs should describe:
   - what changed,
   - why it changed,
-  - verification commands,
+  - verification commands run,
   - runtime checks when relevant.
 
-## Security & Configuration Notes
-- Do not commit secrets, tokens, or local machine-specific configuration.
-- Do not commit build or publish output directories.
-- Keep custom content inside approved asset folders.
+## Security & configuration notes
+
+- Never commit secrets, tokens, signing keys, or machine-specific configuration. The `.gitignore` already excludes `top_speed.p12` and `signpass.txt` under `TopSpeed.Android/`; keep new credentials outside the tree as well.
+- Never commit build or publish output (`bin/`, `obj/`, `Publish/`, `Release/`, `*.binlog`, etc.).
+- Keep custom content inside approved asset folders (`Sounds/`, `Tracks/`, `Vehicles/`, `languages/`).
 - Prefer project-relative paths and checked-in assets over hard-coded local filesystem dependencies.
+- Do not extend `original/`; treat it as a read-only historical reference.

@@ -21,7 +21,7 @@ namespace TopSpeed.Core.Multiplayer
                 RoomCapacityOptions,
                 GetCreateRoomPlayersToStartIndex,
                 SetCreateRoomPlayersToStart,
-                hint: InteractionHints.ForPlatform(
+                hintProvider: () => InteractionHints.ForPlatform(
                     LocalizationService.Mark("Choose the player capacity from 2 to 10."),
                     LocalizationService.Mark("Use LEFT or RIGHT to change."),
                     LocalizationService.Mark("Swipe left or right with two fingers to change.")))
@@ -35,7 +35,7 @@ namespace TopSpeed.Core.Multiplayer
                     RoomTypeOptions,
                     GetCreateRoomTypeIndex,
                     SetCreateRoomType,
-                    hint: InteractionHints.ForPlatform(
+                    hintProvider: () => InteractionHints.ForPlatform(
                         LocalizationService.Mark("Choose whether this room is a race with bots, a multiplayer race without bots, or a one-on-one game."),
                         LocalizationService.Mark("Use LEFT or RIGHT to change."),
                         LocalizationService.Mark("Swipe left or right with two fingers to change."))),
@@ -48,7 +48,7 @@ namespace TopSpeed.Core.Multiplayer
                             _state.RoomDrafts.CreateRoomName),
                     MenuAction.None,
                     onActivate: UpdateCreateRoomName,
-                    hint: InteractionHints.ForPlatform(
+                    hintProvider: () => InteractionHints.ForPlatform(
                         LocalizationService.Mark("Enter a room name. Leave it empty to use an automatic name."),
                         LocalizationService.Mark("Press ENTER to enter a room name."),
                         LocalizationService.Mark("Swipe up to enter a room name."))),

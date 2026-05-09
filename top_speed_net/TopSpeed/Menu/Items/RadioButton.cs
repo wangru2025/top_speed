@@ -21,8 +21,9 @@ namespace TopSpeed.Menu
             MenuAction action = MenuAction.None,
             string? nextMenuId = null,
             bool suppressPostActivateAnnouncement = false,
-            string? hint = null)
-            : base(text, action, nextMenuId, onActivate: null, suppressPostActivateAnnouncement, hint)
+            string? hint = null,
+            Func<string?>? hintProvider = null)
+            : base(text, action, nextMenuId, onActivate: null, suppressPostActivateAnnouncement, hint, hintProvider: hintProvider)
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));

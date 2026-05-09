@@ -55,6 +55,11 @@ namespace TopSpeed.Menu
             return InteractionHints.ForPlatform(desktopHint, touchHint);
         }
 
+        private static Func<string> HintForPlatformProvider(string desktopHint, string touchHint)
+        {
+            return () => HintForPlatform(desktopHint, touchHint);
+        }
+
         private static string HintForPlatform(string hint, string desktopControl, string touchControl)
         {
             var text = LocalizationService.Translate(hint).Trim();
@@ -67,12 +72,22 @@ namespace TopSpeed.Menu
             return text + " " + control;
         }
 
+        private static Func<string> HintForPlatformProvider(string hint, string desktopControl, string touchControl)
+        {
+            return () => HintForPlatform(hint, desktopControl, touchControl);
+        }
+
         private static string HintToggle(string hint)
         {
             return HintForPlatform(
                 hint,
                 LocalizationService.Mark("Press ENTER to toggle."),
                 LocalizationService.Mark("Swipe up to toggle."));
+        }
+
+        private static Func<string> HintToggleProvider(string hint)
+        {
+            return () => HintToggle(hint);
         }
 
         private static string HintChange(string hint)
@@ -83,12 +98,22 @@ namespace TopSpeed.Menu
                 LocalizationService.Mark("Swipe up to change."));
         }
 
+        private static Func<string> HintChangeProvider(string hint)
+        {
+            return () => HintChange(hint);
+        }
+
         private static string HintSelect(string hint)
         {
             return HintForPlatform(
                 hint,
                 LocalizationService.Mark("Press ENTER to select."),
                 LocalizationService.Mark("Swipe up to select."));
+        }
+
+        private static Func<string> HintSelectProvider(string hint)
+        {
+            return () => HintSelect(hint);
         }
 
         private static string HintStart(string hint)
@@ -99,6 +124,11 @@ namespace TopSpeed.Menu
                 LocalizationService.Mark("Swipe up to start."));
         }
 
+        private static Func<string> HintStartProvider(string hint)
+        {
+            return () => HintStart(hint);
+        }
+
         private static string HintAdjust(string hint)
         {
             return HintForPlatform(
@@ -107,12 +137,22 @@ namespace TopSpeed.Menu
                 LocalizationService.Mark("Swipe left or right with two fingers to change."));
         }
 
+        private static Func<string> HintAdjustProvider(string hint)
+        {
+            return () => HintAdjust(hint);
+        }
+
         private static string HintSlider(string hint)
         {
             return HintForPlatform(
                 hint,
                 LocalizationService.Mark("Use LEFT or RIGHT to change by 1, PAGE UP or PAGE DOWN to change by 10, HOME for maximum, END for minimum."),
                 LocalizationService.Mark("Swipe up or down with two fingers to change by 10, swipe left or right with two fingers to change by 1, and swipe up or down with three fingers for maximum or minimum."));
+        }
+
+        private static Func<string> HintSliderProvider(string hint)
+        {
+            return () => HintSlider(hint);
         }
 
         private static string FormatServerPort(int port)

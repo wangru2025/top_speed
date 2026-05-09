@@ -1,21 +1,27 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace TS.Sdl.Interop
 {
     internal static class Library
     {
+        private const string SdlImportName = "SDL3";
         private const int RtldNow = 2;
         private const int RtldGlobal = 0x100;
-        private static readonly OSPlatform AndroidPlatform = OSPlatform.Create("ANDROID");
-        private static readonly OSPlatform IosPlatform = OSPlatform.Create("IOS");
-        private static readonly OSPlatform MacCatalystPlatform = OSPlatform.Create("MACCATALYST");
 
         private static readonly object Sync = new object();
         private static bool _attempted;
         private static bool _loaded;
+        private static bool _resolverInstalled;
+        private static IntPtr _loadedHandle;
         private static string _lastError = "SDL3 library has not been loaded yet.";
+
+        static Library()
+        {
+            InstallResolver();
+        }
 
         public static string LastError
         {
@@ -30,18 +36,24 @@ namespace TS.Sdl.Interop
 
         public static bool EnsureLoaded()
         {
+            return EnsureLoadedHandle() != IntPtr.Zero;
+        }
+
+        private static IntPtr EnsureLoadedHandle()
+        {
             lock (Sync)
             {
                 if (_attempted)
-                    return _loaded;
+                    return _loaded ? _loadedHandle : IntPtr.Zero;
 
                 _attempted = true;
                 var failures = new System.Collections.Generic.List<string>();
                 foreach (var candidate in GetCandidates())
                 {
-                    if (TryLoad(candidate.Path, candidate.RequireFile, out var error))
+                    if (TryLoad(candidate.Path, candidate.RequireFile, out var handle, out var error))
                     {
                         _loaded = true;
+                        _loadedHandle = handle;
                         _lastError = string.Empty;
                         break;
                     }
@@ -55,15 +67,42 @@ namespace TS.Sdl.Interop
                         ? $"SDL3 could not be loaded. Attempts: {string.Join(" | ", failures)}"
                         : "SDL3 could not be loaded.";
 
-                return _loaded;
+                return _loaded ? _loadedHandle : IntPtr.Zero;
             }
+        }
+
+        private static void InstallResolver()
+        {
+            if (_resolverInstalled)
+                return;
+
+            try
+            {
+                NativeLibrary.SetDllImportResolver(typeof(Library).Assembly, ResolveImport);
+            }
+            catch (InvalidOperationException)
+            {
+                // A resolver is already installed for this assembly.
+            }
+
+            _resolverInstalled = true;
+        }
+
+        private static IntPtr ResolveImport(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        {
+            _ = assembly;
+            _ = searchPath;
+
+            return IsSdlLibraryImport(libraryName)
+                ? EnsureLoadedHandle()
+                : IntPtr.Zero;
         }
 
         private static Candidate[] GetCandidates()
         {
             var baseDir = AppContext.BaseDirectory;
             var fileName = GetLibraryFileName();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 return new[]
                 {
@@ -96,11 +135,11 @@ namespace TS.Sdl.Interop
 
         private static string GetLibraryFileName()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
                 return "SDL3.dll";
             if (IsIosLike())
                 return "SDL3.framework/SDL3";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (OperatingSystem.IsMacOS())
                 return "libSDL3.dylib";
             if (IsAndroid())
                 return "libSDL3.so";
@@ -118,8 +157,9 @@ namespace TS.Sdl.Interop
             return libraryFileName;
         }
 
-        private static bool TryLoad(string path, bool requireFile, out string error)
+        private static bool TryLoad(string path, bool requireFile, out IntPtr handle, out string error)
         {
+            handle = IntPtr.Zero;
             if (requireFile && !File.Exists(path))
             {
                 error = "not found";
@@ -128,9 +168,9 @@ namespace TS.Sdl.Interop
 
             try
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (OperatingSystem.IsWindows())
                 {
-                    var handle = LoadLibrary(path);
+                    handle = LoadLibrary(path);
                     if (handle != IntPtr.Zero)
                     {
                         error = string.Empty;
@@ -141,8 +181,8 @@ namespace TS.Sdl.Interop
                     return false;
                 }
 
-                var dlHandle = Dlopen(path, RtldNow | RtldGlobal);
-                if (dlHandle != IntPtr.Zero)
+                handle = Dlopen(path, RtldNow | RtldGlobal);
+                if (handle != IntPtr.Zero)
                 {
                     error = string.Empty;
                     return true;
@@ -156,6 +196,15 @@ namespace TS.Sdl.Interop
                 error = $"{ex.GetType().Name}: {ex.Message}";
                 return false;
             }
+        }
+
+        private static bool IsSdlLibraryImport(string? libraryName)
+        {
+            if (string.IsNullOrWhiteSpace(libraryName))
+                return false;
+
+            return string.Equals(libraryName, SdlImportName, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(libraryName, "SDL3.framework/SDL3", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string? GetDlError()
@@ -200,17 +249,17 @@ namespace TS.Sdl.Interop
 
         private static bool IsAndroid()
         {
-            return RuntimeInformation.IsOSPlatform(AndroidPlatform);
+            return OperatingSystem.IsAndroid();
         }
 
         private static bool IsIosLike()
         {
-            return RuntimeInformation.IsOSPlatform(IosPlatform) || RuntimeInformation.IsOSPlatform(MacCatalystPlatform);
+            return OperatingSystem.IsIOS() || OperatingSystem.IsMacCatalyst();
         }
 
         private static bool IsApplePlatform()
         {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || IsIosLike();
+            return OperatingSystem.IsMacOS() || IsIosLike();
         }
 
         private readonly struct Candidate

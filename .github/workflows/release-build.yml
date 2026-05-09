@@ -719,6 +719,7 @@ jobs:
           fi
           test -f "$app_dir/Frameworks/miniaudio.framework/miniaudio"
           test -f "$app_dir/Frameworks/soundflow-ffmpeg.framework/soundflow-ffmpeg"
+          test -f "$app_dir/Frameworks/SDL3.framework/SDL3"
           app_bundle_name="$(basename "$app_dir")"
           python scripts/build/verify_docs.py --archive "$ipa_name" --prefix "Payload/$app_bundle_name/docs"
           rm -rf "$verify_extract_dir"

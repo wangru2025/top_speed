@@ -6,7 +6,7 @@ namespace TS.Sdl.Input
 {
     public static class Touch
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static ulong[] GetIds()
         {

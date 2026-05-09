@@ -5,7 +5,7 @@ namespace TS.Sdl.Dialogs
 {
     public static class MessageBoxes
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static bool ShowSimple(MessageBoxFlags flags, string title, string message, IntPtr window)
         {

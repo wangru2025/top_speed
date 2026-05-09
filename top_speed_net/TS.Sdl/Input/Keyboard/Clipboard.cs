@@ -6,7 +6,7 @@ namespace TS.Sdl.Input
 {
     public static class Clipboard
     {
-        private const string LibraryName = "SDL3";
+        private const string LibraryName = SdlNativeLibrary.Name;
 
         public static bool SetText(string? text)
         {

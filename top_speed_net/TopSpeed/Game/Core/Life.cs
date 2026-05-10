@@ -11,6 +11,7 @@ namespace TopSpeed.Game
             _driveAccelerometerSensor?.Dispose();
             _driveAccelerometerSensor = null;
             _logo?.Dispose();
+            _multiplayerCommunicatorRuntime.Dispose();
             _menu.Dispose();
             _input.Dispose();
             _session?.SetPacketSink(null);

@@ -92,7 +92,7 @@ namespace TopSpeed.Server.Network
 
             public void SendInitialConnectionState(PlayerConnection player)
             {
-                _owner.SendStream(player, PacketSerializer.WritePlayerNumber(player.Id, 0), PacketStream.Control);
+                _owner.SendStream(player, PacketSerializer.WritePlayerNumber(player.Id, player.PlayerNumber), PacketStream.Control);
                 if (!string.IsNullOrWhiteSpace(_owner._config.Motd))
                     _owner.SendStream(player, PacketSerializer.WriteServerInfo(new PacketServerInfo { Motd = _owner._config.Motd }), PacketStream.Control);
 
@@ -105,6 +105,7 @@ namespace TopSpeed.Server.Network
                         _owner.SendSelectedTrackToPlayer(room, player);
                         _owner.SyncMediaTo(room, player);
                         _owner.SyncLiveTo(room, player);
+                        _owner.SyncVoiceTo(room, player);
                     }
                     else
                     {

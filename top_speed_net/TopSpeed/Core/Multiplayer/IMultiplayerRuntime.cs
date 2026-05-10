@@ -10,6 +10,9 @@ namespace TopSpeed.Core.Multiplayer
         bool IsInRoom { get; }
         bool IsCurrentRoomHost { get; }
         bool IsCurrentRacePaused { get; }
+        bool CommunicatorEnabled { get; }
+        bool CommunicatorVoiceActivationEnabled { get; }
+        ushort CommunicatorFrequencyTenths { get; }
         MultiplayerClientState ClientState { get; }
 
         void ConfigureMenuCloseHandlers();

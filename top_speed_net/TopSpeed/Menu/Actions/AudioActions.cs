@@ -4,6 +4,8 @@ namespace TopSpeed.Menu
     {
         void SaveMusicVolume(float volume);
         void ApplyAudioSettings();
+        string GetVoiceInputDeviceLabel();
+        void ChooseVoiceInputDevice();
     }
 }
 

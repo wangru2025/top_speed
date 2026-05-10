@@ -18,14 +18,17 @@ namespace TopSpeed.Network
         private readonly Sender _sender;
         private readonly Media _media;
         private readonly LiveSend _live;
+        private readonly VoiceSend _voice;
         private readonly Loop _loop;
         private Action<IncomingPacket>? _packetSink;
+        private Action<bool>? _voiceTransmissionSink;
         private byte _playerNumber;
         private int _disconnectPacketQueued;
         private uint _heartbeatTick;
         private uint _lastServerHeartbeatTick;
         private uint _lastServerHeartbeatEchoClientTick;
         private int _lastKnownPingMs;
+        private bool _voiceTransmissionOpen;
         private DateTime _lastServerHeartbeatUtc;
         private DateTime _lastHeartbeatProbeUtc;
 
@@ -46,6 +49,7 @@ namespace TopSpeed.Network
             _sender = new Sender(peer ?? throw new ArgumentNullException(nameof(peer)));
             _media = new Media(_sender);
             _live = new LiveSend(_sender);
+            _voice = new VoiceSend(_sender);
             PlayerId = playerId;
             ResumeToken = resumeToken;
             _playerNumber = playerNumber;
@@ -152,9 +156,26 @@ namespace TopSpeed.Network
                 DrainIncomingToSink();
         }
 
+        public void SetVoiceTransmissionSink(Action<bool>? sink)
+        {
+            _voiceTransmissionSink = sink;
+        }
+
+        private void NotifyVoiceTransmissionState(bool opened)
+        {
+            if (_voiceTransmissionOpen == opened)
+                return;
+
+            _voiceTransmissionOpen = opened;
+            _voiceTransmissionSink?.Invoke(opened);
+        }
+
         public void Dispose()
         {
+            NotifyVoiceTransmissionState(false);
+            _voiceTransmissionSink = null;
             _live.Reset();
+            _voice.Reset();
             _loop.Dispose();
             _manager.Stop();
         }

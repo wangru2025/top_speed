@@ -93,6 +93,7 @@ namespace TopSpeed.Server.Network
                     _owner.SendSelectedTrackToPlayer(room, player);
                     _owner.SyncMediaTo(room, player);
                     _owner.SyncLiveTo(room, player);
+                    _owner.SyncVoiceTo(room, player);
                     _owner._notify.SendRoomState(player, room);
                     return;
                 }
@@ -117,6 +118,7 @@ namespace TopSpeed.Server.Network
                 _owner.SendSelectedTrackToPlayer(room, player);
                 _owner.SyncMediaTo(room, player);
                 _owner.SyncLiveTo(room, player);
+                _owner.SyncVoiceTo(room, player);
                 TouchVersion(room);
                 _owner._notify.SendRoomState(player, room);
 

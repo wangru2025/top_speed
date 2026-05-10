@@ -19,6 +19,7 @@ namespace TopSpeed.Game
             _multiplayerCoordinator.SetClientState(MultiplayerClientState.Reconnecting);
             _multiplayerCoordinator.StartConnectingSoundPulse();
             session.SetPacketSink(null);
+            _multiplayerCommunicatorRuntime.BindSession(null);
             session.Dispose();
             _session = null;
             ResetPendingTrackPackageTransfers();
@@ -56,6 +57,7 @@ namespace TopSpeed.Game
         private void AttachReconnectedSession(MultiplayerSession session, bool wasInRace)
         {
             _session = session;
+            _multiplayerCommunicatorRuntime.BindSession(session);
             _multiplayerCoordinator.SetClientState(wasInRace ? MultiplayerClientState.Racing : MultiplayerClientState.Lobby);
             ResetPendingTrackPackageTransfers();
             ClearQueuedMultiplayerPackets();

@@ -20,7 +20,7 @@ namespace TopSpeed.Menu
                 new MenuItem(LocalizationService.Mark("Audio"),
                     MenuAction.None,
                     nextMenuId: "options_audio",
-                    hint: LocalizationService.Mark("Configure spatial audio behavior, including HRTF processing, stereo widening, and automatic device format detection.")),
+                    hint: LocalizationService.Mark("Configure spatial audio behavior, including HRTF processing, stereo widening, automatic device format detection, and voice input device selection.")),
                 new MenuItem(LocalizationService.Mark("Volume settings"), MenuAction.None, nextMenuId: "options_volume",
                     onActivate: () =>
                     {

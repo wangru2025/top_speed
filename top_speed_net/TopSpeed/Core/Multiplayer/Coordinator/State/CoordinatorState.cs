@@ -7,6 +7,7 @@ namespace TopSpeed.Core.Multiplayer
         public RoomDraftState RoomDrafts { get; } = new RoomDraftState();
         public CoordinatorAudioState Audio { get; } = new CoordinatorAudioState();
         public CoordinatorChatState Chat { get; } = new CoordinatorChatState();
+        public CommunicatorState Communicator { get; } = new CommunicatorState();
         public CoordinatorSavedServersState SavedServers { get; } = new CoordinatorSavedServersState();
     }
 }

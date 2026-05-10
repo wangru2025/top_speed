@@ -17,6 +17,10 @@ namespace TopSpeed.Core.Multiplayer
         private const string MultiplayerBufferPreviousCategoryShortcutActionId = "multiplayer_buffer_prev_category";
         private const string MultiplayerBufferNextCategoryShortcutActionId = "multiplayer_buffer_next_category";
         private const string MultiplayerBufferCopyFocusedItemShortcutActionId = "multiplayer_buffer_copy_focused_item";
+        private const string MultiplayerCommunicatorToggleShortcutActionId = "multiplayer_comm_toggle";
+        private const string MultiplayerCommunicatorSetFrequencyShortcutActionId = "multiplayer_comm_set_frequency";
+        private const string MultiplayerCommunicatorAnnounceFrequencyShortcutActionId = "multiplayer_comm_announce_frequency";
+        private const string MultiplayerCommunicatorToggleVoiceActivationShortcutActionId = "multiplayer_comm_toggle_voice_activation";
         private const string MultiplayerShortcutScopeId = "multiplayer";
 
         private static readonly string[] MultiplayerScopeMenus =
@@ -134,6 +138,38 @@ namespace TopSpeed.Core.Multiplayer
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 CopyFocusedChatItem);
 
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorToggleShortcutActionId,
+                LocalizationService.Mark("Toggle communicator"),
+                LocalizationService.Mark("Turns communicator transmission controls on or off."),
+                Key.C,
+                new ShortcutModifiers(shift: true, control: true, alt: false),
+                ToggleCommunicator);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorSetFrequencyShortcutActionId,
+                LocalizationService.Mark("Set communicator frequency"),
+                LocalizationService.Mark("Opens frequency input for the communicator channel."),
+                Key.F,
+                new ShortcutModifiers(shift: true, control: true, alt: false),
+                BeginCommunicatorFrequencyInput);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorAnnounceFrequencyShortcutActionId,
+                LocalizationService.Mark("Announce communicator frequency"),
+                LocalizationService.Mark("Speaks the currently selected communicator channel frequency."),
+                Key.F,
+                ShortcutModifiers.None,
+                AnnounceCommunicatorFrequency);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorToggleVoiceActivationShortcutActionId,
+                LocalizationService.Mark("Toggle voice activation"),
+                LocalizationService.Mark("Turns communicator voice activation mode on or off."),
+                Key.V,
+                new ShortcutModifiers(shift: true, control: true, alt: false),
+                ToggleCommunicatorVoiceActivation);
+
             _menu.SetScopeShortcutActions(
                 MultiplayerShortcutScopeId,
                 new[]
@@ -147,7 +183,11 @@ namespace TopSpeed.Core.Multiplayer
                     MultiplayerBufferLastItemShortcutActionId,
                     MultiplayerBufferPreviousCategoryShortcutActionId,
                     MultiplayerBufferNextCategoryShortcutActionId,
-                    MultiplayerBufferCopyFocusedItemShortcutActionId
+                    MultiplayerBufferCopyFocusedItemShortcutActionId,
+                    MultiplayerCommunicatorToggleShortcutActionId,
+                    MultiplayerCommunicatorSetFrequencyShortcutActionId,
+                    MultiplayerCommunicatorAnnounceFrequencyShortcutActionId,
+                    MultiplayerCommunicatorToggleVoiceActivationShortcutActionId
                 },
                 LocalizationService.Mark("Multiplayer shortcuts"));
 

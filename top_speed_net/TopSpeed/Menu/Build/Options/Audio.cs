@@ -20,7 +20,14 @@ namespace TopSpeed.Menu
                 new CheckBox(LocalizationService.Mark("Automatic audio device format"),
                     () => _settings.AutoDetectAudioDeviceFormat,
                     value => _settingsActions.UpdateSetting(() => _settings.AutoDetectAudioDeviceFormat = value),
-                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, the game uses the device channel count and sample rate. Restart required.")))
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, the game uses the device channel count and sample rate. Restart required."))),
+                new MenuItem(
+                    () => LocalizationService.Format(
+                        LocalizationService.Mark("Voice input device: {0}"),
+                        _audio.GetVoiceInputDeviceLabel()),
+                    MenuAction.None,
+                    onActivate: _audio.ChooseVoiceInputDevice,
+                    hint: LocalizationService.Mark("Select the microphone used for communicator voice chat in multiplayer."))
             };
 
             return BackMenu("options_audio", items);

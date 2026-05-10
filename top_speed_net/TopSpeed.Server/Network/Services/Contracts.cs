@@ -105,5 +105,10 @@ namespace TopSpeed.Server.Network
     {
         void RegisterPackets(ServerPktReg registry);
     }
+
+    internal interface IVoiceService
+    {
+        void RegisterPackets(ServerPktReg registry);
+    }
 }
 

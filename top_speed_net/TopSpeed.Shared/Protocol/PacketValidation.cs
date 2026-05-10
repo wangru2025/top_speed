@@ -193,6 +193,45 @@ namespace TopSpeed.Protocol
                 && stop.StreamId != 0;
         }
 
+        public static bool IsValidVoiceFrequencyTenths(int value)
+        {
+            return value >= ProtocolConstants.VoiceFrequencyTenthsMin
+                   && value <= ProtocolConstants.VoiceFrequencyTenthsMax;
+        }
+
+        public static bool IsValidVoiceStart(PacketPlayerVoiceStart start)
+        {
+            return start != null
+                && IsValidPlayerId(start.PlayerId)
+                && IsValidPlayerNumber(start.PlayerNumber)
+                && start.StreamId != 0
+                && start.Codec == LiveCodec.Opus
+                && start.SampleRate == ProtocolConstants.VoiceSampleRate
+                && start.FrameMs == ProtocolConstants.VoiceFrameMs
+                && start.Channels >= ProtocolConstants.VoiceChannelsMin
+                && start.Channels <= ProtocolConstants.VoiceChannelsMax
+                && IsValidVoiceFrequencyTenths(start.FrequencyTenths);
+        }
+
+        public static bool IsValidVoiceFrame(PacketPlayerVoiceFrame frame)
+        {
+            return frame != null
+                && IsValidPlayerId(frame.PlayerId)
+                && IsValidPlayerNumber(frame.PlayerNumber)
+                && frame.StreamId != 0
+                && frame.Data != null
+                && frame.Data.Length > 0
+                && frame.Data.Length <= ProtocolConstants.MaxVoiceFrameBytes;
+        }
+
+        public static bool IsValidVoiceStop(PacketPlayerVoiceStop stop)
+        {
+            return stop != null
+                && IsValidPlayerId(stop.PlayerId)
+                && IsValidPlayerNumber(stop.PlayerNumber)
+                && stop.StreamId != 0;
+        }
+
         public static bool IsStaleSequence(uint currentSequence, uint incomingSequence)
         {
             return currentSequence != 0 && incomingSequence != 0 && currentSequence >= incomingSequence;

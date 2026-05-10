@@ -20,6 +20,7 @@ namespace TopSpeed.Game
             UpdateTextInputPrompt();
             UpdateSessionReconnect();
             _stateMachine.Update(deltaSeconds);
+            _multiplayerCommunicatorRuntime.Update(deltaSeconds);
 
             if (_pendingDriveStart)
             {

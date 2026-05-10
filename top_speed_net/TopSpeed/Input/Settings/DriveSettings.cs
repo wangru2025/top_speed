@@ -39,6 +39,7 @@ namespace TopSpeed.Input
         public bool HrtfAudio { get; set; }
         public bool StereoWidening { get; set; }
         public bool AutoDetectAudioDeviceFormat { get; set; }
+        public string VoiceInputDeviceName { get; set; } = string.Empty;
         public bool RandomCustomTracks { get; set; }
         public bool RandomCustomVehicles { get; set; }
         public bool SingleRaceCustomVehicles { get; set; }
@@ -125,6 +126,7 @@ namespace TopSpeed.Input
             HrtfAudio = true;
             StereoWidening = false;
             AutoDetectAudioDeviceFormat = true;
+            VoiceInputDeviceName = string.Empty;
             RandomCustomTracks = false;
             RandomCustomVehicles = false;
             SingleRaceCustomVehicles = false;

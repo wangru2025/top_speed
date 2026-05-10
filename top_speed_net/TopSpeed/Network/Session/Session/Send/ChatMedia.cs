@@ -29,6 +29,27 @@ namespace TopSpeed.Network
             return _live.TrySendStop(PlayerId, PlayerNumber, streamId);
         }
 
+        public bool SendVoiceStart(uint streamId, LiveAudioProfile profile, ushort frequencyTenths, bool pushToTalk)
+        {
+            var sent = _voice.TrySendStart(PlayerId, PlayerNumber, streamId, profile, frequencyTenths, pushToTalk);
+            if (sent)
+                NotifyVoiceTransmissionState(true);
+            return sent;
+        }
+
+        public bool SendVoiceFrame(uint streamId, in LiveOpusFrame frame)
+        {
+            return _voice.TrySendFrame(PlayerId, PlayerNumber, streamId, frame);
+        }
+
+        public bool SendVoiceStop(uint streamId)
+        {
+            var sent = _voice.TrySendStop(PlayerId, PlayerNumber, streamId);
+            if (sent)
+                NotifyVoiceTransmissionState(false);
+            return sent;
+        }
+
         public bool SendChatMessage(string text)
         {
             var packet = new PacketProtocolMessage

@@ -16,6 +16,10 @@ namespace TopSpeed.Server.Network
         public HandshakeState Handshake { get; set; }
         public ConnectionLifecycleState LifecycleState { get; set; }
         public PlayerState State { get; set; }
+        public bool HasVoice { get; set; }
+        public uint VoiceStreamId { get; set; }
+        public ushort VoiceFrequencyTenths { get; set; }
+        public bool VoicePushToTalk { get; set; }
     }
 
     internal sealed class ServerStressSnapshot
@@ -86,7 +90,11 @@ namespace TopSpeed.Server.Network
                     RoomId = player.RoomId,
                     Handshake = player.Handshake,
                     LifecycleState = player.LifecycleState,
-                    State = player.State
+                    State = player.State,
+                    HasVoice = player.Voice != null,
+                    VoiceStreamId = player.Voice?.StreamId ?? 0,
+                    VoiceFrequencyTenths = player.Voice?.FrequencyTenths ?? 0,
+                    VoicePushToTalk = player.Voice?.PushToTalk ?? false
                 };
             }
         }

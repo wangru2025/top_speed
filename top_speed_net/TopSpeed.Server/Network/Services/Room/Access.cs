@@ -22,6 +22,7 @@ namespace TopSpeed.Server.Network
                 {
                     player.RoomId = null;
                     player.Live = null;
+                    player.Voice = null;
                     _owner._notify.SendRoomState(player, null);
                     _owner.SendProtocolMessage(player, ProtocolMessageCode.NotInRoom, LocalizationService.Mark("You are not in a game room."));
                     return false;

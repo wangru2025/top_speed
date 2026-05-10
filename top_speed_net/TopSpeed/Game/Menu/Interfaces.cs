@@ -13,6 +13,8 @@ namespace TopSpeed.Game
     {
         void IMenuAudioActions.SaveMusicVolume(float volume) => SaveMusicVolume(volume);
         void IMenuAudioActions.ApplyAudioSettings() => ApplyAudioSettings();
+        string IMenuAudioActions.GetVoiceInputDeviceLabel() => GetVoiceInputDeviceLabel();
+        void IMenuAudioActions.ChooseVoiceInputDevice() => ChooseVoiceInputDevice();
 
         void IMenuDriveActions.QueueDriveStart(DriveMode mode) => QueueDriveStart(mode);
 

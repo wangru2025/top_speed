@@ -54,6 +54,7 @@ namespace TopSpeed.Server.Network
         public byte RadioVolumePercent { get; set; }
         public InMedia? IncomingMedia { get; set; }
         public LiveState? Live { get; set; }
+        public VoiceState? Voice { get; set; }
         public DateTime LastHeartbeatUtc { get; set; }
         public DateTime? SuspendedUtc { get; private set; }
         public ConnectionLifecycleState LifecycleState { get; private set; }

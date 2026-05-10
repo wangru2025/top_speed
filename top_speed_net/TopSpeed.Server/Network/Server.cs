@@ -35,6 +35,7 @@ namespace TopSpeed.Server.Network
         private readonly IRaceService _race;
         private readonly IMediaService _media;
         private readonly ILiveService _live;
+        private readonly IVoiceService _voice;
         private readonly IChatService _chat;
         private readonly INotifyService _notify;
         private readonly Dictionary<uint, PlayerConnection> _players = new Dictionary<uint, PlayerConnection>();
@@ -101,6 +102,7 @@ namespace TopSpeed.Server.Network
             _race = new Race(this);
             _media = new Media(this);
             _live = new Live(this);
+            _voice = new Voice(this);
             _chat = new Chat(this);
             _notify = new Notify(this);
             RegisterPackets();

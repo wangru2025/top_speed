@@ -53,6 +53,7 @@ namespace TopSpeed.Game
                 RegisterRace();
                 RegisterMedia();
                 RegisterLive();
+                RegisterVoice();
                 RegisterChat();
             }
 

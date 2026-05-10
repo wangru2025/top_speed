@@ -20,6 +20,7 @@ namespace TopSpeed.Server.Network
             RegisterRacePackets();
             RegisterMediaPackets();
             RegisterLivePackets();
+            RegisterVoicePackets();
             RegisterRoomPackets();
             RegisterChatPackets();
         }

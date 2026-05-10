@@ -88,6 +88,7 @@ namespace TopSpeed.Game
         private TimeTrialSession? _timeTrial;
         private SingleSession? _singleRace;
         private readonly MultiplayerRaceRuntime _multiplayerRaceRuntime;
+        private readonly Multiplayer.Communicator.MultiplayerCommunicatorRuntime _multiplayerCommunicatorRuntime;
         private bool _updateCheckQueued;
         private bool _updatePromptShown;
         private Task<UpdateCheckResult>? _updateCheckTask;

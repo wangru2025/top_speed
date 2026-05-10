@@ -197,7 +197,8 @@ namespace TopSpeed.Server.Commands
                 new List<OptionItem>
                 {
                     new OptionItem("custom_tracks", LocalizationService.Mark("Custom tracks"), OptionValueType.Bool, ToggleCustomTracks, () => CommandInput.FormatOnOff(_settings.Features.CustomTracks)),
-                    new OptionItem("text_chat", LocalizationService.Mark("Text chat"), OptionValueType.Bool, ToggleTextChat, () => CommandInput.FormatOnOff(_settings.Features.TextChat))
+                    new OptionItem("text_chat", LocalizationService.Mark("Text chat"), OptionValueType.Bool, ToggleTextChat, () => CommandInput.FormatOnOff(_settings.Features.TextChat)),
+                    new OptionItem("voice_chat", LocalizationService.Mark("Voice chat"), OptionValueType.Bool, ToggleVoiceChat, () => CommandInput.FormatOnOff(_settings.Features.VoiceChat))
                 });
         }
 
@@ -448,6 +449,13 @@ namespace TopSpeed.Server.Commands
             _settings.Features.TextChat = !_settings.Features.TextChat;
             ApplyFeatureSettings();
             ConsoleSink.WriteLine(BuildOptionLine(LocalizationService.Mark("Text chat"), CommandInput.FormatOnOff(_settings.Features.TextChat)));
+        }
+
+        private void ToggleVoiceChat()
+        {
+            _settings.Features.VoiceChat = !_settings.Features.VoiceChat;
+            ApplyFeatureSettings();
+            ConsoleSink.WriteLine(BuildOptionLine(LocalizationService.Mark("Voice chat"), CommandInput.FormatOnOff(_settings.Features.VoiceChat)));
         }
 
         private void ApplyFeatureSettings()

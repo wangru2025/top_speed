@@ -80,6 +80,9 @@ namespace TopSpeed.Core.Settings
         [DataMember(Name = "autoDetectAudioDeviceFormat")]
         public bool? AutoDetectAudioDeviceFormat { get; set; }
 
+        [DataMember(Name = "voiceInputDevice")]
+        public string? VoiceInputDevice { get; set; }
+
     }
 
     [DataContract]

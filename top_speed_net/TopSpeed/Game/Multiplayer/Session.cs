@@ -8,6 +8,7 @@ namespace TopSpeed.Game
         private void SetSession(MultiplayerSession session)
         {
             _session = session;
+            _multiplayerCommunicatorRuntime.BindSession(session);
             ResetMultiplayerTrackPackageState();
             _multiplayerRaceRuntime.ResetSession();
             ClearQueuedMultiplayerPackets();
@@ -23,6 +24,7 @@ namespace TopSpeed.Game
         {
             CancelSessionReconnect();
             var session = _session;
+            _multiplayerCommunicatorRuntime.BindSession(null);
             if (session != null)
                 session.SetPacketSink(null);
             session?.Dispose();

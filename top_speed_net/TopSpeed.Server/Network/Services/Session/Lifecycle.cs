@@ -61,6 +61,7 @@ namespace TopSpeed.Server.Network
                 }
 
                 _owner.CleanupLiveStreams();
+                _owner.CleanupVoiceStreams();
             }
 
             public void HandlePeerDisconnected(
@@ -158,6 +159,7 @@ namespace TopSpeed.Server.Network
                 if (room != null)
                 {
                     _owner.StopLive(player, room, notifyRoom: true);
+                    _owner.StopVoice(player, room, notifyRoom: true);
                     _owner.ResetMediaState(player, room);
                     _owner._trackPackageUploads.Remove(player.Id);
                     room.PendingLoadouts.Remove(player.Id);

@@ -23,6 +23,7 @@ namespace TopSpeed.Server.Network
                 {
                     player.RoomId = null;
                     player.Live = null;
+                    player.Voice = null;
                     if (player.LifecycleState != ConnectionLifecycleState.Closed
                         && player.LifecycleState != ConnectionLifecycleState.Expired)
                     {
@@ -55,6 +56,7 @@ namespace TopSpeed.Server.Network
                 room.TrackReadyPlayers.Remove(player.Id);
                 room.MediaMap.Remove(player.Id);
                 _owner.StopLive(player, room, notifyRoom: notify);
+                _owner.StopVoice(player, room, notifyRoom: notify);
                 player.IncomingMedia = null;
                 player.MediaLoaded = false;
                 player.MediaPlaying = false;

@@ -140,7 +140,11 @@ namespace TopSpeed.Core.Multiplayer
                 || _menu.TryTriggerShortcutAction(MultiplayerBufferNextItemShortcutActionId, input)
                 || _menu.TryTriggerShortcutAction(MultiplayerBufferPreviousCategoryShortcutActionId, input)
                 || _menu.TryTriggerShortcutAction(MultiplayerBufferNextCategoryShortcutActionId, input)
-                || _menu.TryTriggerShortcutAction(MultiplayerBufferCopyFocusedItemShortcutActionId, input);
+                || _menu.TryTriggerShortcutAction(MultiplayerBufferCopyFocusedItemShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerCommunicatorToggleShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerCommunicatorSetFrequencyShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerCommunicatorAnnounceFrequencyShortcutActionId, input)
+                || _menu.TryTriggerShortcutAction(MultiplayerCommunicatorToggleVoiceActivationShortcutActionId, input);
         }
 
         private void PlayChatItemNavigationFeedback(Chat.HistoryMoveResult result)

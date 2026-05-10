@@ -79,6 +79,8 @@ namespace TopSpeed.Core.Settings
 
             if (audio.AutoDetectAudioDeviceFormat.HasValue)
                 settings.AutoDetectAudioDeviceFormat = audio.AutoDetectAudioDeviceFormat.Value;
+            if (audio.VoiceInputDevice != null)
+                settings.VoiceInputDeviceName = audio.VoiceInputDevice.Trim();
 
             if (hasCategoryVolumes)
             {

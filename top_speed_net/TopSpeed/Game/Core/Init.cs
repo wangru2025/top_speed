@@ -123,6 +123,12 @@ namespace TopSpeed.Game
                 SetMultiplayerLoadout);
             _multiplayerCoordinator = multiplayerCoordinator;
             _multiplayerMenuTouch = multiplayerCoordinator;
+            _multiplayerCommunicatorRuntime = new Multiplayer.Communicator.MultiplayerCommunicatorRuntime(
+                audio,
+                _settings,
+                multiplayerCoordinator,
+                input,
+                GetSession);
             _multiplayerRaceRuntime = new MultiplayerRaceRuntime(this);
             _multiplayerDispatch = new MultiplayerDispatch(this);
             _menuRegistry.RegisterAll();

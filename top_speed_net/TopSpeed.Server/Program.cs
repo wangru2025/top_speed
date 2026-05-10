@@ -76,12 +76,13 @@ namespace TopSpeed.Server
             };
             if (loggingEnabled)
                 logger.Info(LocalizationService.Format(
-                    LocalizationService.Mark("Server configuration: port={0}, discoveryPort={1}, maxPlayers={2}, features.custom_tracks={3}, features.text_chat={4}, moderation.maxNameLength={5}, moderation.blockRepeatedLettersInName={6}, moderation.allowDuplicateNames={7}."),
+                    LocalizationService.Mark("Server configuration: port={0}, discoveryPort={1}, maxPlayers={2}, features.custom_tracks={3}, features.text_chat={4}, features.voice_chat={5}, moderation.maxNameLength={6}, moderation.blockRepeatedLettersInName={7}, moderation.allowDuplicateNames={8}."),
                     config.Port,
                     config.DiscoveryPort,
                     config.MaxPlayers,
                     config.Features.CustomTracks,
                     config.Features.TextChat,
+                    config.Features.VoiceChat,
                     config.Moderation.MaxNameLength,
                     config.Moderation.BlockRepeatedLettersInName,
                     config.Moderation.AllowDuplicateNames));

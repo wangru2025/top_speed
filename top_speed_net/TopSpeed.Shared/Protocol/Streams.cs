@@ -10,7 +10,8 @@ namespace TopSpeed.Protocol
         Chat = 5,
         Direct = 6,
         Query = 7,
-        Live = 8
+        Live = 8,
+        Voice = 9
     }
 
     public enum PacketDeliveryKind : byte
@@ -36,7 +37,7 @@ namespace TopSpeed.Protocol
 
     public static class PacketStreams
     {
-        public const int Count = 9;
+        public const int Count = 10;
 
         // Handshake, keepalive, assignment, disconnect.
         public static PacketStreamSpec Control => new PacketStreamSpec(PacketStream.Control, 0, PacketDeliveryKind.ReliableOrdered);
@@ -56,6 +57,8 @@ namespace TopSpeed.Protocol
         public static PacketStreamSpec Query => new PacketStreamSpec(PacketStream.Query, 7, PacketDeliveryKind.ReliableOrdered);
         // Real-time live audio frames (control uses delivery override).
         public static PacketStreamSpec Live => new PacketStreamSpec(PacketStream.Live, 8, PacketDeliveryKind.Sequenced);
+        // Real-time communicator voice frames (control uses delivery override).
+        public static PacketStreamSpec Voice => new PacketStreamSpec(PacketStream.Voice, 9, PacketDeliveryKind.Sequenced);
 
         public static PacketStreamSpec Get(PacketStream stream)
         {
@@ -70,6 +73,7 @@ namespace TopSpeed.Protocol
                 PacketStream.Direct => Direct,
                 PacketStream.Query => Query,
                 PacketStream.Live => Live,
+                PacketStream.Voice => Voice,
                 _ => Control
             };
         }

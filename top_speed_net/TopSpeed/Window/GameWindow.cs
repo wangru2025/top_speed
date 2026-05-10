@@ -9,6 +9,7 @@ namespace TopSpeed.Windowing
     internal sealed class GameWindow : Form
     {
         private const int WmSysCommand = 0x0112;
+        private const int WmSysChar = 0x0106;
         private const int ScKeyMenu = 0xF100;
         private readonly TextBox _inputBox;
         private readonly object _textInputLock = new object();
@@ -143,6 +144,12 @@ namespace TopSpeed.Windowing
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == WmSysCommand && ((int)m.WParam & 0xFFF0) == ScKeyMenu)
+            {
+                return;
+            }
+
+            // Swallow system-char events so Alt-based game shortcuts do not trigger the Windows bell.
+            if (m.Msg == WmSysChar)
             {
                 return;
             }

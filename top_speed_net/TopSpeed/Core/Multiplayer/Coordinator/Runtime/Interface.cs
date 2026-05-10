@@ -2,6 +2,14 @@ namespace TopSpeed.Core.Multiplayer
 {
     internal sealed partial class MultiplayerCoordinator
     {
+        internal bool IsCommunicatorEnabled => _state.Communicator.Enabled;
+        internal bool IsCommunicatorVoiceActivationEnabled => _state.Communicator.VoiceActivationEnabled;
+        internal ushort CommunicatorFrequencyTenths => _state.Communicator.FrequencyTenths;
+
+        bool IMultiplayerRuntime.CommunicatorEnabled => IsCommunicatorEnabled;
+        bool IMultiplayerRuntime.CommunicatorVoiceActivationEnabled => IsCommunicatorVoiceActivationEnabled;
+        ushort IMultiplayerRuntime.CommunicatorFrequencyTenths => CommunicatorFrequencyTenths;
+
         void IMultiplayerRuntime.NextChatCategory()
         {
             NextChatCategory();

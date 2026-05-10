@@ -37,7 +37,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
 
         private Network.MultiplayerSession? _boundSession;
         private bool _transmitting;
-        private bool _localMicCueOpen;
+        private bool _micCueOpen;
         private uint _streamId;
         private uint _nextStreamId = 1;
         private ushort _activeFrequencyTenths;
@@ -67,21 +67,16 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (ReferenceEquals(_boundSession, session))
                 return;
 
-            if (_transmitting)
-                StopTransmission();
-
+            Disarm();
             _boundSession = session;
-
             ClearRemoteStreams();
         }
 
         public void Dispose()
         {
-            StopTransmission();
+            Disarm();
             _boundSession = null;
-
             ClearRemoteStreams();
-            DisposeCapture();
             DisposeCachedSounds();
         }
     }

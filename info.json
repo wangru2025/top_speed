@@ -1,12 +1,13 @@
 {
-  "version": "2026.5.9.1",
+  "version": "2026.5.9.2",
   "serverVersion": "2026.5.5.1",
   "changes": [
     "Fixed many bugs with the multiplayer server.",
     "Added a new way of navigating through message history by using the comma to move to the previous item, period to move to the next item, and left/right brackets are used to navigate between buffers. The separate history screen is still available.",
     "Added an ability to copy the current buffer item to the clipboard by pressing ctrl+space, or by going to the history and pressing enter on any message there.",
     "Added the ability to reset menu shortcuts to their defaults.",
-    "Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files)."
+    "Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files).",
+    "Fixed multiplayer voice chat so that remote players actually hear push-to-talk and voice-activation transmissions, and the mic open/close cue now matches the real transmission state."
   ],
   "serverChanges": [
     "Fixed some deadlock bugs with rooms where players would get stuck in a room after a while."

@@ -5,6 +5,16 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
+## 2026.5.9.2
+### Game Changes
+- Fixed multiplayer voice chat so that remote players actually hear push-to-talk and voice-activation transmissions:
+  - The capture device is now brought up as soon as the communicator is armed (enabled with a non-zero frequency on a connected session), so the first VOX/PTT key press no longer loses the leading frames while MiniAudio cold-starts the microphone.
+  - VOX (voice-activation) now actually gates on the RMS voice-activity detector — previously it transmitted continuously whenever VAD was on; now it transmits only while voice is detected (with a short hold window) and stops when you go quiet.
+  - The local mic open/close cue is now tied to the real transmission state instead of the should-transmit intent, so the "you're now live" sound only plays after the server has accepted the start packet.
+  - When the communicator is turned off (or the session disconnects), the capture device is torn down instead of leaking the OS mic indefinitely.
+- Removed duplicated logic in the runtime: there is now a single transmission state machine (`Disarm` / `BeginTransmission` / `EndTransmission`) instead of four copies of the stop-and-clear pattern, and the client-side `LiveSend` / `VoiceSend` start/frame/stop logic is consolidated into a shared `OutboundStreamSend` base.
+
+
 ## 2026.5.9.1
 ### Game Changes
 - Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files). The fix is in the SoundFlow native FFmpeg wrapper: tail-of-stream codec/demuxer hiccups are now reported as graceful end-of-stream instead of as fatal decoder errors, so the radio source's `Seek(0)`+retry path recovers cleanly.

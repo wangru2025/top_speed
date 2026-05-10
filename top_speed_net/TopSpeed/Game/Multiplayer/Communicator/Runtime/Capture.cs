@@ -145,9 +145,10 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             _captureEngine = null;
             _captureDeviceName = string.Empty;
             _captureChannels = 1;
+            DiscardCapturedSamples();
         }
 
-        private void OnCapturedAudio(Span<float> samples, SoundFlow.Enums.Capability _capability)
+        private void OnCapturedAudio(Span<float> samples, Capability _capability)
         {
             if (samples.Length == 0)
                 return;
@@ -205,10 +206,15 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             }
         }
 
-        private void ClearCapturedSamples()
+        private void DiscardCapturedSamples()
         {
             lock (_captureLock)
                 _capturedSamples.Clear();
+        }
+
+        private void ResetVoiceActivity()
+        {
+            _lastVoiceActivityUtcTicks = 0;
         }
     }
 }

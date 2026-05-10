@@ -49,7 +49,7 @@ namespace TopSpeed.Network
         {
             try
             {
-                peer.Send(payload, DeliveryMethod.ReliableOrdered);
+                peer.Send(payload, PacketStreams.Control.Channel, DeliveryMethod.ReliableOrdered);
                 return SendResult.Ok();
             }
             catch (ObjectDisposedException ex)
@@ -70,7 +70,7 @@ namespace TopSpeed.Network
         {
             try
             {
-                peer.Send(payload, DeliveryMethod.Unreliable);
+                peer.Send(payload, PacketStreams.Control.Channel, DeliveryMethod.Unreliable);
             }
             catch (ObjectDisposedException)
             {

@@ -1,0 +1,203 @@
+name: Feature Validation
+
+on:
+  push:
+    branches:
+      - fix/protocol-handshake-control-channel-validate
+  workflow_dispatch:
+
+jobs:
+  build_windows:
+    name: Validate Windows ${{ matrix.target_name }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: Game and tests
+            kind: game
+          - target_name: Server
+            kind: server
+            server_publish_profile: ReleaseWinX64
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "false"
+
+      - name: Restore and build Windows target
+        shell: pwsh
+        run: |
+          if ("${{ matrix.kind }}" -eq "game") {
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier=win-x64
+            dotnet restore TopSpeed.Tests/TopSpeed.Tests.csproj
+            dotnet build TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-restore
+            dotnet test TopSpeed.Tests/TopSpeed.Tests.csproj --configuration Release --framework net10.0-windows --no-build --verbosity normal
+            dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0-windows --runtime win-x64 --no-restore
+            exit $LASTEXITCODE
+          }
+
+          dotnet restore TopSpeed.Server/TopSpeed.Server.csproj
+          dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=${{ matrix.server_publish_profile }} -p:UseNativeAotUpdater=false -p:UseTrimmedUpdater=false
+
+  build_mac:
+    name: Validate macOS ${{ matrix.target_name }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: Game mac-x64
+            kind: game
+            runtime_id: osx-x64
+          - target_name: Game mac-arm64
+            kind: game
+            runtime_id: osx-arm64
+          - target_name: Server mac-x64
+            kind: server
+            server_publish_profile: ReleaseMacX64
+          - target_name: Server mac-arm64
+            kind: server
+            server_publish_profile: ReleaseMacArm64
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "false"
+
+      - name: Restore and build macOS target
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ matrix.kind }}" == "game" ]]; then
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier=${{ matrix.runtime_id }}
+            dotnet publish TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0 --runtime ${{ matrix.runtime_id }} -p:UseNativeAotUpdater=true -p:UseTrimmedUpdater=false --no-restore
+            exit 0
+          fi
+
+          dotnet restore TopSpeed.Server/TopSpeed.Server.csproj
+          dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=${{ matrix.server_publish_profile }} -p:UseNativeAotUpdater=true -p:UseTrimmedUpdater=false
+
+  build_linux:
+    name: Validate Linux ${{ matrix.target_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_name: Game
+            kind: game
+            runtime_id: linux-x64
+          - target_name: Server linux-x64
+            kind: server
+            server_publish_profile: ReleaseLinuxX64
+          - target_name: Server linux-arm64
+            kind: server
+            server_publish_profile: ReleaseLinuxArm64
+          - target_name: Server linux-arm32
+            kind: server
+            server_publish_profile: ReleaseLinuxArm32
+          - target_name: Server linux-musl-x64
+            kind: server
+            server_publish_profile: ReleaseLinuxMuslX64
+          - target_name: Server linux-musl-arm64
+            kind: server
+            server_publish_profile: ReleaseLinuxMuslArm64
+          - target_name: Server linux-x86-fdd
+            kind: server
+            server_publish_profile: ReleaseLinuxX86FrameworkDependent
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "false"
+
+      - name: Restore and build Linux target
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ matrix.kind }}" == "game" ]]; then
+            dotnet restore TopSpeed/TopSpeed.csproj -p:RuntimeIdentifier=${{ matrix.runtime_id }}
+            dotnet build TopSpeed/TopSpeed.csproj --configuration Release --framework net10.0 --runtime ${{ matrix.runtime_id }} -p:UseNativeAotUpdater=false -p:UseTrimmedUpdater=true --no-restore
+            exit 0
+          fi
+
+          dotnet restore TopSpeed.Server/TopSpeed.Server.csproj
+          dotnet publish TopSpeed.Server/TopSpeed.Server.csproj --configuration Release -p:ServerPublishProfile=${{ matrix.server_publish_profile }} -p:UseNativeAotUpdater=false -p:UseTrimmedUpdater=true
+
+  build_android:
+    name: Validate Android ${{ matrix.runtime_id }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime_id:
+          - android-arm64
+          - android-arm
+    defaults:
+      run:
+        working-directory: top_speed_net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          dotnet-version: 10.0.x
+          python-version: "3.x"
+          install-python-deps: "true"
+          python-packages: markdown
+          install-java: "true"
+          java-version: "21"
+
+      - name: Install Android workload
+        run: dotnet workload install android
+
+      - name: Restore and build Android target
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore TopSpeed.Android/TopSpeed.Android.csproj
+          dotnet publish TopSpeed.Android/TopSpeed.Android.csproj \
+            --configuration Release \
+            --framework net10.0-android \
+            --runtime ${{ matrix.runtime_id }} \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false

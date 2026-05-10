@@ -5,10 +5,18 @@ on:
     branches: [ "china-release" ]
     paths-ignore:
       - ".gitignore"
+  workflow_run:
+    workflows: [ "Sync Upstream" ]
+    types:
+      - completed
+
+env:
+  RELEASE_SOURCE_REF: ${{ github.event_name == 'workflow_run' && 'china-release' || github.ref_name }}
 
 jobs:
   metadata:
     name: Release Metadata
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'china-release')
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release_info.outputs.version }}
@@ -25,6 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           fetch-depth: 0
           submodules: recursive
 
@@ -140,6 +149,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           submodules: recursive
 
       - name: Setup build environment
@@ -230,6 +240,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           submodules: recursive
 
       - name: Setup build environment
@@ -349,6 +360,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           submodules: recursive
 
       - name: Setup build environment
@@ -434,6 +446,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           submodules: recursive
 
       - name: Setup build environment
@@ -532,6 +545,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ env.RELEASE_SOURCE_REF }}
           fetch-depth: 0
           submodules: recursive
 

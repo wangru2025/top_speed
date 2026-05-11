@@ -122,7 +122,7 @@ namespace TopSpeed.Menu
             };
         }
 
-        private static bool HasModifierHeld(IInputService input)
+        internal static bool HasModifierHeld(IInputService input)
         {
             return input.IsDown(Key.LeftControl)
                 || input.IsDown(Key.RightControl)

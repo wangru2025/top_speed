@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using TopSpeed.Audio;
 using TopSpeed.Localization;
 
 namespace TopSpeed.Drive.Panels
@@ -10,57 +8,18 @@ namespace TopSpeed.Drive.Panels
     {
         private bool BuildPlaylistFromFolder(string folderPath, bool preserveCurrentMedia, bool announceErrors)
         {
-            if (string.IsNullOrWhiteSpace(folderPath))
+            if (!MediaPlaylist.TryBuildFromFolder(
+                    folderPath,
+                    _shuffleMode,
+                    _random,
+                    out var fullFolder,
+                    out var files,
+                    out var error))
             {
                 if (announceErrors)
-                    _announce(LocalizationService.Translate(LocalizationService.Mark("No folder was selected.")));
+                    AnnounceFolderError(error);
                 return false;
             }
-
-            string fullFolder;
-            try
-            {
-                fullFolder = Path.GetFullPath(folderPath);
-            }
-            catch
-            {
-                if (announceErrors)
-                    _announce(LocalizationService.Translate(LocalizationService.Mark("The selected folder path is invalid.")));
-                return false;
-            }
-
-            if (!Directory.Exists(fullFolder))
-            {
-                if (announceErrors)
-                    _announce(LocalizationService.Translate(LocalizationService.Mark("The selected folder does not exist.")));
-                return false;
-            }
-
-            List<string> files;
-            try
-            {
-                files = Directory
-                    .EnumerateFiles(fullFolder, "*.*", SearchOption.TopDirectoryOnly)
-                    .Where(IsSupportedAudioFile)
-                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-            }
-            catch
-            {
-                if (announceErrors)
-                    _announce(LocalizationService.Translate(LocalizationService.Mark("Could not read files from the selected folder.")));
-                return false;
-            }
-
-            if (files.Count == 0)
-            {
-                if (announceErrors)
-                    _announce(LocalizationService.Translate(LocalizationService.Mark("No supported audio files were found in the selected folder.")));
-                return false;
-            }
-
-            if (_shuffleMode)
-                Shuffle(files);
 
             var currentPath = preserveCurrentMedia ? _radio.MediaPath : null;
 
@@ -82,38 +41,34 @@ namespace TopSpeed.Drive.Panels
             return true;
         }
 
-        private static bool IsSupportedAudioFile(string path)
-        {
-            var extension = Path.GetExtension(path);
-            if (string.IsNullOrWhiteSpace(extension))
-                return false;
-
-            for (var i = 0; i < SupportedExtensions.Length; i++)
-            {
-                if (string.Equals(extension, SupportedExtensions[i], StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private void Shuffle(List<string> files)
-        {
-            for (var i = files.Count - 1; i > 0; i--)
-            {
-                var j = _random.Next(i + 1);
-                var tmp = files[i];
-                files[i] = files[j];
-                files[j] = tmp;
-            }
-        }
-
         private void TryRestoreFolderPlaylist()
         {
             if (string.IsNullOrWhiteSpace(_settings.RadioLastFolder))
                 return;
 
             BuildPlaylistFromFolder(_settings.RadioLastFolder, preserveCurrentMedia: false, announceErrors: false);
+        }
+
+        private void AnnounceFolderError(MediaPlaylistFolderLoadError error)
+        {
+            switch (error)
+            {
+                case MediaPlaylistFolderLoadError.EmptyPath:
+                    _announce(LocalizationService.Translate(LocalizationService.Mark("No folder was selected.")));
+                    return;
+                case MediaPlaylistFolderLoadError.InvalidPath:
+                    _announce(LocalizationService.Translate(LocalizationService.Mark("The selected folder path is invalid.")));
+                    return;
+                case MediaPlaylistFolderLoadError.NotFound:
+                    _announce(LocalizationService.Translate(LocalizationService.Mark("The selected folder does not exist.")));
+                    return;
+                case MediaPlaylistFolderLoadError.ReadFailed:
+                    _announce(LocalizationService.Translate(LocalizationService.Mark("Could not read files from the selected folder.")));
+                    return;
+                case MediaPlaylistFolderLoadError.NoSupportedFiles:
+                    _announce(LocalizationService.Translate(LocalizationService.Mark("No supported audio files were found in the selected folder.")));
+                    return;
+            }
         }
     }
 }

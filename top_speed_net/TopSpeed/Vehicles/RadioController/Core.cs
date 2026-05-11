@@ -1,12 +1,40 @@
 using System;
 using TopSpeed.Audio;
+using TopSpeed.Input;
 using TS.Audio;
 
 namespace TopSpeed.Vehicles
 {
     internal sealed partial class VehicleRadioController : IDisposable
     {
+        internal readonly struct PlaybackOptions
+        {
+            public PlaybackOptions(
+                string busName,
+                bool spatialize,
+                bool allowHrtf,
+                DriveSettings? settings,
+                AudioVolumeCategory? volumeCategory,
+                string tempFolderName)
+            {
+                BusName = string.IsNullOrWhiteSpace(busName) ? AudioEngineOptions.RadioBusName : busName;
+                Spatialize = spatialize;
+                AllowHrtf = allowHrtf;
+                Settings = settings;
+                VolumeCategory = volumeCategory;
+                TempFolderName = string.IsNullOrWhiteSpace(tempFolderName) ? "Radio" : tempFolderName;
+            }
+
+            public string BusName { get; }
+            public bool Spatialize { get; }
+            public bool AllowHrtf { get; }
+            public DriveSettings? Settings { get; }
+            public AudioVolumeCategory? VolumeCategory { get; }
+            public string TempFolderName { get; }
+        }
+
         private readonly AudioManager _audio;
+        private readonly PlaybackOptions _options;
         private Source? _source;
         private bool _desiredPlaying;
         private bool _pausedByGame;
@@ -17,8 +45,22 @@ namespace TopSpeed.Vehicles
         private bool _loopPlayback = true;
 
         public VehicleRadioController(AudioManager audio)
+            : this(
+                audio,
+                new PlaybackOptions(
+                    AudioEngineOptions.RadioBusName,
+                    spatialize: true,
+                    allowHrtf: true,
+                    settings: null,
+                    volumeCategory: null,
+                    tempFolderName: "Radio"))
+        {
+        }
+
+        public VehicleRadioController(AudioManager audio, PlaybackOptions options)
         {
             _audio = audio ?? throw new ArgumentNullException(nameof(audio));
+            _options = options;
         }
 
         public uint MediaId => _mediaId;
@@ -38,7 +80,7 @@ namespace TopSpeed.Vehicles
                 volumePercent = 100;
 
             _volumePercent = volumePercent;
-            _source?.SetVolumePercent(_volumePercent);
+            ApplySourceVolume();
         }
 
         public void SetLoopPlayback(bool loopPlayback)
@@ -48,6 +90,25 @@ namespace TopSpeed.Vehicles
                 return;
 
             _source.SetLooping(_loopPlayback);
+        }
+
+        public void RefreshCategoryVolume()
+        {
+            ApplySourceVolume();
+        }
+
+        private void ApplySourceVolume()
+        {
+            if (_source == null)
+                return;
+
+            if (_options.Settings != null && _options.VolumeCategory.HasValue)
+            {
+                _source.SetVolumePercent(_options.Settings, _options.VolumeCategory.Value, _volumePercent);
+                return;
+            }
+
+            _source.SetVolumePercent(_volumePercent);
         }
     }
 }

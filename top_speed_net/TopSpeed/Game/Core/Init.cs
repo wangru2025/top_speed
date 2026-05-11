@@ -129,7 +129,11 @@ namespace TopSpeed.Game
                 _settings,
                 multiplayerCoordinator,
                 input,
-                GetSession);
+                GetSession,
+                _fileDialogs,
+                text => _speech.Speak(text),
+                SaveSettings,
+                () => _textInputPromptActive || _inputMapping.IsActive || _shortcutMapping.IsActive);
             _multiplayerRaceRuntime = new MultiplayerRaceRuntime(this);
             _multiplayerDispatch = new MultiplayerDispatch(this);
             _menuRegistry.RegisterAll();

@@ -20,8 +20,10 @@ namespace TopSpeed.Menu
 
         private UpdateInputState CaptureInputState(IInputService input)
         {
-            var tabPressed = input.WasPressed(Key.Tab);
+            var controlHeld = input.IsDown(Key.LeftControl) || input.IsDown(Key.RightControl);
             var shiftHeld = input.IsDown(Key.LeftShift) || input.IsDown(Key.RightShift);
+            var altHeld = input.IsDown(Key.LeftAlt) || input.IsDown(Key.RightAlt);
+            var tabPressed = !controlHeld && !altHeld && input.WasPressed(Key.Tab);
 
             var state = new UpdateInputState(
                 MenuInputBindings.IsPressed(input, MenuInputAction.PreviousItem),

@@ -70,7 +70,10 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private void UpdateRemoteAudibility(ushort localFrequencyTenths)
         {
             foreach (var stream in _remoteStreams.Values)
+            {
+                stream.RefreshVolume(_settings);
                 stream.SetAudible(IsAudibleForLocalFrequency(stream.FrequencyTenths, localFrequencyTenths));
+            }
         }
 
         private void CleanupTimedOutRemoteStreams()

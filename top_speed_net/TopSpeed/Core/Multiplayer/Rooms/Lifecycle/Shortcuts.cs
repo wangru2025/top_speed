@@ -151,7 +151,7 @@ namespace TopSpeed.Core.Multiplayer
                 LocalizationService.Mark("Set communicator frequency"),
                 LocalizationService.Mark("Opens frequency input for the communicator channel."),
                 Key.F,
-                new ShortcutModifiers(shift: false, control: true, alt: false),
+                new ShortcutModifiers(shift: true, control: true, alt: false),
                 BeginCommunicatorFrequencyInput);
 
             _menu.RegisterShortcutAction(

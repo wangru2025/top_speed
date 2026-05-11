@@ -13,6 +13,9 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (session == null || !session.IsConnected)
             {
                 ClearRemoteStreams();
+                ClearRemoteMedia();
+                PauseLocalMedia();
+                ResetLocalMediaTransmissionState();
                 Disarm();
                 return;
             }
@@ -21,7 +24,9 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 ? _multiplayer.CommunicatorFrequencyTenths
                 : (ushort)0;
             UpdateRemoteAudibility(localAudibleFrequencyTenths);
+            UpdateRemoteMediaAudibility(localAudibleFrequencyTenths);
             CleanupTimedOutRemoteStreams();
+            HandleCommunicatorMediaUpdate(session, localAudibleFrequencyTenths);
 
             if (!IsArmed())
             {
@@ -91,12 +96,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (!_input.IsDown(key))
                 return false;
 
-            return !_input.IsDown(InputKey.LeftControl)
-                && !_input.IsDown(InputKey.RightControl)
-                && !_input.IsDown(InputKey.LeftShift)
-                && !_input.IsDown(InputKey.RightShift)
-                && !_input.IsDown(InputKey.LeftAlt)
-                && !_input.IsDown(InputKey.RightAlt);
+            return !IsModifierDown();
         }
 
         private uint NextStreamId()
@@ -106,6 +106,45 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 id = _nextStreamId++;
 
             return id;
+        }
+
+        private uint NextMediaId()
+        {
+            var id = _nextMediaId++;
+            if (id == 0)
+                id = _nextMediaId++;
+
+            return id;
+        }
+
+        private bool IsModifierDown()
+        {
+            return _input.IsDown(InputKey.LeftControl)
+                || _input.IsDown(InputKey.RightControl)
+                || _input.IsDown(InputKey.LeftShift)
+                || _input.IsDown(InputKey.RightShift)
+                || _input.IsDown(InputKey.LeftAlt)
+                || _input.IsDown(InputKey.RightAlt);
+        }
+
+        private bool WasPressedWithModifiers(InputKey key, bool control, bool shift, bool alt)
+        {
+            var isDown = _input.IsDown(key);
+            if (!isDown)
+            {
+                _shortcutPressedKeys.Remove(key);
+                return false;
+            }
+
+            if (_shortcutPressedKeys.Contains(key))
+                return false;
+
+            _shortcutPressedKeys.Add(key);
+
+            var controlDown = _input.IsDown(InputKey.LeftControl) || _input.IsDown(InputKey.RightControl);
+            var shiftDown = _input.IsDown(InputKey.LeftShift) || _input.IsDown(InputKey.RightShift);
+            var altDown = _input.IsDown(InputKey.LeftAlt) || _input.IsDown(InputKey.RightAlt);
+            return controlDown == control && shiftDown == shift && altDown == alt;
         }
     }
 }

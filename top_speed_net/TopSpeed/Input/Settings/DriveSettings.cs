@@ -7,6 +7,10 @@ namespace TopSpeed.Input
 {
     internal sealed class DriveSettings
     {
+        public const int MinVoiceInputGainPercent = 0;
+        public const int MaxVoiceInputGainPercent = 400;
+        public const int DefaultVoiceInputGainPercent = 200;
+
         public DriveSettings()
         {
             RestoreDefaults();
@@ -40,6 +44,7 @@ namespace TopSpeed.Input
         public bool StereoWidening { get; set; }
         public bool AutoDetectAudioDeviceFormat { get; set; }
         public string VoiceInputDeviceName { get; set; } = string.Empty;
+        public int VoiceInputGainPercent { get; set; }
         public bool RandomCustomTracks { get; set; }
         public bool RandomCustomVehicles { get; set; }
         public bool SingleRaceCustomVehicles { get; set; }
@@ -127,6 +132,7 @@ namespace TopSpeed.Input
             StereoWidening = false;
             AutoDetectAudioDeviceFormat = true;
             VoiceInputDeviceName = string.Empty;
+            VoiceInputGainPercent = DefaultVoiceInputGainPercent;
             RandomCustomTracks = false;
             RandomCustomVehicles = false;
             SingleRaceCustomVehicles = false;

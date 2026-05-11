@@ -93,7 +93,8 @@ namespace TopSpeed.Server.Network
                     _owner.SendSelectedTrackToPlayer(room, player);
                     _owner.SyncMediaTo(room, player);
                     _owner.SyncLiveTo(room, player);
-                    _owner.SyncVoiceTo(room, player);
+                    // Voice is relayed server-wide and was already synced at
+                    // SendInitialConnectionState, so we do not re-sync on room join.
                     _owner._notify.SendRoomState(player, room);
                     return;
                 }
@@ -118,7 +119,8 @@ namespace TopSpeed.Server.Network
                 _owner.SendSelectedTrackToPlayer(room, player);
                 _owner.SyncMediaTo(room, player);
                 _owner.SyncLiveTo(room, player);
-                _owner.SyncVoiceTo(room, player);
+                // Voice is relayed server-wide and was already synced at
+                // SendInitialConnectionState, so we do not re-sync on room join.
                 TouchVersion(room);
                 _owner._notify.SendRoomState(player, room);
 

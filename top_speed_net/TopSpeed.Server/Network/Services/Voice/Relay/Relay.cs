@@ -8,11 +8,13 @@ namespace TopSpeed.Server.Network
     {
         private static readonly TimeSpan VoiceTimeout = TimeSpan.FromMilliseconds(ProtocolConstants.VoiceTimeoutMs);
 
+        // Voice chat is relayed server-wide. Frequency-tuning happens on the
+        // receiver, so a transmitter does not need to be in the same room (or
+        // any room) as the listener — anyone tuned to the same frequency on
+        // the server should hear them, including in the lobby.
         private void OnVoiceStart(PlayerConnection player, PacketPlayerVoiceStart start)
         {
             if (!_config.Features.VoiceChat)
-                return;
-            if (!player.RoomId.HasValue || !_rooms.TryGetValue(player.RoomId.Value, out var room))
                 return;
             if (start.PlayerId != player.Id)
                 return;
@@ -20,7 +22,7 @@ namespace TopSpeed.Server.Network
                 return;
 
             if (player.Voice != null)
-                StopVoice(player, room, notifyRoom: true);
+                StopVoice(player, notifyRoom: true);
 
             player.Voice = new VoiceState
             {
@@ -36,8 +38,7 @@ namespace TopSpeed.Server.Network
                 LastFrameUtc = DateTime.UtcNow
             };
 
-            _notify.ToRoomExcept(
-                room,
+            _notify.ToAllExcept(
                 player.Id,
                 PacketSerializer.WritePlayerVoiceStart(new PacketPlayerVoiceStart
                 {
@@ -58,8 +59,6 @@ namespace TopSpeed.Server.Network
         private void OnVoiceFrame(PlayerConnection player, PacketPlayerVoiceFrame frame)
         {
             if (!_config.Features.VoiceChat)
-                return;
-            if (!player.RoomId.HasValue || !_rooms.TryGetValue(player.RoomId.Value, out var room))
                 return;
             if (frame.PlayerId != player.Id)
                 return;
@@ -82,8 +81,7 @@ namespace TopSpeed.Server.Network
             voice.NextSequence = unchecked((ushort)(frame.Sequence + 1));
             voice.LastFrameUtc = DateTime.UtcNow;
 
-            _notify.ToRoomExcept(
-                room,
+            _notify.ToAllExcept(
                 player.Id,
                 PacketSerializer.WritePlayerVoiceFrame(new PacketPlayerVoiceFrame
                 {
@@ -101,8 +99,6 @@ namespace TopSpeed.Server.Network
         {
             if (!_config.Features.VoiceChat)
                 return;
-            if (!player.RoomId.HasValue || !_rooms.TryGetValue(player.RoomId.Value, out var room))
-                return;
             if (stop.PlayerId != player.Id)
                 return;
             if (!PacketValidation.IsValidVoiceStop(stop))
@@ -114,7 +110,7 @@ namespace TopSpeed.Server.Network
             if (voice.StreamId != stop.StreamId)
                 return;
 
-            StopVoice(player, room, notifyRoom: true);
+            StopVoice(player, notifyRoom: true);
         }
     }
 }

@@ -105,7 +105,6 @@ namespace TopSpeed.Server.Network
                         _owner.SendSelectedTrackToPlayer(room, player);
                         _owner.SyncMediaTo(room, player);
                         _owner.SyncLiveTo(room, player);
-                        _owner.SyncVoiceTo(room, player);
                     }
                     else
                     {
@@ -121,6 +120,11 @@ namespace TopSpeed.Server.Network
                     player.MarkActive();
                     _owner._room.HandleStateRequest(player);
                 }
+
+                // Voice chat is relayed server-wide (lobby + every room), so a
+                // freshly-connected or resuming player needs to be told about
+                // every currently-active voice stream regardless of room state.
+                _owner.SyncVoiceTo(player);
 
                 if (player.RoomId.HasValue && _owner._rooms.ContainsKey(player.RoomId.Value))
                     player.MarkActive();

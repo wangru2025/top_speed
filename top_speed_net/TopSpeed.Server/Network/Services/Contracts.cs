@@ -74,6 +74,8 @@ namespace TopSpeed.Server.Network
         void ToRoom(GameRoom room, byte[] payload, PacketStream stream, PacketDeliveryKind delivery);
         void ToRoomExcept(GameRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream);
         void ToRoomExcept(GameRoom room, uint exceptPlayerId, byte[] payload, PacketStream stream, PacketDeliveryKind delivery);
+        void ToAllExcept(uint exceptPlayerId, byte[] payload, PacketStream stream);
+        void ToAllExcept(uint exceptPlayerId, byte[] payload, PacketStream stream, PacketDeliveryKind delivery);
         void ToPlayer(PlayerConnection player, byte[] payload, PacketStream stream);
         void ToPlayer(PlayerConnection player, byte[] payload, PacketStream stream, PacketDeliveryKind delivery);
         void ProtocolToRoom(GameRoom room, string text);

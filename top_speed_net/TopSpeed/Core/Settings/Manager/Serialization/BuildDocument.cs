@@ -28,10 +28,12 @@ namespace TopSpeed.Core.Settings
                     AmbientsAndSourcesPercent = audio.AmbientsAndSourcesPercent,
                     MusicPercent = audio.MusicPercent,
                     OnlineServerEventsPercent = audio.OnlineServerEventsPercent,
+                    CommunicatorPercent = audio.CommunicatorPercent,
                     HrtfAudio = settings.HrtfAudio,
                     StereoWidening = settings.StereoWidening,
                     AutoDetectAudioDeviceFormat = settings.AutoDetectAudioDeviceFormat,
-                    VoiceInputDevice = settings.VoiceInputDeviceName
+                    VoiceInputDevice = settings.VoiceInputDeviceName,
+                    VoiceInputGainPercent = settings.VoiceInputGainPercent
                 },
                 Input = new SettingsInputDocument
                 {

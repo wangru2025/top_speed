@@ -96,6 +96,36 @@ namespace TopSpeed.Server.Network
                 }
             }
 
+            public void ToAllExcept(uint exceptPlayerId, byte[] payload, PacketStream stream)
+            {
+                if (payload == null)
+                    return;
+
+                foreach (var player in _owner._players.Values)
+                {
+                    if (player.Id == exceptPlayerId)
+                        continue;
+                    if (!IsReady(player))
+                        continue;
+                    _owner.SendStream(player, payload, stream);
+                }
+            }
+
+            public void ToAllExcept(uint exceptPlayerId, byte[] payload, PacketStream stream, PacketDeliveryKind delivery)
+            {
+                if (payload == null)
+                    return;
+
+                foreach (var player in _owner._players.Values)
+                {
+                    if (player.Id == exceptPlayerId)
+                        continue;
+                    if (!IsReady(player))
+                        continue;
+                    _owner.SendStream(player, payload, stream, delivery);
+                }
+            }
+
             public void ToLobby(byte[] payload, PacketStream stream)
             {
                 if (payload == null)

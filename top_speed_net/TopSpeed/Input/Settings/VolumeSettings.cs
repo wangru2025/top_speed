@@ -13,7 +13,8 @@ namespace TopSpeed.Input
         Radio,
         AmbientsAndSources,
         Music,
-        OnlineServerEvents
+        OnlineServerEvents,
+        Communicator
     }
 
     internal sealed class AudioVolumeSettings
@@ -28,6 +29,7 @@ namespace TopSpeed.Input
         public int AmbientsAndSourcesPercent { get; set; }
         public int MusicPercent { get; set; }
         public int OnlineServerEventsPercent { get; set; }
+        public int CommunicatorPercent { get; set; }
 
         public void RestoreDefaults(int defaultMusicPercent)
         {
@@ -41,6 +43,7 @@ namespace TopSpeed.Input
             AmbientsAndSourcesPercent = 100;
             MusicPercent = ClampPercent(defaultMusicPercent);
             OnlineServerEventsPercent = 100;
+            CommunicatorPercent = 100;
         }
 
         public void ClampAll()
@@ -55,6 +58,7 @@ namespace TopSpeed.Input
             AmbientsAndSourcesPercent = ClampPercent(AmbientsAndSourcesPercent);
             MusicPercent = ClampPercent(MusicPercent);
             OnlineServerEventsPercent = ClampPercent(OnlineServerEventsPercent);
+            CommunicatorPercent = ClampPercent(CommunicatorPercent);
         }
 
         public int GetPercent(AudioVolumeCategory category)
@@ -71,6 +75,7 @@ namespace TopSpeed.Input
                 AudioVolumeCategory.AmbientsAndSources => AmbientsAndSourcesPercent,
                 AudioVolumeCategory.Music => MusicPercent,
                 AudioVolumeCategory.OnlineServerEvents => OnlineServerEventsPercent,
+                AudioVolumeCategory.Communicator => CommunicatorPercent,
                 _ => 100
             };
         }

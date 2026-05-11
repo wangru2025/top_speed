@@ -31,10 +31,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private AudioCaptureDevice? _captureDevice;
         private string _captureDeviceName = string.Empty;
         private int _captureChannels = 1;
-        private long _captureSampleCount;
-        private bool _captureFirstFrameLogged;
-        private long _txFrameCount;
-        private long _txByteCount;
 
         private Network.MultiplayerSession? _boundSession;
         private bool _transmitting;

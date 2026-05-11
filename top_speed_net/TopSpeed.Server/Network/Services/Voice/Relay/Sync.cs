@@ -5,7 +5,7 @@ namespace TopSpeed.Server.Network
 {
     internal sealed partial class RaceServer
     {
-        private void StopVoice(PlayerConnection player, GameRoom room, bool notifyRoom)
+        private void StopVoice(PlayerConnection player, bool notifyRoom)
         {
             var voice = player.Voice;
             if (voice == null)
@@ -15,8 +15,7 @@ namespace TopSpeed.Server.Network
             if (!notifyRoom)
                 return;
 
-            _notify.ToRoomExcept(
-                room,
+            _notify.ToAllExcept(
                 player.Id,
                 PacketSerializer.WritePlayerVoiceStop(new PacketPlayerVoiceStop
                 {
@@ -28,16 +27,18 @@ namespace TopSpeed.Server.Network
                 PacketDeliveryKind.ReliableOrdered);
         }
 
-        private void SyncVoiceTo(GameRoom room, PlayerConnection receiver)
+        // Sync every currently-active voice stream to a freshly-connected (or
+        // resuming) receiver, so they hear ongoing speakers without having to
+        // wait for the next VoiceStart. Voice is relayed server-wide, so this
+        // walks every connected player rather than just one room.
+        private void SyncVoiceTo(PlayerConnection receiver)
         {
             if (!_config.Features.VoiceChat)
                 return;
 
-            foreach (var id in room.PlayerIds)
+            foreach (var owner in _players.Values)
             {
-                if (id == receiver.Id)
-                    continue;
-                if (!_players.TryGetValue(id, out var owner))
+                if (owner.Id == receiver.Id)
                     continue;
 
                 var voice = owner.Voice;

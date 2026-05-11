@@ -71,6 +71,9 @@ namespace TopSpeed.Core.Settings
         [DataMember(Name = "onlineServerEventsPercent")]
         public int? OnlineServerEventsPercent { get; set; }
 
+        [DataMember(Name = "communicatorPercent")]
+        public int? CommunicatorPercent { get; set; }
+
         [DataMember(Name = "hrtfAudio")]
         public bool? HrtfAudio { get; set; }
 
@@ -82,6 +85,9 @@ namespace TopSpeed.Core.Settings
 
         [DataMember(Name = "voiceInputDevice")]
         public string? VoiceInputDevice { get; set; }
+
+        [DataMember(Name = "voiceInputGainPercent")]
+        public int? VoiceInputGainPercent { get; set; }
 
     }
 

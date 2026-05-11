@@ -71,6 +71,12 @@ namespace TopSpeed.Core.Settings
                 hasCategoryVolumes = true;
             }
 
+            if (audio.CommunicatorPercent.HasValue)
+            {
+                settings.AudioVolumes.CommunicatorPercent = ClampPercent(audio.CommunicatorPercent.Value, "audio.communicatorPercent", issues);
+                hasCategoryVolumes = true;
+            }
+
             if (audio.HrtfAudio.HasValue)
                 settings.HrtfAudio = audio.HrtfAudio.Value;
 
@@ -81,6 +87,16 @@ namespace TopSpeed.Core.Settings
                 settings.AutoDetectAudioDeviceFormat = audio.AutoDetectAudioDeviceFormat.Value;
             if (audio.VoiceInputDevice != null)
                 settings.VoiceInputDeviceName = audio.VoiceInputDevice.Trim();
+            if (audio.VoiceInputGainPercent.HasValue)
+            {
+                settings.VoiceInputGainPercent = ClampInt(
+                    audio.VoiceInputGainPercent.Value,
+                    settings.VoiceInputGainPercent,
+                    DriveSettings.MinVoiceInputGainPercent,
+                    DriveSettings.MaxVoiceInputGainPercent,
+                    "audio.voiceInputGainPercent",
+                    issues);
+            }
 
             if (hasCategoryVolumes)
             {

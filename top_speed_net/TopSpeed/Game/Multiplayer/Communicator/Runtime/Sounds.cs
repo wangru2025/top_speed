@@ -1,6 +1,7 @@
 using System.IO;
 using TopSpeed.Audio;
 using TopSpeed.Core;
+using TopSpeed.Input;
 using TS.Audio;
 
 namespace TopSpeed.Game.Multiplayer.Communicator
@@ -28,7 +29,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             {
                 _audio.PlayOneShot(sound, AudioEngineOptions.UiBusName, configure: handle =>
                 {
-                    handle.SetVolumePercent(100);
+                    handle.SetVolumePercent(_settings, AudioVolumeCategory.Communicator, 100);
                 });
             }
             catch

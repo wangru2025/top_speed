@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+using TopSpeed.Input;
 using TopSpeed.Localization;
 namespace TopSpeed.Menu
 {
@@ -27,7 +28,13 @@ namespace TopSpeed.Menu
                         _audio.GetVoiceInputDeviceLabel()),
                     MenuAction.None,
                     onActivate: _audio.ChooseVoiceInputDevice,
-                    hint: LocalizationService.Mark("Select the microphone used for communicator voice chat in multiplayer."))
+                    hint: LocalizationService.Mark("Select the microphone used for communicator voice chat in multiplayer.")),
+                new Slider(
+                    LocalizationService.Mark("Microphone input gain"),
+                    $"{DriveSettings.MinVoiceInputGainPercent}-{DriveSettings.MaxVoiceInputGainPercent}",
+                    () => _settings.VoiceInputGainPercent,
+                    value => _settingsActions.UpdateSetting(() => _settings.VoiceInputGainPercent = value),
+                    hintProvider: HintSliderProvider(LocalizationService.Mark("Amplifies the captured microphone signal before it is sent to other players. 100 is unity gain. Raise this if other players report you sound too quiet; lower it if your voice clips.")))
             };
 
             return BackMenu("options_audio", items);

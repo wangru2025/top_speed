@@ -15,13 +15,7 @@ namespace TopSpeed.Server.Network
                 if (now - voice.LastFrameUtc <= VoiceTimeout)
                     continue;
 
-                if (!player.RoomId.HasValue || !_rooms.TryGetValue(player.RoomId.Value, out var room))
-                {
-                    player.Voice = null;
-                    continue;
-                }
-
-                StopVoice(player, room, notifyRoom: true);
+                StopVoice(player, notifyRoom: true);
             }
         }
     }

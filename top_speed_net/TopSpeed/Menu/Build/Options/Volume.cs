@@ -64,7 +64,12 @@ namespace TopSpeed.Menu
                     LocalizationService.Mark("Online server event sounds"),
                     () => _settings.AudioVolumes.OnlineServerEventsPercent,
                     value => _settings.AudioVolumes.OnlineServerEventsPercent = value,
-                    LocalizationService.Mark("Controls server and multiplayer event sounds such as connection and other events."))
+                    LocalizationService.Mark("Controls server and multiplayer event sounds such as connection and other events.")),
+                BuildVolumeSlider(
+                    LocalizationService.Mark("Communicator volume"),
+                    () => _settings.AudioVolumes.CommunicatorPercent,
+                    value => _settings.AudioVolumes.CommunicatorPercent = value,
+                    LocalizationService.Mark("Controls communicator activation cues and remote voice chat playback. Affects how loud other players sound when they speak through the communicator."))
             };
 
             return BackMenu("options_volume", items);

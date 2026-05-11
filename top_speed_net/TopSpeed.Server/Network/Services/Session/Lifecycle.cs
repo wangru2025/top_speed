@@ -156,10 +156,10 @@ namespace TopSpeed.Server.Network
                 if (sendDisconnectPacket)
                     _owner.SendStream(player, PacketSerializer.WriteDisconnect(BuildDisconnectMessage(reason)), PacketStream.Control);
 
+                _owner.StopVoice(player, notifyRoom: true);
                 if (room != null)
                 {
                     _owner.StopLive(player, room, notifyRoom: true);
-                    _owner.StopVoice(player, room, notifyRoom: true);
                     _owner.ResetMediaState(player, room);
                     _owner._trackPackageUploads.Remove(player.Id);
                     room.PendingLoadouts.Remove(player.Id);
@@ -227,6 +227,7 @@ namespace TopSpeed.Server.Network
                 var disconnectReason = player.LastDisconnectReason;
                 var disconnectState = player.GameConnectionState;
                 player.MarkClosed();
+                _owner.StopVoice(player, notifyRoom: notifyRoom);
                 if (player.RoomId.HasValue)
                     _owner._room.Leave(player, notifyRoom);
                 _owner._trackPackageUploads.Remove(player.Id);

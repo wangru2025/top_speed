@@ -49,13 +49,11 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 if (chosenDevice != null && TryStartCaptureDevice(null, format, desiredDeviceName))
                     return true;
 
-                VoiceDebug.Log("capture: EnsureCaptureInitialized exhausted all backends");
                 DisposeCapture();
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                VoiceDebug.Log($"capture: EnsureCaptureInitialized threw: {ex.GetType().Name}: {ex.Message}");
                 DisposeCapture();
                 return false;
             }
@@ -70,19 +68,13 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 captureDevice.OnAudioProcessed += OnCapturedAudio;
                 captureDevice.Start();
 
-                lock (_captureLock)
-                    _captureSampleCount = 0;
                 _captureDevice = captureDevice;
                 _captureChannels = Math.Max(1, captureDevice.Format.Channels);
                 _captureDeviceName = captureDeviceName;
-                _captureFirstFrameLogged = false;
-
-                VoiceDebug.Log($"capture: device started name='{(string.IsNullOrEmpty(captureDeviceName) ? "(default)" : captureDeviceName)}' format={captureDevice.Format.SampleRate}Hz/{captureDevice.Format.Channels}ch/{captureDevice.Format.Format}");
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                VoiceDebug.Log($"capture: InitializeCaptureDevice failed: {ex.GetType().Name}: {ex.Message}");
                 try
                 {
                     captureDevice?.OnAudioProcessed -= OnCapturedAudio;
@@ -166,12 +158,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (frameCount <= 0)
                 return;
 
-            if (!_captureFirstFrameLogged)
-            {
-                _captureFirstFrameLogged = true;
-                VoiceDebug.Log($"capture: first OnAudioProcessed callback samples={samples.Length} channels={channels} frames={frameCount}");
-            }
-
             lock (_captureLock)
             {
                 for (var frame = 0; frame < frameCount; frame++)
@@ -195,8 +181,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                     var trim = _capturedSamples.Count - MaxCapturedSamples;
                     _capturedSamples.RemoveRange(0, trim);
                 }
-
-                _captureSampleCount += frameCount;
             }
         }
 
@@ -221,16 +205,5 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             lock (_captureLock)
                 _capturedSamples.Clear();
         }
-
-        internal long CaptureSampleCount
-        {
-            get
-            {
-                lock (_captureLock)
-                    return _captureSampleCount;
-            }
-        }
-
-        internal bool IsCaptureRunning => _captureDevice != null;
     }
 }

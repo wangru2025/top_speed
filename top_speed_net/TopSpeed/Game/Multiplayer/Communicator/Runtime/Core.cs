@@ -12,8 +12,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
 {
     internal sealed partial class MultiplayerCommunicatorRuntime : IDisposable
     {
-        private const float VoiceActivationThreshold = 0.015f;
-        private const int VoiceActivationHoldMs = 350;
         private const int MaxCapturedSamples = ProtocolConstants.VoiceSampleRate * 2;
         private const int MaxQueuedRemoteFrames = 16;
 
@@ -33,11 +31,14 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private AudioCaptureDevice? _captureDevice;
         private string _captureDeviceName = string.Empty;
         private int _captureChannels = 1;
-        private long _lastVoiceActivityUtcTicks;
+        private long _captureSampleCount;
+        private bool _captureFirstFrameLogged;
+        private long _txFrameCount;
+        private long _txByteCount;
 
         private Network.MultiplayerSession? _boundSession;
         private bool _transmitting;
-        private bool _localMicCueOpen;
+        private bool _micCueOpen;
         private uint _streamId;
         private uint _nextStreamId = 1;
         private ushort _activeFrequencyTenths;
@@ -67,21 +68,16 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (ReferenceEquals(_boundSession, session))
                 return;
 
-            if (_transmitting)
-                StopTransmission();
-
+            Disarm();
             _boundSession = session;
-
             ClearRemoteStreams();
         }
 
         public void Dispose()
         {
-            StopTransmission();
+            Disarm();
             _boundSession = null;
-
             ClearRemoteStreams();
-            DisposeCapture();
             DisposeCachedSounds();
         }
     }

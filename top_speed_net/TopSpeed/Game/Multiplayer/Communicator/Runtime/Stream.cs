@@ -53,6 +53,30 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             public bool PushToTalk { get; }
             public long LastReceivedUtcTicks { get; set; }
             public bool IsAudible { get; private set; }
+            public long FramesPushed { get; private set; }
+
+            private bool _notAudibleDropLogged;
+            private bool _audibleFrameLogged;
+
+            // Returns true the first time this is called per stream so the caller
+            // can log a single "drops because not audible" line without spamming.
+            public bool OnNotAudibleDropFirstLog()
+            {
+                if (_notAudibleDropLogged)
+                    return false;
+                _notAudibleDropLogged = true;
+                return true;
+            }
+
+            public void OnAudibleFrame()
+            {
+                FramesPushed++;
+                if (!_audibleFrameLogged)
+                {
+                    _audibleFrameLogged = true;
+                    VoiceDebug.Log($"rx: first audible frame pushed stream={StreamId}");
+                }
+            }
 
             public void SetAudible(bool audible)
             {

@@ -9,7 +9,10 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         public void ApplyRemoteVoiceStart(PacketPlayerVoiceStart start, long receivedUtcTicks)
         {
             if (start == null || !PacketValidation.IsValidVoiceStart(start))
+            {
+                VoiceDebug.Log($"rx: ApplyRemoteVoiceStart rejected (validation) start={(start == null ? "null" : $"player={start.PlayerId} stream={start.StreamId} freq={start.FrequencyTenths}")}");
                 return;
+            }
 
             if (_boundSession != null && start.PlayerId == _boundSession.PlayerId)
                 return;
@@ -31,6 +34,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             var audible = IsAudibleForLocalFrequency(start.FrequencyTenths, localFrequencyTenths);
             stream.SetAudible(audible);
             _remoteStreams[start.PlayerId] = stream;
+            VoiceDebug.Log($"rx: VoiceStart player={start.PlayerId} stream={start.StreamId} srcFreq={start.FrequencyTenths} localFreq={localFrequencyTenths} audible={audible} ptt={start.PushToTalk}");
             if (start.PushToTalk && audible)
                 PlayRemotePttCue();
         }
@@ -41,15 +45,26 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 return;
 
             if (!_remoteStreams.TryGetValue(frame.PlayerId, out var stream))
+            {
+                VoiceDebug.Log($"rx: VoiceFrame dropped (no stream for player) player={frame.PlayerId} stream={frame.StreamId}");
                 return;
+            }
             if (stream.StreamId != frame.StreamId)
+            {
+                VoiceDebug.Log($"rx: VoiceFrame dropped (stream id mismatch) player={frame.PlayerId} expected={stream.StreamId} got={frame.StreamId}");
                 return;
+            }
 
             stream.LastReceivedUtcTicks = receivedUtcTicks;
             if (!stream.IsAudible)
+            {
+                if (stream.OnNotAudibleDropFirstLog())
+                    VoiceDebug.Log($"rx: VoiceFrame dropped (not audible at local freq) player={frame.PlayerId} stream={frame.StreamId}");
                 return;
+            }
 
             stream.PushFrame(frame);
+            stream.OnAudibleFrame();
         }
 
         public void ApplyRemoteVoiceStop(PacketPlayerVoiceStop stop)
@@ -63,6 +78,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 return;
 
             var playCue = stream.PushToTalk && stream.IsAudible;
+            VoiceDebug.Log($"rx: VoiceStop player={stop.PlayerId} stream={stop.StreamId} framesPlayed={stream.FramesPushed}");
             stream.Dispose();
             _remoteStreams.Remove(stop.PlayerId);
             if (playCue)

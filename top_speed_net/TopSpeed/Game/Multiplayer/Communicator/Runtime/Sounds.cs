@@ -7,9 +7,20 @@ namespace TopSpeed.Game.Multiplayer.Communicator
 {
     internal sealed partial class MultiplayerCommunicatorRuntime
     {
-        private void OnLocalTransmissionStateChanged(bool opened)
+        // Drives the local mic open/close cue from the actual transmission state so
+        // the user only hears the "you're now live" sound after the network actually
+        // accepted the voice-start, not on key-down.
+        private void UpdateMicCue(bool open)
         {
-            var sound = opened ? GetMicOpenSound() : GetMicCloseSound();
+            if (_micCueOpen == open)
+                return;
+
+            _micCueOpen = open;
+            PlayLocalCue(open ? GetMicOpenSound() : GetMicCloseSound());
+        }
+
+        private void PlayLocalCue(SoundAsset? sound)
+        {
             if (sound == null)
                 return;
 
@@ -45,16 +56,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (cue == null)
                 return;
 
-            try
-            {
-                _audio.PlayOneShot(cue, AudioEngineOptions.UiBusName, configure: handle =>
-                {
-                    handle.SetVolumePercent(100);
-                });
-            }
-            catch
-            {
-            }
+            PlayLocalCue(cue);
         }
 
         private SoundAsset? GetPttCue()

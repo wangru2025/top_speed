@@ -1,17 +1,12 @@
-using System;
 using TopSpeed.Protocol;
 
 namespace TopSpeed.Network.Session
 {
-    internal sealed class VoiceSend
+    internal sealed class VoiceSend : OutboundStreamSend
     {
-        private readonly Sender _sender;
-        private bool _active;
-        private uint _streamId;
-
         public VoiceSend(Sender sender)
+            : base(sender, PacketStream.Voice)
         {
-            _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
 
         public bool TrySendStart(
@@ -22,83 +17,38 @@ namespace TopSpeed.Network.Session
             ushort frequencyTenths,
             bool pushToTalk)
         {
-            if (streamId == 0)
-                return false;
-
-            if (_active && _streamId == streamId)
-                return true;
-
-            if (_active)
-            {
-                if (!TrySendStop(playerId, playerNumber, _streamId))
-                {
-                    // Recover from a stale local active state so transmission does not get stuck forever.
-                    _active = false;
-                    _streamId = 0;
-                }
-            }
-
-            var sent = _sender.TrySend(
-                ClientPacketSerializer.WritePlayerVoiceStart(
-                    playerId,
-                    playerNumber,
-                    streamId,
-                    profile.Codec,
-                    profile.SampleRate,
-                    profile.Channels,
-                    profile.FrameMs,
-                    frequencyTenths,
-                    pushToTalk),
-                PacketStream.Voice,
-                PacketDeliveryKind.ReliableOrdered);
-
-            if (!sent)
-                return false;
-
-            _active = true;
-            _streamId = streamId;
-            return true;
+            var packet = ClientPacketSerializer.WritePlayerVoiceStart(
+                playerId,
+                playerNumber,
+                streamId,
+                profile.Codec,
+                profile.SampleRate,
+                profile.Channels,
+                profile.FrameMs,
+                frequencyTenths,
+                pushToTalk);
+            return TrySendStartCore(playerId, playerNumber, streamId, packet);
         }
 
         public bool TrySendFrame(uint playerId, byte playerNumber, uint streamId, in LiveOpusFrame frame)
         {
-            if (!_active || _streamId != streamId)
-                return false;
-
-            return _sender.TrySend(
-                ClientPacketSerializer.WritePlayerVoiceFrame(
-                    playerId,
-                    playerNumber,
-                    streamId,
-                    frame.Sequence,
-                    frame.Timestamp,
-                    frame.Payload),
-                PacketStream.Voice,
-                PacketDeliveryKind.Sequenced);
+            return TrySendFrameCore(playerId, playerNumber, streamId, in frame);
         }
 
-        public bool TrySendStop(uint playerId, byte playerNumber, uint streamId)
+        protected override byte[] WriteFramePacket(uint playerId, byte playerNumber, uint streamId, in LiveOpusFrame frame)
         {
-            if (!_active || _streamId != streamId)
-                return true;
-
-            var sent = _sender.TrySend(
-                ClientPacketSerializer.WritePlayerVoiceStop(playerId, playerNumber, streamId),
-                PacketStream.Voice,
-                PacketDeliveryKind.ReliableOrdered);
-
-            if (!sent)
-                return false;
-
-            _active = false;
-            _streamId = 0;
-            return true;
+            return ClientPacketSerializer.WritePlayerVoiceFrame(
+                playerId,
+                playerNumber,
+                streamId,
+                frame.Sequence,
+                frame.Timestamp,
+                frame.Payload);
         }
 
-        public void Reset()
+        protected override byte[] WriteStopPacket(uint playerId, byte playerNumber, uint streamId)
         {
-            _active = false;
-            _streamId = 0;
+            return ClientPacketSerializer.WritePlayerVoiceStop(playerId, playerNumber, streamId);
         }
     }
 }

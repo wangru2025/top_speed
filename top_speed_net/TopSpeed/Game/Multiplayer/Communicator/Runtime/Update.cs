@@ -1,4 +1,3 @@
-using System;
 using TopSpeed.Input;
 
 namespace TopSpeed.Game.Multiplayer.Communicator
@@ -11,84 +10,93 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (!ReferenceEquals(session, _boundSession))
                 BindSession(session);
 
-            var pttHeld = _input.IsDown(InputKey.V);
-            UpdateLocalMicCueState(session, pttHeld);
-
             if (session == null || !session.IsConnected)
+            {
                 ClearRemoteStreams();
+                Disarm();
+                return;
+            }
 
-            var frequencyTenths = _multiplayer.CommunicatorFrequencyTenths;
-            var localAudibleFrequencyTenths = _multiplayer.CommunicatorEnabled ? frequencyTenths : (ushort)0;
+            var localAudibleFrequencyTenths = _multiplayer.CommunicatorEnabled
+                ? _multiplayer.CommunicatorFrequencyTenths
+                : (ushort)0;
             UpdateRemoteAudibility(localAudibleFrequencyTenths);
             CleanupTimedOutRemoteStreams();
 
-            if (ShouldMonitorVoiceActivity(session) && !EnsureCaptureInitialized())
+            if (!IsArmed())
             {
-                StopTransmission();
-                ClearCapturedSamples();
+                Disarm();
                 return;
             }
 
-            if (!TryGetTransmitState(session, pttHeld, out var shouldTransmit, out var pushToTalk))
-            {
-                StopTransmission();
-                ClearCapturedSamples();
-                return;
-            }
-
-            if (!shouldTransmit)
-            {
-                StopTransmission();
-                ClearCapturedSamples();
-                return;
-            }
-
+            // Arm: bring up the capture device the moment the communicator is enabled,
+            // so VOX and PTT can transmit immediately instead of losing the first frames
+            // to a cold-start of MiniAudio while the user is already talking.
             if (!EnsureCaptureInitialized())
             {
-                StopTransmission();
+                Disarm();
                 return;
             }
 
-            if (_transmitting && (_activeFrequencyTenths != frequencyTenths || _activePushToTalk != pushToTalk))
-                StopTransmission();
+            var shouldTransmit = ShouldTransmit(out var pushToTalk);
+            var frequencyTenths = _multiplayer.CommunicatorFrequencyTenths;
 
-            if (!_transmitting)
+            if (_transmitting &&
+                (!shouldTransmit
+                 || _activeFrequencyTenths != frequencyTenths
+                 || _activePushToTalk != pushToTalk))
             {
-                if (!StartTransmission(session!, frequencyTenths, pushToTalk))
+                EndTransmission();
+            }
+
+            if (shouldTransmit && !_transmitting)
+            {
+                if (!BeginTransmission(session, frequencyTenths, pushToTalk))
                     return;
             }
 
-            SendCapturedFrames(session!);
+            if (_transmitting)
+                SendCapturedFrames(session);
+            else
+                DiscardCapturedSamples();
         }
 
-        private bool TryGetTransmitState(Network.MultiplayerSession? session, bool pttHeld, out bool shouldTransmit, out bool pushToTalk)
+        private bool IsArmed()
         {
-            shouldTransmit = false;
-            pushToTalk = false;
+            return _multiplayer.CommunicatorEnabled
+                && _multiplayer.CommunicatorFrequencyTenths != 0;
+        }
 
-            if (session == null || !session.IsConnected)
-                return false;
-            if (!_multiplayer.CommunicatorEnabled)
-                return false;
-            if (_multiplayer.CommunicatorFrequencyTenths == 0)
-                return false;
-
+        // Single source of truth for "should we be transmitting right now?".
+        // VOX mode: continuous transmission while voice activation is enabled. No
+        // voice-activity detector — the user explicitly opted into open-mic.
+        // PTT mode: transmit only while the V key is held with no modifier keys
+        // (Ctrl / Shift / Alt). The modifier exclusion is critical because
+        // Ctrl+Shift+V is the toggle shortcut for VOX itself; without it, pressing
+        // the toggle would briefly open PTT and play the activation cue.
+        private bool ShouldTransmit(out bool pushToTalk)
+        {
             if (_multiplayer.CommunicatorVoiceActivationEnabled)
             {
                 pushToTalk = false;
-                if (pttHeld)
-                {
-                    shouldTransmit = false;
-                    return true;
-                }
-
-                shouldTransmit = true;
                 return true;
             }
 
             pushToTalk = true;
-            shouldTransmit = pttHeld;
-            return true;
+            return IsUnmodifiedKeyDown(InputKey.V);
+        }
+
+        private bool IsUnmodifiedKeyDown(InputKey key)
+        {
+            if (!_input.IsDown(key))
+                return false;
+
+            return !_input.IsDown(InputKey.LeftControl)
+                && !_input.IsDown(InputKey.RightControl)
+                && !_input.IsDown(InputKey.LeftShift)
+                && !_input.IsDown(InputKey.RightShift)
+                && !_input.IsDown(InputKey.LeftAlt)
+                && !_input.IsDown(InputKey.RightAlt);
         }
 
         private uint NextStreamId()
@@ -98,46 +106,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 id = _nextStreamId++;
 
             return id;
-        }
-
-        private bool IsVoiceActivityActive()
-        {
-            var last = _lastVoiceActivityUtcTicks;
-            if (last <= 0)
-                return false;
-
-            var holdTicks = TimeSpan.FromMilliseconds(VoiceActivationHoldMs).Ticks;
-            return DateTime.UtcNow.Ticks - last <= holdTicks;
-        }
-
-        private bool ShouldMonitorVoiceActivity(Network.MultiplayerSession? session)
-        {
-            return session != null
-                && session.IsConnected
-                && _multiplayer.CommunicatorEnabled
-                && _multiplayer.CommunicatorFrequencyTenths != 0
-                && _multiplayer.CommunicatorVoiceActivationEnabled;
-        }
-
-        private void UpdateLocalMicCueState(Network.MultiplayerSession? session, bool pttHeld)
-        {
-            var shouldOpen = ShouldLocalMicCueBeOpen(session, pttHeld);
-            if (_localMicCueOpen == shouldOpen)
-                return;
-
-            _localMicCueOpen = shouldOpen;
-            OnLocalTransmissionStateChanged(shouldOpen);
-        }
-
-        private bool ShouldLocalMicCueBeOpen(Network.MultiplayerSession? session, bool pttHeld)
-        {
-            if (!_multiplayer.CommunicatorEnabled)
-                return false;
-
-            if (_multiplayer.CommunicatorVoiceActivationEnabled)
-                return !pttHeld;
-
-            return pttHeld;
         }
     }
 }

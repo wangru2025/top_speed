@@ -17,10 +17,20 @@ namespace TopSpeed.Core.Multiplayer
         private const string MultiplayerBufferPreviousCategoryShortcutActionId = "multiplayer_buffer_prev_category";
         private const string MultiplayerBufferNextCategoryShortcutActionId = "multiplayer_buffer_next_category";
         private const string MultiplayerBufferCopyFocusedItemShortcutActionId = "multiplayer_buffer_copy_focused_item";
-        private const string MultiplayerCommunicatorToggleShortcutActionId = "multiplayer_comm_toggle";
-        private const string MultiplayerCommunicatorSetFrequencyShortcutActionId = "multiplayer_comm_set_frequency";
-        private const string MultiplayerCommunicatorAnnounceFrequencyShortcutActionId = "multiplayer_comm_announce_frequency";
-        private const string MultiplayerCommunicatorToggleVoiceActivationShortcutActionId = "multiplayer_comm_toggle_voice_activation";
+        private const string MultiplayerCommunicatorToggleShortcutActionId = CommunicatorShortcutIds.Toggle;
+        private const string MultiplayerCommunicatorSetFrequencyShortcutActionId = CommunicatorShortcutIds.SetFrequency;
+        private const string MultiplayerCommunicatorAnnounceFrequencyShortcutActionId = CommunicatorShortcutIds.AnnounceFrequency;
+        private const string MultiplayerCommunicatorPushToTalkShortcutActionId = CommunicatorShortcutIds.PushToTalk;
+        private const string MultiplayerCommunicatorToggleVoiceActivationShortcutActionId = CommunicatorShortcutIds.ToggleVoiceActivation;
+        private const string MultiplayerCommunicatorMediaLoadFileShortcutActionId = CommunicatorShortcutIds.MediaLoadFile;
+        private const string MultiplayerCommunicatorMediaLoadFolderShortcutActionId = CommunicatorShortcutIds.MediaLoadFolder;
+        private const string MultiplayerCommunicatorMediaPlayPauseShortcutActionId = CommunicatorShortcutIds.MediaPlayPause;
+        private const string MultiplayerCommunicatorMediaToggleLoopShortcutActionId = CommunicatorShortcutIds.MediaToggleLoop;
+        private const string MultiplayerCommunicatorMediaPreviousTrackShortcutActionId = CommunicatorShortcutIds.MediaPreviousTrack;
+        private const string MultiplayerCommunicatorMediaNextTrackShortcutActionId = CommunicatorShortcutIds.MediaNextTrack;
+        private const string MultiplayerCommunicatorMediaVolumeUpShortcutActionId = CommunicatorShortcutIds.MediaVolumeUp;
+        private const string MultiplayerCommunicatorMediaVolumeDownShortcutActionId = CommunicatorShortcutIds.MediaVolumeDown;
+        private const string MultiplayerCommunicatorMediaToggleShuffleShortcutActionId = CommunicatorShortcutIds.MediaToggleShuffle;
         private const string MultiplayerShortcutScopeId = "multiplayer";
 
         private static readonly string[] MultiplayerScopeMenus =
@@ -163,6 +173,96 @@ namespace TopSpeed.Core.Multiplayer
                 AnnounceCommunicatorFrequency);
 
             _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorPushToTalkShortcutActionId,
+                LocalizationService.Mark("Communicator push to talk"),
+                LocalizationService.Mark("Hold to transmit communicator voice when voice activation is off."),
+                Key.V,
+                ShortcutModifiers.None,
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaLoadFileShortcutActionId,
+                LocalizationService.Mark("Load communicator media file"),
+                LocalizationService.Mark("Loads an audio file for communicator streaming."),
+                Key.O,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaLoadFolderShortcutActionId,
+                LocalizationService.Mark("Load communicator media folder"),
+                LocalizationService.Mark("Loads an audio folder for communicator streaming."),
+                Key.F,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaPlayPauseShortcutActionId,
+                LocalizationService.Mark("Play or pause communicator media"),
+                LocalizationService.Mark("Toggles play and pause for communicator streaming media."),
+                Key.P,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaToggleLoopShortcutActionId,
+                LocalizationService.Mark("Toggle communicator media loop"),
+                LocalizationService.Mark("Turns communicator media loop mode on or off."),
+                Key.L,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaPreviousTrackShortcutActionId,
+                LocalizationService.Mark("Previous communicator media track"),
+                LocalizationService.Mark("Moves to the previous track in the communicator media playlist."),
+                Key.PageUp,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaNextTrackShortcutActionId,
+                LocalizationService.Mark("Next communicator media track"),
+                LocalizationService.Mark("Moves to the next track in the communicator media playlist."),
+                Key.PageDown,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaVolumeUpShortcutActionId,
+                LocalizationService.Mark("Increase communicator media volume"),
+                LocalizationService.Mark("Increases communicator media volume."),
+                Key.Up,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaVolumeDownShortcutActionId,
+                LocalizationService.Mark("Decrease communicator media volume"),
+                LocalizationService.Mark("Decreases communicator media volume."),
+                Key.Down,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
+                MultiplayerCommunicatorMediaToggleShuffleShortcutActionId,
+                LocalizationService.Mark("Toggle communicator media shuffle"),
+                LocalizationService.Mark("Turns communicator media shuffle mode on or off."),
+                Key.S,
+                new ShortcutModifiers(shift: false, control: true, alt: false),
+                NoOpShortcutAction,
+                () => false);
+
+            _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorToggleVoiceActivationShortcutActionId,
                 LocalizationService.Mark("Toggle voice activation"),
                 LocalizationService.Mark("Turns communicator voice activation mode on or off."),
@@ -187,6 +287,16 @@ namespace TopSpeed.Core.Multiplayer
                     MultiplayerCommunicatorToggleShortcutActionId,
                     MultiplayerCommunicatorSetFrequencyShortcutActionId,
                     MultiplayerCommunicatorAnnounceFrequencyShortcutActionId,
+                    MultiplayerCommunicatorPushToTalkShortcutActionId,
+                    MultiplayerCommunicatorMediaLoadFileShortcutActionId,
+                    MultiplayerCommunicatorMediaLoadFolderShortcutActionId,
+                    MultiplayerCommunicatorMediaPlayPauseShortcutActionId,
+                    MultiplayerCommunicatorMediaToggleLoopShortcutActionId,
+                    MultiplayerCommunicatorMediaPreviousTrackShortcutActionId,
+                    MultiplayerCommunicatorMediaNextTrackShortcutActionId,
+                    MultiplayerCommunicatorMediaVolumeUpShortcutActionId,
+                    MultiplayerCommunicatorMediaVolumeDownShortcutActionId,
+                    MultiplayerCommunicatorMediaToggleShuffleShortcutActionId,
                     MultiplayerCommunicatorToggleVoiceActivationShortcutActionId
                 },
                 LocalizationService.Mark("Multiplayer shortcuts"));
@@ -210,6 +320,10 @@ namespace TopSpeed.Core.Multiplayer
                 LocalizationService.Mark("Room controls"));
 
             _menu.SetClose(MultiplayerMenuKeys.LoadoutVehicle, HandleLoadoutVehicleClose);
+        }
+
+        private static void NoOpShortcutAction()
+        {
         }
     }
 }

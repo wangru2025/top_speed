@@ -150,32 +150,32 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorToggleShortcutActionId,
-                LocalizationService.Mark("Toggle communicator"),
-                LocalizationService.Mark("Turns communicator transmission controls on or off."),
+                LocalizationService.Mark("Toggle transmission"),
+                LocalizationService.Mark("Turns transmission controls on or off."),
                 Key.C,
                 new ShortcutModifiers(shift: true, control: true, alt: false),
                 ToggleCommunicator);
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorSetFrequencyShortcutActionId,
-                LocalizationService.Mark("Set communicator frequency"),
-                LocalizationService.Mark("Opens frequency input for the communicator channel."),
+                LocalizationService.Mark("Set frequency"),
+                LocalizationService.Mark("Opens frequency input for the channel."),
                 Key.F,
                 new ShortcutModifiers(shift: true, control: true, alt: false),
                 BeginCommunicatorFrequencyInput);
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorAnnounceFrequencyShortcutActionId,
-                LocalizationService.Mark("Announce communicator frequency"),
-                LocalizationService.Mark("Speaks the currently selected communicator channel frequency."),
+                LocalizationService.Mark("Announce frequency"),
+                LocalizationService.Mark("Speaks the currently selected channel frequency."),
                 Key.F,
                 ShortcutModifiers.None,
                 AnnounceCommunicatorFrequency);
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorPushToTalkShortcutActionId,
-                LocalizationService.Mark("Communicator push to talk"),
-                LocalizationService.Mark("Hold to transmit communicator voice when voice activation is off."),
+                LocalizationService.Mark("Push to talk"),
+                LocalizationService.Mark("Hold to transmit voice when voice activation is off."),
                 Key.V,
                 ShortcutModifiers.None,
                 NoOpShortcutAction,
@@ -183,8 +183,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaLoadFileShortcutActionId,
-                LocalizationService.Mark("Load communicator media file"),
-                LocalizationService.Mark("Loads an audio file for communicator streaming."),
+                LocalizationService.Mark("Load media file"),
+                LocalizationService.Mark("Loads an audio file for streaming."),
                 Key.O,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -192,8 +192,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaLoadFolderShortcutActionId,
-                LocalizationService.Mark("Load communicator media folder"),
-                LocalizationService.Mark("Loads an audio folder for communicator streaming."),
+                LocalizationService.Mark("Load media folder"),
+                LocalizationService.Mark("Loads an audio folder for streaming."),
                 Key.F,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -201,8 +201,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaPlayPauseShortcutActionId,
-                LocalizationService.Mark("Play or pause communicator media"),
-                LocalizationService.Mark("Toggles play and pause for communicator streaming media."),
+                LocalizationService.Mark("Play or pause media"),
+                LocalizationService.Mark("Toggles play and pause for streaming media."),
                 Key.P,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -210,8 +210,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaToggleLoopShortcutActionId,
-                LocalizationService.Mark("Toggle communicator media loop"),
-                LocalizationService.Mark("Turns communicator media loop mode on or off."),
+                LocalizationService.Mark("Toggle media loop"),
+                LocalizationService.Mark("Turns media loop mode on or off."),
                 Key.L,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -219,8 +219,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaPreviousTrackShortcutActionId,
-                LocalizationService.Mark("Previous communicator media track"),
-                LocalizationService.Mark("Moves to the previous track in the communicator media playlist."),
+                LocalizationService.Mark("Previous media track"),
+                LocalizationService.Mark("Moves to the previous track in the media playlist."),
                 Key.PageUp,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -228,8 +228,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaNextTrackShortcutActionId,
-                LocalizationService.Mark("Next communicator media track"),
-                LocalizationService.Mark("Moves to the next track in the communicator media playlist."),
+                LocalizationService.Mark("Next media track"),
+                LocalizationService.Mark("Moves to the next track in the media playlist."),
                 Key.PageDown,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -237,8 +237,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaVolumeUpShortcutActionId,
-                LocalizationService.Mark("Increase communicator media volume"),
-                LocalizationService.Mark("Increases communicator media volume."),
+                LocalizationService.Mark("Increase media volume"),
+                LocalizationService.Mark("Increases media volume."),
                 Key.Up,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -246,8 +246,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaVolumeDownShortcutActionId,
-                LocalizationService.Mark("Decrease communicator media volume"),
-                LocalizationService.Mark("Decreases communicator media volume."),
+                LocalizationService.Mark("Decrease media volume"),
+                LocalizationService.Mark("Decreases media volume."),
                 Key.Down,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -255,8 +255,8 @@ namespace TopSpeed.Core.Multiplayer
 
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorMediaToggleShuffleShortcutActionId,
-                LocalizationService.Mark("Toggle communicator media shuffle"),
-                LocalizationService.Mark("Turns communicator media shuffle mode on or off."),
+                LocalizationService.Mark("Toggle media shuffle"),
+                LocalizationService.Mark("Turns media shuffle mode on or off."),
                 Key.S,
                 new ShortcutModifiers(shift: false, control: true, alt: false),
                 NoOpShortcutAction,
@@ -265,7 +265,7 @@ namespace TopSpeed.Core.Multiplayer
             _menu.RegisterShortcutAction(
                 MultiplayerCommunicatorToggleVoiceActivationShortcutActionId,
                 LocalizationService.Mark("Toggle voice activation"),
-                LocalizationService.Mark("Turns communicator voice activation mode on or off."),
+                LocalizationService.Mark("Turns voice activation mode on or off."),
                 Key.V,
                 new ShortcutModifiers(shift: true, control: true, alt: false),
                 ToggleCommunicatorVoiceActivation);

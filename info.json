@@ -1,5 +1,5 @@
 {
-  "version": "2026.5.9.3",
+  "version": "2026.5.9.1",
   "serverVersion": "2026.5.5.3",
   "changes": [
     "Fixed many bugs with the multiplayer server.",
@@ -7,7 +7,6 @@
     "Added an ability to copy the current buffer item to the clipboard by pressing ctrl+space, or by going to the history and pressing enter on any message there.",
     "Added the ability to reset menu shortcuts to their defaults.",
     "Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files).",
-    "Fixed multiplayer voice chat so remote players can finally hear each other in the lobby as well as inside rooms. Anyone tuned to the same communicator frequency now hears the transmission regardless of which room (or no room) they are in.",
     "Added a Communicator volume slider in audio options that controls both communicator activation cues and remote voice playback, independent of the radio volume.",
     "Added a Microphone input gain slider in audio options so quiet microphones can be boosted before being sent over voice chat. Defaults to 200 percent."
   ],

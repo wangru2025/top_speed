@@ -14,6 +14,21 @@ namespace TopSpeed.Network
             return _media.TrySendStreamed(PlayerId, PlayerNumber, mediaId, filePath);
         }
 
+        public bool SendCommunicatorMediaStreamed(uint mediaId, string filePath, ushort frequencyTenths)
+        {
+            return _media.TrySendCommunicatorStreamed(PlayerId, PlayerNumber, mediaId, filePath, frequencyTenths);
+        }
+
+        public bool SendCommunicatorMediaState(PacketPlayerCommunicatorMediaState state)
+        {
+            if (state == null)
+                return false;
+
+            state.PlayerId = PlayerId;
+            state.PlayerNumber = PlayerNumber;
+            return _sender.TrySend(ClientPacketSerializer.WritePlayerCommunicatorMediaState(state), PacketStream.Media);
+        }
+
         public bool SendLiveStart(uint streamId, LiveAudioProfile profile)
         {
             return _live.TrySendStart(PlayerId, PlayerNumber, streamId, profile);

@@ -128,11 +128,17 @@ namespace TopSpeed.Game
                 _settings,
                 multiplayerCoordinator,
                 input,
-                GetSession);
+                GetSession,
+                _fileDialogs,
+                text => _speech.Speak(text),
+                SaveSettings,
+                IsShortcutActionHeld,
+                () => _textInputPromptActive || _inputMapping.IsActive || _shortcutMapping.IsActive);
             _multiplayerRaceRuntime = new MultiplayerRaceRuntime(this);
             _multiplayerDispatch = new MultiplayerDispatch(this);
             _menuRegistry.RegisterAll();
             _multiplayerCoordinator.ConfigureMenuCloseHandlers();
+            RegisterGlobalShortcutActions();
             ApplySavedShortcutBindings();
             _settings.AudioVolumes ??= new AudioVolumeSettings();
             _settings.SyncAudioCategoriesFromMusicVolume();

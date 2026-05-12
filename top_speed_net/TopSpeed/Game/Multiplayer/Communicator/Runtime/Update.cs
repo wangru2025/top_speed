@@ -1,4 +1,4 @@
-using TopSpeed.Input;
+using TopSpeed.Core.Multiplayer;
 
 namespace TopSpeed.Game.Multiplayer.Communicator
 {
@@ -13,6 +13,9 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (session == null || !session.IsConnected)
             {
                 ClearRemoteStreams();
+                ClearRemoteMedia();
+                PauseLocalMedia();
+                ResetLocalMediaTransmissionState();
                 Disarm();
                 return;
             }
@@ -21,7 +24,9 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 ? _multiplayer.CommunicatorFrequencyTenths
                 : (ushort)0;
             UpdateRemoteAudibility(localAudibleFrequencyTenths);
+            UpdateRemoteMediaAudibility(localAudibleFrequencyTenths);
             CleanupTimedOutRemoteStreams();
+            HandleCommunicatorMediaUpdate(session, localAudibleFrequencyTenths);
 
             if (!IsArmed())
             {
@@ -70,10 +75,8 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         // Single source of truth for "should we be transmitting right now?".
         // VOX mode: continuous transmission while voice activation is enabled. No
         // voice-activity detector — the user explicitly opted into open-mic.
-        // PTT mode: transmit only while the V key is held with no modifier keys
-        // (Ctrl / Shift / Alt). The modifier exclusion is critical because
-        // Ctrl+Shift+V is the toggle shortcut for VOX itself; without it, pressing
-        // the toggle would briefly open PTT and play the activation cue.
+        // PTT mode: transmit only while the configured push-to-talk shortcut is held.
+        // The binding is fully remappable through menu shortcut mapping.
         private bool ShouldTransmit(out bool pushToTalk)
         {
             if (_multiplayer.CommunicatorVoiceActivationEnabled)
@@ -83,20 +86,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             }
 
             pushToTalk = true;
-            return IsUnmodifiedKeyDown(InputKey.V);
-        }
-
-        private bool IsUnmodifiedKeyDown(InputKey key)
-        {
-            if (!_input.IsDown(key))
-                return false;
-
-            return !_input.IsDown(InputKey.LeftControl)
-                && !_input.IsDown(InputKey.RightControl)
-                && !_input.IsDown(InputKey.LeftShift)
-                && !_input.IsDown(InputKey.RightShift)
-                && !_input.IsDown(InputKey.LeftAlt)
-                && !_input.IsDown(InputKey.RightAlt);
+            return _isShortcutHeld(CommunicatorShortcutIds.PushToTalk);
         }
 
         private uint NextStreamId()
@@ -106,6 +96,34 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 id = _nextStreamId++;
 
             return id;
+        }
+
+        private uint NextMediaId()
+        {
+            var id = _nextMediaId++;
+            if (id == 0)
+                id = _nextMediaId++;
+
+            return id;
+        }
+
+        private bool WasShortcutPressed(string actionId)
+        {
+            if (string.IsNullOrWhiteSpace(actionId))
+                return false;
+
+            var isDown = _isShortcutHeld(actionId);
+            if (!isDown)
+            {
+                _pressedShortcutActions.Remove(actionId);
+                return false;
+            }
+
+            if (_pressedShortcutActions.Contains(actionId))
+                return false;
+
+            _pressedShortcutActions.Add(actionId);
+            return true;
         }
     }
 }

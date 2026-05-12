@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using TopSpeed.Audio;
 using TopSpeed.Localization;
 
 namespace TopSpeed.Drive.Panels
@@ -22,15 +22,15 @@ namespace TopSpeed.Drive.Panels
                 if (!LoadPlaylistEntry(_playlistIndex, preservePlaybackState: false, announceLoaded: true))
                     return;
                 _radio.SetPlayback(true);
-                _announce(LocalizationService.Translate(LocalizationService.Mark("Radio playing.")));
+                _announce(LocalizationService.Translate(LocalizationService.Mark("playing")));
                 _playbackChanged?.Invoke(_radio.HasMedia, _radio.DesiredPlaying, _radio.MediaId);
                 return;
             }
 
             _radio.TogglePlayback();
             _announce(_radio.DesiredPlaying
-                ? LocalizationService.Translate(LocalizationService.Mark("Radio playing."))
-                : LocalizationService.Translate(LocalizationService.Mark("Radio paused.")));
+                ? LocalizationService.Translate(LocalizationService.Mark("playing"))
+                : LocalizationService.Translate(LocalizationService.Mark("paused")));
             _playbackChanged?.Invoke(_radio.HasMedia, _radio.DesiredPlaying, _radio.MediaId);
         }
 
@@ -73,7 +73,7 @@ namespace TopSpeed.Drive.Panels
                 : LocalizationService.Translate(LocalizationService.Mark("Loop mode off.")));
         }
 
-        private bool LoadPlaylistEntry(int index, bool preservePlaybackState, bool announceLoaded, bool announceNameOnly = false)
+        private bool LoadPlaylistEntry(int index, bool preservePlaybackState, bool announceLoaded)
         {
             if (index < 0 || index >= _playlist.Count)
                 return false;
@@ -93,11 +93,8 @@ namespace TopSpeed.Drive.Panels
 
             if (announceLoaded)
             {
-                var fileName = Path.GetFileName(mediaPath);
-                if (announceNameOnly)
-                    _announce(fileName);
-                else
-                    _announce(LocalizationService.Format(LocalizationService.Mark("Radio loaded {0}."), fileName));
+                var fileName = MediaPlaylist.GetDisplayName(mediaPath);
+                _announce(fileName);
             }
 
             _mediaLoaded?.Invoke(mediaId, mediaPath);

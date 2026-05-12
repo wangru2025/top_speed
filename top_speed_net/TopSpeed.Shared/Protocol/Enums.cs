@@ -125,7 +125,11 @@ namespace TopSpeed.Protocol
         ServerHeartbeat = 70,
         PlayerVoiceStart = 71,
         PlayerVoiceFrame = 72,
-        PlayerVoiceStop = 73
+        PlayerVoiceStop = 73,
+        PlayerCommunicatorMediaBegin = 74,
+        PlayerCommunicatorMediaChunk = 75,
+        PlayerCommunicatorMediaEnd = 76,
+        PlayerCommunicatorMediaState = 77
     }
 
     public enum ProtocolMessageCode : byte

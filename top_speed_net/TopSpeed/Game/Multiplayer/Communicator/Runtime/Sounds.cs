@@ -51,13 +51,53 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             return GetCachedSound(ref _micCloseSound, Path.Combine("network", "comm", "mic_close.wav"));
         }
 
+        private void PlayVolumeFeedback(bool increase)
+        {
+            var sound = increase ? GetVolumeUpSound() : GetVolumeDownSound();
+            if (sound == null)
+                return;
+
+            try
+            {
+                _audio.PlayOneShot(sound, AudioEngineOptions.UiBusName, configure: handle =>
+                {
+                    // Match race radio panel volume feedback path.
+                    handle.SetVolumePercent(_settings, AudioVolumeCategory.OnlineServerEvents, 100);
+                });
+            }
+            catch
+            {
+            }
+        }
+
+        private SoundAsset? GetVolumeUpSound()
+        {
+            return GetCachedSound(ref _volumeUpSound, Path.Combine("network", "volume_up.ogg"));
+        }
+
+        private SoundAsset? GetVolumeDownSound()
+        {
+            return GetCachedSound(ref _volumeDownSound, Path.Combine("network", "volume_down.ogg"));
+        }
+
         private void PlayRemotePttCue()
         {
             var cue = GetPttCue();
             if (cue == null)
                 return;
 
-            PlayLocalCue(cue);
+            try
+            {
+                // Match race announcement unkey playback path (copilot bus), while
+                // still scaling by communicator volume settings.
+                _audio.PlayOneShot(cue, AudioEngineOptions.CopilotBusName, configure: handle =>
+                {
+                    handle.SetVolumePercent(_settings, AudioVolumeCategory.Communicator, 100);
+                });
+            }
+            catch
+            {
+            }
         }
 
         private SoundAsset? GetPttCue()
@@ -105,6 +145,8 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         {
             DisposeSound(ref _micOpenSound);
             DisposeSound(ref _micCloseSound);
+            DisposeSound(ref _volumeUpSound);
+            DisposeSound(ref _volumeDownSound);
             for (var i = 0; i < _pttCues.Length; i++)
             {
                 var cue = _pttCues[i];

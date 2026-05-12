@@ -28,13 +28,15 @@ namespace TopSpeed.Vehicles
                     return false;
                 }
 
-                var playablePath = PreparePlayablePath(fullPath, mediaId, out tempPlaybackPath);
+                var playablePath = PreparePlayablePath(fullPath, mediaId, _options.TempFolderName, out tempPlaybackPath);
                 var wasPlaying = preservePlaybackState ? _desiredPlaying : false;
                 DisposeSource();
                 var asset = _audio.LoadStream(playablePath);
-                _source = _audio.CreateSpatialSource(asset, AudioEngineOptions.RadioBusName, allowHrtf: true);
+                _source = _options.Spatialize
+                    ? _audio.CreateSpatialSource(asset, _options.BusName, allowHrtf: _options.AllowHrtf)
+                    : _audio.CreateSource(asset, _options.BusName, useHrtf: _options.AllowHrtf);
                 _source.SetDopplerFactor(0f);
-                _source.SetVolumePercent(_volumePercent);
+                ApplySourceVolume();
                 _mediaPath = fullPath;
                 _mediaId = mediaId;
                 _desiredPlaying = wasPlaying;
@@ -92,7 +94,7 @@ namespace TopSpeed.Vehicles
 
             try
             {
-                var folder = Path.Combine(Path.GetTempPath(), "TopSpeed", "Radio");
+                var folder = Path.Combine(Path.GetTempPath(), "TopSpeed", _options.TempFolderName);
                 Directory.CreateDirectory(folder);
                 var normalizedExtension = NormalizeExtension(extension);
                 var path = Path.Combine(folder, $"radio_{mediaId}_{Guid.NewGuid():N}{normalizedExtension}");
@@ -159,11 +161,16 @@ namespace TopSpeed.Vehicles
 
         private static string PreparePlayablePath(string path, uint mediaId, out string? tempPlaybackPath)
         {
+            return PreparePlayablePath(path, mediaId, "Radio", out tempPlaybackPath);
+        }
+
+        private static string PreparePlayablePath(string path, uint mediaId, string tempFolderName, out string? tempPlaybackPath)
+        {
             tempPlaybackPath = null;
             if (!RequiresAsciiPlaybackPath(path))
                 return path;
 
-            var folder = Path.Combine(Path.GetTempPath(), "TopSpeed", "Radio");
+            var folder = Path.Combine(Path.GetTempPath(), "TopSpeed", string.IsNullOrWhiteSpace(tempFolderName) ? "Radio" : tempFolderName);
             Directory.CreateDirectory(folder);
             var extension = NormalizeExtension(Path.GetExtension(path));
             tempPlaybackPath = Path.Combine(folder, $"radio_local_{mediaId}_{Guid.NewGuid():N}{extension}");

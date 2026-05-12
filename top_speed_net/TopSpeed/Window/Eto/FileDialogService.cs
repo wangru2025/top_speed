@@ -24,7 +24,7 @@ namespace TopSpeed.Windowing.Eto
                 string? selectedPath = null;
                 using (var dialog = new OpenFileDialog())
                 {
-                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select radio media file"));
+                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select a media file"));
                     dialog.Filters.Add(new FileFilter("Audio files", ".wav", ".ogg", ".mp3", ".flac", ".aac", ".m4a"));
                     dialog.Filters.Add(new FileFilter("All files", ".*"));
 
@@ -46,7 +46,7 @@ namespace TopSpeed.Windowing.Eto
                 string? selectedFolder = null;
                 using (var dialog = new SelectFolderDialog())
                 {
-                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select radio media folder"));
+                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select a media folder"));
                     if (!string.IsNullOrWhiteSpace(initialFolder))
                     {
                         dialog.Directory = initialFolder!;

@@ -5,11 +5,17 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
-## 2026.5.9.3
+## 2026.5.11.1
 ### Game Changes
-- Added a Communicator volume slider in audio options that controls both communicator activation cues (mic open/close, PTT) and remote voice-chat playback. It is independent of the in-vehicle radio volume, so you can lower or mute voice chat without touching the radio (or the other way around).
-- Added a Microphone input gain slider in audio options so quiet microphones can be amplified before being sent over voice chat. The value is a percentage (100 is unity gain) and defaults to 200 percent because Windows mic capture frequently delivers low-level samples that arrived at remote players as near-silent before this setting existed. Adjustable between 0 and 400 percent; samples are still clipped to the float range to avoid distortion.
-- Remote voice playback is no longer routed through the Radio volume category and is now controlled by the new Communicator slider.
+- Added a full voice chat system to the game. Any player who is connected to a server can enable their communicator by pressing ctrl+shift+c to listen to other players, and either holding v or ctrl+shift+v to talk.
+- The communicator has a frequency, between 0.0 and 1000.0. The default public frequency is 1.0 which is by default all players are tuned to. You can read the current frequency by pressing f, and change it by pressing ctrl+f.
+- There are new settings in the audio to choose the default voice input device and Microphone gain.
+- Added a new category in the volume settings for communicator. This controls the loudness of communicator sounds as well as other players. This does not affect the radio.
+
+
+### Server Changes
+- Added voice chat support.
+- Added a new flag to control voice chat on the server level.
 
 
 ## 2026.5.9.2

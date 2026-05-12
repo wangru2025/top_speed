@@ -13,7 +13,6 @@ namespace TopSpeed.Drive.Panels
     internal sealed partial class RadioVehiclePanel : IVehicleRacePanel
     {
         private const int VolumeStepPercent = 10;
-        private static readonly string[] SupportedExtensions = { ".wav", ".ogg", ".mp3", ".flac", ".aac", ".m4a" };
 
         private readonly DriveInput _input;
         private readonly AudioManager _audio;

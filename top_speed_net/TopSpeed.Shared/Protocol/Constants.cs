@@ -23,7 +23,7 @@ namespace TopSpeed.Protocol
         public const int LiveChannelsMax = 2;
         public const int LiveTimeoutMs = 3000;
         public const int MaxVoiceFrameBytes = 900;
-        public const int VoiceSampleRate = 24000;
+        public const int VoiceSampleRate = 48000;
         public const int VoiceFrameMs = 20;
         public const int VoiceChannelsMin = 1;
         public const int VoiceChannelsMax = 1;

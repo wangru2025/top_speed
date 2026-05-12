@@ -76,6 +76,12 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 }
             }
 
+            public void RefreshVolume(DriveSettings settings)
+            {
+                lock (_lock)
+                    _source.SetVolumePercent(settings, AudioVolumeCategory.Communicator, 100);
+            }
+
             public void PushFrame(PacketPlayerVoiceFrame frame)
             {
                 if (frame.Data == null || frame.Data.Length == 0)

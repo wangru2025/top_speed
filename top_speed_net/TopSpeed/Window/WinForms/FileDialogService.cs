@@ -22,7 +22,7 @@ namespace TopSpeed.Windowing.WinForms
                     dialog.CheckFileExists = true;
                     dialog.CheckPathExists = true;
                     dialog.Multiselect = false;
-                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select radio media file"));
+                    dialog.Title = LocalizationService.Translate(LocalizationService.Mark("Select a media file"));
                     dialog.Filter = "Audio files|*.wav;*.ogg;*.mp3;*.flac;*.aac;*.m4a|All files|*.*";
 
                     var owner = GetDialogOwner();
@@ -47,7 +47,7 @@ namespace TopSpeed.Windowing.WinForms
                 string? selectedFolder = null;
                 using (var dialog = new FolderBrowserDialog())
                 {
-                    dialog.Description = LocalizationService.Translate(LocalizationService.Mark("Select radio media folder"));
+                    dialog.Description = LocalizationService.Translate(LocalizationService.Mark("Select a media folder"));
                     dialog.ShowNewFolderButton = false;
                     if (!string.IsNullOrWhiteSpace(initialFolder) && Directory.Exists(initialFolder))
                         dialog.SelectedPath = initialFolder;

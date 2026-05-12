@@ -27,4 +27,13 @@ namespace TopSpeed.Server.Network
         public bool IsComplete => TotalBytes > 0 && Offset >= (int)TotalBytes;
     }
 
+    internal sealed class CommunicatorMediaState
+    {
+        public uint MediaId { get; set; }
+        public ushort FrequencyTenths { get; set; }
+        public bool MediaLoaded { get; set; }
+        public bool MediaPlaying { get; set; }
+        public byte VolumePercent { get; set; } = 100;
+    }
+
 }

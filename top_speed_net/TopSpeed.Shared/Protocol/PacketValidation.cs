@@ -140,6 +140,12 @@ namespace TopSpeed.Protocol
                 && begin.TotalBytes <= ProtocolConstants.MaxMediaBytes;
         }
 
+        public static bool IsValidCommunicatorMediaBegin(PacketPlayerMediaBegin begin)
+        {
+            return IsValidMediaBegin(begin)
+                && IsValidVoiceFrequencyTenths(begin.FrequencyTenths);
+        }
+
         public static bool IsValidMediaChunk(PacketPlayerMediaChunk chunk)
         {
             return chunk != null
@@ -159,6 +165,16 @@ namespace TopSpeed.Protocol
                 && IsValidPlayerNumber(end.PlayerNumber)
                 && end.MediaId != 0
                 && end.TransferId != 0;
+        }
+
+        public static bool IsValidCommunicatorMediaState(PacketPlayerCommunicatorMediaState state)
+        {
+            return state != null
+                && IsValidPlayerId(state.PlayerId)
+                && IsValidPlayerNumber(state.PlayerNumber)
+                && IsValidVoiceFrequencyTenths(state.FrequencyTenths)
+                && (!state.MediaLoaded || state.MediaId != 0)
+                && state.VolumePercent <= 100;
         }
 
         public static bool IsValidLiveStart(PacketPlayerLiveStart start)

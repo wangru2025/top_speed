@@ -130,6 +130,25 @@ namespace TopSpeed.Shortcuts
             return true;
         }
 
+        public bool HasUnmodifiedBindingForKeyInContext(Key key, in ShortcutContext context)
+        {
+            if (key == Key.Unknown)
+                return false;
+
+            var candidateIds = BuildCandidateActionIds(in context);
+            for (var i = 0; i < candidateIds.Count; i++)
+            {
+                var actionId = candidateIds[i];
+                if (!_actions.TryGetValue(actionId, out var action))
+                    continue;
+
+                if (action.Key == key && action.Modifiers.IsEmpty)
+                    return true;
+            }
+
+            return false;
+        }
+
         public IReadOnlyList<ShortcutGroup> GetGroups()
         {
             var groups = new List<ShortcutGroup>

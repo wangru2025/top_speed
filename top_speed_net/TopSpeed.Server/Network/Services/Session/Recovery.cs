@@ -125,6 +125,7 @@ namespace TopSpeed.Server.Network
                 // freshly-connected or resuming player needs to be told about
                 // every currently-active voice stream regardless of room state.
                 _owner.SyncVoiceTo(player);
+                _owner.SyncCommunicatorMediaTo(player);
 
                 if (player.RoomId.HasValue && _owner._rooms.ContainsKey(player.RoomId.Value))
                     player.MarkActive();

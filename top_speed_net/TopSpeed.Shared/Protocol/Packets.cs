@@ -101,6 +101,7 @@ namespace TopSpeed.Protocol
         public uint TransferId;
         public uint TotalBytes;
         public string FileExtension = string.Empty;
+        public ushort FrequencyTenths;
     }
 
     public sealed class PacketPlayerMediaChunk
@@ -119,6 +120,17 @@ namespace TopSpeed.Protocol
         public byte PlayerNumber;
         public uint MediaId;
         public uint TransferId;
+    }
+
+    public sealed class PacketPlayerCommunicatorMediaState
+    {
+        public uint PlayerId;
+        public byte PlayerNumber;
+        public uint MediaId;
+        public ushort FrequencyTenths;
+        public bool MediaLoaded;
+        public bool MediaPlaying;
+        public byte VolumePercent;
     }
 
     public sealed class PacketPlayerBumped

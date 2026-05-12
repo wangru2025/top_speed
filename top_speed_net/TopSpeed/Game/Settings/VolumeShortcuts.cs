@@ -1,10 +1,28 @@
 using TopSpeed.Input;
 using TopSpeed.Localization;
+using TopSpeed.Shortcuts;
 
 namespace TopSpeed.Game
 {
     internal sealed partial class Game
     {
+        private const string GlobalVolumeNextCategoryShortcutActionId = "global_volume_next_category";
+        private const string GlobalVolumePreviousCategoryShortcutActionId = "global_volume_previous_category";
+        private const string GlobalVolumeDecreaseStepShortcutActionId = "global_volume_decrease_step";
+        private const string GlobalVolumeIncreaseStepShortcutActionId = "global_volume_increase_step";
+        private const string GlobalVolumeDecreaseLargeStepShortcutActionId = "global_volume_decrease_large_step";
+        private const string GlobalVolumeIncreaseLargeStepShortcutActionId = "global_volume_increase_large_step";
+
+        private static readonly string[] GlobalShortcutActionIds =
+        {
+            GlobalVolumeNextCategoryShortcutActionId,
+            GlobalVolumePreviousCategoryShortcutActionId,
+            GlobalVolumeDecreaseStepShortcutActionId,
+            GlobalVolumeIncreaseStepShortcutActionId,
+            GlobalVolumeDecreaseLargeStepShortcutActionId,
+            GlobalVolumeIncreaseLargeStepShortcutActionId
+        };
+
         private static readonly AudioVolumeCategory[] GlobalVolumeShortcutCategories =
         {
             AudioVolumeCategory.Master,
@@ -22,29 +40,105 @@ namespace TopSpeed.Game
 
         private int _globalVolumeShortcutCategoryIndex;
 
+        private void RegisterGlobalShortcutActions()
+        {
+            _menu.RegisterShortcutAction(
+                GlobalVolumeNextCategoryShortcutActionId,
+                LocalizationService.Mark("Next volume category"),
+                LocalizationService.Mark("Cycles to the next global volume category."),
+                InputKey.F6,
+                ShortcutModifiers.None,
+                () => CycleGlobalVolumeCategory(1),
+                CanHandleGlobalShortcutInput);
+
+            _menu.RegisterShortcutAction(
+                GlobalVolumePreviousCategoryShortcutActionId,
+                LocalizationService.Mark("Previous volume category"),
+                LocalizationService.Mark("Cycles to the previous global volume category."),
+                InputKey.F6,
+                new ShortcutModifiers(shift: true, control: false, alt: false),
+                () => CycleGlobalVolumeCategory(-1),
+                CanHandleGlobalShortcutInput);
+
+            _menu.RegisterShortcutAction(
+                GlobalVolumeDecreaseStepShortcutActionId,
+                LocalizationService.Mark("Decrease volume by 1"),
+                LocalizationService.Mark("Decreases the selected global volume category by one step."),
+                InputKey.F7,
+                ShortcutModifiers.None,
+                () => AdjustSelectedGlobalVolume(-1),
+                CanHandleGlobalShortcutInput);
+
+            _menu.RegisterShortcutAction(
+                GlobalVolumeIncreaseStepShortcutActionId,
+                LocalizationService.Mark("Increase volume by 1"),
+                LocalizationService.Mark("Increases the selected global volume category by one step."),
+                InputKey.F8,
+                ShortcutModifiers.None,
+                () => AdjustSelectedGlobalVolume(1),
+                CanHandleGlobalShortcutInput);
+
+            _menu.RegisterShortcutAction(
+                GlobalVolumeDecreaseLargeStepShortcutActionId,
+                LocalizationService.Mark("Decrease volume by 10"),
+                LocalizationService.Mark("Decreases the selected global volume category by ten steps."),
+                InputKey.F7,
+                new ShortcutModifiers(shift: true, control: false, alt: false),
+                () => AdjustSelectedGlobalVolume(-10),
+                CanHandleGlobalShortcutInput);
+
+            _menu.RegisterShortcutAction(
+                GlobalVolumeIncreaseLargeStepShortcutActionId,
+                LocalizationService.Mark("Increase volume by 10"),
+                LocalizationService.Mark("Increases the selected global volume category by ten steps."),
+                InputKey.F8,
+                new ShortcutModifiers(shift: true, control: false, alt: false),
+                () => AdjustSelectedGlobalVolume(10),
+                CanHandleGlobalShortcutInput);
+
+            _menu.SetGlobalShortcutActions(GlobalShortcutActionIds);
+        }
+
         private void HandleGlobalVolumeShortcuts()
         {
-            if (_textInputPromptActive || _inputMapping.IsActive || _shortcutMapping.IsActive)
+            if (!CanHandleGlobalShortcutInput())
                 return;
 
-            var controlDown = _input.IsDown(InputKey.LeftControl) || _input.IsDown(InputKey.RightControl);
-            var shiftDown = _input.IsDown(InputKey.LeftShift) || _input.IsDown(InputKey.RightShift);
-            var altDown = _input.IsDown(InputKey.LeftAlt) || _input.IsDown(InputKey.RightAlt);
-
-            if (_input.WasPressed(InputKey.F6) && !controlDown && !altDown)
-            {
-                CycleGlobalVolumeCategory(shiftDown ? -1 : 1);
+            if (_menu.TryTriggerShortcutAction(GlobalVolumeNextCategoryShortcutActionId, _input))
                 return;
-            }
-
-            if (_input.WasPressed(InputKey.F7) && !controlDown && !altDown)
-            {
-                AdjustSelectedGlobalVolume(shiftDown ? -10 : -1);
+            if (_menu.TryTriggerShortcutAction(GlobalVolumePreviousCategoryShortcutActionId, _input))
                 return;
-            }
+            if (_menu.TryTriggerShortcutAction(GlobalVolumeDecreaseStepShortcutActionId, _input))
+                return;
+            if (_menu.TryTriggerShortcutAction(GlobalVolumeIncreaseStepShortcutActionId, _input))
+                return;
+            if (_menu.TryTriggerShortcutAction(GlobalVolumeDecreaseLargeStepShortcutActionId, _input))
+                return;
+            _menu.TryTriggerShortcutAction(GlobalVolumeIncreaseLargeStepShortcutActionId, _input);
+        }
 
-            if (_input.WasPressed(InputKey.F8) && !controlDown && !altDown)
-                AdjustSelectedGlobalVolume(shiftDown ? 10 : 1);
+        private bool IsShortcutActionHeld(string actionId)
+        {
+            if (string.IsNullOrWhiteSpace(actionId))
+                return false;
+            if (!_menu.TryGetShortcutBinding(actionId, out var binding))
+                return false;
+
+            return IsShortcutHeld(binding);
+        }
+
+        private bool IsShortcutHeld(ShortcutBinding binding)
+        {
+            return binding.Key != InputKey.Unknown
+                && _input.IsDown(binding.Key)
+                && binding.Modifiers.MatchesInput(_input);
+        }
+
+        private bool CanHandleGlobalShortcutInput()
+        {
+            return !_textInputPromptActive
+                && !_inputMapping.IsActive
+                && !_shortcutMapping.IsActive;
         }
 
         private void CycleGlobalVolumeCategory(int delta)

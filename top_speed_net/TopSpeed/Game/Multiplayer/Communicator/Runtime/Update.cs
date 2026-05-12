@@ -1,4 +1,4 @@
-using TopSpeed.Input;
+using TopSpeed.Core.Multiplayer;
 
 namespace TopSpeed.Game.Multiplayer.Communicator
 {
@@ -75,10 +75,8 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         // Single source of truth for "should we be transmitting right now?".
         // VOX mode: continuous transmission while voice activation is enabled. No
         // voice-activity detector — the user explicitly opted into open-mic.
-        // PTT mode: transmit only while the V key is held with no modifier keys
-        // (Ctrl / Shift / Alt). The modifier exclusion is critical because
-        // Ctrl+Shift+V is the toggle shortcut for VOX itself; without it, pressing
-        // the toggle would briefly open PTT and play the activation cue.
+        // PTT mode: transmit only while the configured push-to-talk shortcut is held.
+        // The binding is fully remappable through menu shortcut mapping.
         private bool ShouldTransmit(out bool pushToTalk)
         {
             if (_multiplayer.CommunicatorVoiceActivationEnabled)
@@ -88,15 +86,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             }
 
             pushToTalk = true;
-            return IsUnmodifiedKeyDown(InputKey.V);
-        }
-
-        private bool IsUnmodifiedKeyDown(InputKey key)
-        {
-            if (!_input.IsDown(key))
-                return false;
-
-            return !IsModifierDown();
+            return _isShortcutHeld(CommunicatorShortcutIds.PushToTalk);
         }
 
         private uint NextStreamId()
@@ -117,34 +107,23 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             return id;
         }
 
-        private bool IsModifierDown()
+        private bool WasShortcutPressed(string actionId)
         {
-            return _input.IsDown(InputKey.LeftControl)
-                || _input.IsDown(InputKey.RightControl)
-                || _input.IsDown(InputKey.LeftShift)
-                || _input.IsDown(InputKey.RightShift)
-                || _input.IsDown(InputKey.LeftAlt)
-                || _input.IsDown(InputKey.RightAlt);
-        }
+            if (string.IsNullOrWhiteSpace(actionId))
+                return false;
 
-        private bool WasPressedWithModifiers(InputKey key, bool control, bool shift, bool alt)
-        {
-            var isDown = _input.IsDown(key);
+            var isDown = _isShortcutHeld(actionId);
             if (!isDown)
             {
-                _shortcutPressedKeys.Remove(key);
+                _pressedShortcutActions.Remove(actionId);
                 return false;
             }
 
-            if (_shortcutPressedKeys.Contains(key))
+            if (_pressedShortcutActions.Contains(actionId))
                 return false;
 
-            _shortcutPressedKeys.Add(key);
-
-            var controlDown = _input.IsDown(InputKey.LeftControl) || _input.IsDown(InputKey.RightControl);
-            var shiftDown = _input.IsDown(InputKey.LeftShift) || _input.IsDown(InputKey.RightShift);
-            var altDown = _input.IsDown(InputKey.LeftAlt) || _input.IsDown(InputKey.RightAlt);
-            return controlDown == control && shiftDown == shift && altDown == alt;
+            _pressedShortcutActions.Add(actionId);
+            return true;
         }
     }
 }

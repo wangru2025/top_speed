@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using TopSpeed.Audio;
+using TopSpeed.Core.Multiplayer;
 using TopSpeed.Input;
 using TopSpeed.Localization;
 using TopSpeed.Protocol;
@@ -25,29 +26,29 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (_isInputBlocked())
                 return;
 
-            if (WasPressedWithModifiers(InputKey.O, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaLoadFile))
                 OpenCommunicatorMediaFile();
 
-            if (WasPressedWithModifiers(InputKey.F, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaLoadFolder))
                 OpenCommunicatorMediaFolder();
 
-            if (WasPressedWithModifiers(InputKey.P, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaPlayPause))
                 ToggleMediaPlayback(session);
 
-            if (WasPressedWithModifiers(InputKey.L, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaToggleLoop))
                 ToggleMediaLoop();
 
-            if (WasPressedWithModifiers(InputKey.PageUp, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaPreviousTrack))
                 CycleMediaTrack(session, -1);
-            else if (WasPressedWithModifiers(InputKey.PageDown, control: true, shift: false, alt: false))
+            else if (WasShortcutPressed(CommunicatorShortcutIds.MediaNextTrack))
                 CycleMediaTrack(session, 1);
 
-            if (WasPressedWithModifiers(InputKey.Up, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaVolumeUp))
                 AdjustMediaVolume(session, MediaVolumeStepPercent);
-            else if (WasPressedWithModifiers(InputKey.Down, control: true, shift: false, alt: false))
+            else if (WasShortcutPressed(CommunicatorShortcutIds.MediaVolumeDown))
                 AdjustMediaVolume(session, -MediaVolumeStepPercent);
 
-            if (WasPressedWithModifiers(InputKey.S, control: true, shift: false, alt: false))
+            if (WasShortcutPressed(CommunicatorShortcutIds.MediaToggleShuffle))
                 ToggleMediaShuffle();
         }
 

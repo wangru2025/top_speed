@@ -27,6 +27,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private readonly IFileDialogs _fileDialogs;
         private readonly Action<string> _announce;
         private readonly Action _saveSettings;
+        private readonly Func<string, bool> _isShortcutHeld;
         private readonly Func<bool> _isInputBlocked;
         private readonly object _captureLock = new object();
         private readonly object _mediaSelectionLock = new object();
@@ -36,7 +37,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private readonly Dictionary<uint, PacketPlayerCommunicatorMediaState> _remoteMediaStates = new Dictionary<uint, PacketPlayerCommunicatorMediaState>();
         private readonly Dictionary<uint, VehicleRadioController> _remoteMediaControllers = new Dictionary<uint, VehicleRadioController>();
         private readonly List<string> _mediaPlaylist = new List<string>();
-        private readonly HashSet<InputKey> _shortcutPressedKeys = new HashSet<InputKey>();
+        private readonly HashSet<string> _pressedShortcutActions = new HashSet<string>(StringComparer.Ordinal);
         private readonly Random _random = new Random();
         private readonly VoiceEncoder _encoder = new VoiceEncoder();
         private readonly short[] _captureFrame = new short[ProtocolConstants.VoiceSampleRate * ProtocolConstants.VoiceFrameMs / 1000];
@@ -95,6 +96,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             IFileDialogs fileDialogs,
             Action<string> announce,
             Action saveSettings,
+            Func<string, bool>? isShortcutHeld = null,
             Func<bool>? isInputBlocked = null)
         {
             _audio = audio ?? throw new ArgumentNullException(nameof(audio));
@@ -105,6 +107,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             _fileDialogs = fileDialogs ?? throw new ArgumentNullException(nameof(fileDialogs));
             _announce = announce ?? throw new ArgumentNullException(nameof(announce));
             _saveSettings = saveSettings ?? throw new ArgumentNullException(nameof(saveSettings));
+            _isShortcutHeld = isShortcutHeld ?? (_ => false);
             _isInputBlocked = isInputBlocked ?? (() => false);
             _mediaShuffleMode = _settings.RadioShuffle;
             _mediaLoopMode = false;

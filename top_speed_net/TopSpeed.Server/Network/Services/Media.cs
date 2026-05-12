@@ -38,6 +38,34 @@ namespace TopSpeed.Server.Network
                     else
                         _owner.PacketFail(endPoint, Command.PlayerMediaEnd);
                 });
+                registry.Add("media", Command.PlayerCommunicatorMediaBegin, (player, payload, endPoint) =>
+                {
+                    if (PacketSerializer.TryReadPlayerCommunicatorMediaBegin(payload, out var begin))
+                        _owner.OnCommunicatorMediaBegin(player, begin);
+                    else
+                        _owner.PacketFail(endPoint, Command.PlayerCommunicatorMediaBegin);
+                });
+                registry.Add("media", Command.PlayerCommunicatorMediaChunk, (player, payload, endPoint) =>
+                {
+                    if (PacketSerializer.TryReadPlayerCommunicatorMediaChunk(payload, out var chunk))
+                        _owner.OnCommunicatorMediaChunk(player, chunk);
+                    else
+                        _owner.PacketFail(endPoint, Command.PlayerCommunicatorMediaChunk);
+                });
+                registry.Add("media", Command.PlayerCommunicatorMediaEnd, (player, payload, endPoint) =>
+                {
+                    if (PacketSerializer.TryReadPlayerCommunicatorMediaEnd(payload, out var end))
+                        _owner.OnCommunicatorMediaEnd(player, end);
+                    else
+                        _owner.PacketFail(endPoint, Command.PlayerCommunicatorMediaEnd);
+                });
+                registry.Add("media", Command.PlayerCommunicatorMediaState, (player, payload, endPoint) =>
+                {
+                    if (PacketSerializer.TryReadPlayerCommunicatorMediaState(payload, out var state))
+                        _owner.OnCommunicatorMediaState(player, state);
+                    else
+                        _owner.PacketFail(endPoint, Command.PlayerCommunicatorMediaState);
+                });
             }
         }
     }

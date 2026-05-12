@@ -12,6 +12,9 @@ namespace TopSpeed.Menu
         public static bool TryGetPressedLetter(IInputService input, out char letter)
         {
             letter = '\0';
+            if (input == null || HasModifierHeld(input))
+                return false;
+
             for (var c = 'A'; c <= 'Z'; c++)
             {
                 if (!input.WasPressed(ToLetterKey(c)))
@@ -22,6 +25,12 @@ namespace TopSpeed.Menu
             }
 
             return false;
+        }
+
+        public static bool TryGetLetterKey(char letter, out Key key)
+        {
+            key = ToLetterKey(char.ToUpperInvariant(letter));
+            return key != Key.Unknown;
         }
 
         public static bool ItemStartsWithLetter(MenuItem item, char letter)
@@ -111,6 +120,16 @@ namespace TopSpeed.Menu
                 'Z' => Key.Z,
                 _ => Key.Unknown
             };
+        }
+
+        internal static bool HasModifierHeld(IInputService input)
+        {
+            return input.IsDown(Key.LeftControl)
+                || input.IsDown(Key.RightControl)
+                || input.IsDown(Key.LeftShift)
+                || input.IsDown(Key.RightShift)
+                || input.IsDown(Key.LeftAlt)
+                || input.IsDown(Key.RightAlt);
         }
     }
 }

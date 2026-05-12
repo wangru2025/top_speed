@@ -75,13 +75,14 @@ namespace TopSpeed.Menu
 
         public static bool IsPressed(IInputService input, MenuInputAction action)
         {
+            var modifierHeld = MenuInputUtil.HasModifierHeld(input);
             for (var i = 0; i < DefaultBindings.Length; i++)
             {
                 var binding = DefaultBindings[i];
                 if (binding.Action != action)
                     continue;
 
-                if (binding.Key.HasValue && input.WasPressed(binding.Key.Value))
+                if (binding.Key.HasValue && !modifierHeld && input.WasPressed(binding.Key.Value))
                     return true;
                 if (binding.Gesture.HasValue && input.WasGesturePressed(binding.Gesture.Value))
                     return true;

@@ -24,8 +24,8 @@ namespace TopSpeed.Core.Multiplayer
                 LocalizationService.Mark("Are you sure you want to disconnect?"),
                 QuestionId.No,
                 HandleDisconnectQuestionResult,
-                new QuestionButton(QuestionId.Yes, LocalizationService.Mark("Yes, disconnect from the server")),
-                new QuestionButton(QuestionId.No, LocalizationService.Mark("No, stay connected"), flags: QuestionButtonFlags.Default)));
+                new QuestionButton(QuestionId.Yes, LocalizationService.Mark("Yes")),
+                new QuestionButton(QuestionId.No, LocalizationService.Mark("No"), flags: QuestionButtonFlags.Default)));
         }
 
         private void HandleDisconnectQuestionResult(int resultId)

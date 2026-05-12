@@ -6,6 +6,12 @@ namespace TopSpeed.Network.Session
 {
     internal sealed class Loop : IDisposable
     {
+        // 5 ms keeps the added round-trip latency under 5 ms (so the displayed
+        // ping stays within a few ms of the true value even on low-latency LAN)
+        // while still letting the polling thread sleep instead of waking 1000
+        // times a second.
+        private const int PollIntervalMs = 5;
+
         private readonly CancellationTokenSource _cts;
         private readonly Task _pollTask;
         private readonly Task _keepAliveTask;
@@ -46,11 +52,13 @@ namespace TopSpeed.Network.Session
 
         private void PollLoop(Action poll, CancellationToken token)
         {
+            using var wake = new ManualResetEventSlim(false);
+            using var registration = token.Register(() => wake.Set());
             while (!token.IsCancellationRequested)
             {
                 poll();
                 _drain();
-                Thread.Sleep(1);
+                wake.Wait(PollIntervalMs);
             }
 
             _drain();

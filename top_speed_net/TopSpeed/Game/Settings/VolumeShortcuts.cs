@@ -1,6 +1,7 @@
 using TopSpeed.Input;
 using TopSpeed.Localization;
 using TopSpeed.Shortcuts;
+using TopSpeed.Core.Multiplayer;
 
 namespace TopSpeed.Game
 {
@@ -121,6 +122,8 @@ namespace TopSpeed.Game
         {
             if (string.IsNullOrWhiteSpace(actionId))
                 return false;
+            if (string.Equals(actionId, CommunicatorShortcutIds.PushToTalk, System.StringComparison.Ordinal) && IsTopZonePttGestureHeld())
+                return true;
             if (!_menu.TryGetShortcutBinding(actionId, out var binding))
                 return false;
 

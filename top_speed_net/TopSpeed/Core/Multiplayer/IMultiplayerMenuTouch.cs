@@ -11,6 +11,9 @@ namespace TopSpeed.Core.Multiplayer
         void CheckPing();
         void OpenGlobalChatHotkey();
         void OpenRoomChatHotkey();
+        void ToggleCommunicator();
+        void ToggleCommunicatorVoiceActivation();
+        void BeginCommunicatorFrequencyInput();
+        void AnnounceCommunicatorFrequency();
     }
 }
-

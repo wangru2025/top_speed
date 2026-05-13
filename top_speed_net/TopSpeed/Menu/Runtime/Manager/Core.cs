@@ -13,7 +13,6 @@ namespace TopSpeed.Menu
         private const int DefaultFadeMs = 1000;
         private readonly Dictionary<string, MenuScreen> _screens;
         private readonly ShortcutCatalog _shortcutCatalog;
-        private readonly HashSet<Key> _reservedLetterNavigationKeys;
         private readonly Stack<MenuScreen> _stack;
         private readonly AudioManager _audio;
         private readonly SpeechService _speech;
@@ -31,7 +30,6 @@ namespace TopSpeed.Menu
             _usageHintsEnabled = usageHintsEnabled ?? (() => false);
             _screens = new Dictionary<string, MenuScreen>(StringComparer.Ordinal);
             _shortcutCatalog = new ShortcutCatalog();
-            _reservedLetterNavigationKeys = new HashSet<Key>();
             _stack = new Stack<MenuScreen>();
         }
 
@@ -158,17 +156,6 @@ namespace TopSpeed.Menu
 
             action.Trigger();
             return true;
-        }
-
-        public void SetLetterNavigationKeyReserved(Key key, bool reserved)
-        {
-            if (key == Key.Unknown)
-                return;
-
-            if (reserved)
-                _reservedLetterNavigationKeys.Add(key);
-            else
-                _reservedLetterNavigationKeys.Remove(key);
         }
 
         public void SetClose(string id, Func<CloseEvent, bool>? onClose)

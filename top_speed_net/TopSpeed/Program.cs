@@ -32,11 +32,11 @@ namespace TopSpeed
             try
             {
 #if WINDOWS
+                using var timerResolution = new WindowsTimerResolution(1);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 #endif
 
-                WindowsTimerResolution.EnablePermanentHighResolution();
                 NativeLibraryBootstrap.Initialize();
 
 #if WINDOWS
@@ -65,10 +65,6 @@ namespace TopSpeed
             {
                 HandleException(ex);
             }
-            finally
-            {
-                WindowsTimerResolution.DisablePermanentHighResolution();
-            }
         }
 
         private static void RegisterGlobalExceptionHandlers()
@@ -86,6 +82,47 @@ namespace TopSpeed
                 args.SetObserved();
             };
         }
+
+#if WINDOWS
+        private sealed class WindowsTimerResolution : IDisposable
+        {
+            private readonly uint _milliseconds;
+            private readonly bool _active;
+
+            public WindowsTimerResolution(uint milliseconds)
+            {
+                _milliseconds = milliseconds;
+                try
+                {
+                    _active = timeBeginPeriod(_milliseconds) == 0;
+                }
+                catch
+                {
+                    _active = false;
+                }
+            }
+
+            public void Dispose()
+            {
+                if (!_active)
+                    return;
+
+                try
+                {
+                    timeEndPeriod(_milliseconds);
+                }
+                catch
+                {
+                }
+            }
+
+            [DllImport("winmm.dll", EntryPoint = "timeBeginPeriod")]
+            private static extern uint timeBeginPeriod(uint uPeriod);
+
+            [DllImport("winmm.dll", EntryPoint = "timeEndPeriod")]
+            private static extern uint timeEndPeriod(uint uPeriod);
+        }
+#endif
 
         private static void HandleException(Exception exception)
         {

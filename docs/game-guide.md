@@ -30,27 +30,29 @@
     - [11.7 Server Settings (Client-Side Multiplayer Defaults)](#117-server-settings-client-side-multiplayer-defaults)
     - [11.8 Defaults Summary](#118-defaults-summary)
 - [12. Multiplayer Client Guide](#12-multiplayer-client-guide)
-- [13. Dedicated Server Guide](#13-dedicated-server-guide)
-- [14. Panels and Vehicle Radio](#14-panels-and-vehicle-radio)
-- [15. Custom Tracks and Custom Vehicles](#15-custom-tracks-and-custom-vehicles)
-- [16. Updater Behavior on Desktop and Android](#16-updater-behavior-on-desktop-and-android)
-- [17. Detailed Driving Tutorials](#17-detailed-driving-tutorials)
-- [18. Multiplayer Setup Walkthroughs](#18-multiplayer-setup-walkthroughs)
-- [19. Settings Tuning Profiles](#19-settings-tuning-profiles)
-- [20. Additional Notes for Testers and Release Preparation](#20-additional-notes-for-testers-and-release-preparation)
-- [21. Troubleshooting](#21-troubleshooting)
-- [22. Frequently Asked Questions](#22-frequently-asked-questions)
-- [23. Control Reference](#23-control-reference)
-    - [23.1 Menu Navigation](#231-menu-navigation)
-    - [23.2 Main Menu and Startup](#232-main-menu-and-startup)
-    - [23.3 Driving Core Intents](#233-driving-core-intents)
-    - [23.4 Driving Information Requests](#234-driving-information-requests)
-    - [23.5 Direct Player Number and Position Keys During Race](#235-direct-player-number-and-position-keys-during-race)
-    - [23.6 Panel and Radio Controls](#236-panel-and-radio-controls)
-    - [23.7 Multiplayer Menu Touch Layout (Android)](#237-multiplayer-menu-touch-layout-android)
-    - [23.8 Multiplayer Race Overlay Controls](#238-multiplayer-race-overlay-controls)
-- [24. Credits and Acknowledgements](#24-credits-and-acknowledgements)
-- [25. Contact me](#25-contact-me)
+- [13. Communicator (Multiplayer Voice and Streaming)](#13-communicator-multiplayer-voice-and-streaming)
+- [14. Dedicated Server Guide](#14-dedicated-server-guide)
+- [15. Panels and Vehicle Radio](#15-panels-and-vehicle-radio)
+- [16. Custom Tracks and Custom Vehicles](#16-custom-tracks-and-custom-vehicles)
+- [17. Updater Behavior on Desktop and Android](#17-updater-behavior-on-desktop-and-android)
+- [18. Detailed Driving Tutorials](#18-detailed-driving-tutorials)
+- [19. Multiplayer Setup Walkthroughs](#19-multiplayer-setup-walkthroughs)
+- [20. Settings Tuning Profiles](#20-settings-tuning-profiles)
+- [21. Additional Notes for Testers and Release Preparation](#21-additional-notes-for-testers-and-release-preparation)
+- [22. Troubleshooting](#22-troubleshooting)
+- [23. Frequently Asked Questions](#23-frequently-asked-questions)
+- [24. Control Reference](#24-control-reference)
+    - [24.1 Menu Navigation](#241-menu-navigation)
+    - [24.2 Main Menu and Startup](#242-main-menu-and-startup)
+    - [24.3 Driving Core Intents](#243-driving-core-intents)
+    - [24.4 Driving Information Requests](#244-driving-information-requests)
+    - [24.5 Direct Player Number and Position Keys During Race](#245-direct-player-number-and-position-keys-during-race)
+    - [24.6 Panel and Radio Controls](#246-panel-and-radio-controls)
+    - [24.7 Multiplayer Menu Touch Layout (Android)](#247-multiplayer-menu-touch-layout-android)
+    - [24.8 Multiplayer Race Overlay Controls](#248-multiplayer-race-overlay-controls)
+    - [24.9 Communicator Controls](#249-communicator-controls)
+- [25. Credits and Acknowledgements](#25-credits-and-acknowledgements)
+- [26. Contact me](#26-contact-me)
 
 ## 1. Welcome
 Welcome. I am Diamond Star, the one behind this project, which took months of development and refinement, either by me or by AI, to revive this game and hopefully make it better.
@@ -65,7 +67,7 @@ I would like to thank anyone who contributed to the project. Although I get smal
 
 This guide is written for players and server hosts. It explains installation, first launch, settings, race modes, multiplayer, touch controls, and common troubleshooting.
 
-If you are completely new, read sections 7 through 11 first, then use section 23 as your control reference while playing.
+If you are completely new, read sections 7 through 11 first, then use section 24 as your control reference while playing.
 
 ## 2. About This Release
 Top Speed started as an older open-source C++ project from the 2008-2013 period. The current game is a full rewrite in C#.
@@ -82,7 +84,7 @@ Main third-party license groups used here include SoundFlow notices, SteamAudio.
 ## 4. Supported Platforms
 Top Speed is available on various desktop operating systems and mobile. Mobile support is currently limited to Android, and hopefully iOS will come in the future.
 
-Desktop builds are available for Windows, Linux, and macOS. Android support is focused on ARM64 devices and requires Android 11 or newer.
+Desktop builds are available for Windows, Linux, and macOS. Android support targets ARM64 devices first, with a separate ARM32 (ARMv7) build for older 32-bit phones, and requires Android 11 or newer either way.
 
 Please do not open new issues to request for supporting older Android versions as this is not possible due to the requirements of some libraries such as Prism, which requires the minimum API to be 30 (Android 11).
 
@@ -112,7 +114,7 @@ On Mac OS, the game works on Mac OS 12.1 or later.
 On Linux, for the speech to work correctly you need to have Orca version 49 or later.
 
 #### 4.2.2. Mobile Requirements
-On Android, the game works on Android 11 or later and works only on 64bit architectures for now. It is recommended to have a relatively good processor for the game to work properly especially for HRTF audio without stuttering.
+On Android, the game works on Android 11 or later. Both 64-bit and 32-bit (ARMv7) builds are published. A reasonably fast processor is recommended so HRTF audio plays without stuttering, especially on entry-level 32-bit devices.
 
 ## 5. Install, Update, and Remove
 ### Install on Desktop
@@ -318,11 +320,15 @@ Recalibrate screen reader rate runs calibration again so delayed hints match you
 ### 11.3 Audio
 Audio settings affect positional clarity and overall sound feel.
 
-Enable HRTF audio improves 3D positional cues for many players. Keep it enabled unless your device or headphones make it sound worse. If you face audio crackling, especially on Android, please disable that. While it is recommended to enable HRTF because it gives much better ThreeD spatial awareness, some older Android devices are not capable of processing HRTF. Please restart the game when changing this option to take effect.
+Enable HRTF audio improves 3D positional cues for many players. Keep it enabled unless your device or headphones make it sound worse. HRTF gives a much stronger sense of where each sound is coming from, but some older Android devices cannot process it without crackling; if that happens on your device, turn it off. Restart the game after changing this option for it to take effect.
 
 Stereo widening for own car: This is an accessibility option for people who struggle to differentiate between left and right. It makes your own car easier to localize for some listeners.
 
 Automatic audio device format lets the game use the device's native format automatically. Restart after changing it to take effect.
+
+Voice input device chooses which microphone the communicator uses to capture your voice in multiplayer. The default is your system's default capture device. Changing it while the communicator is off applies the next time you turn the communicator on; changing it while the communicator is on rearms the device automatically. This setting only matters once you are connected to a server and using the communicator; offline play does not use the microphone.
+
+Microphone input gain is a percent slider between 0 and 400, with a default of 200. It amplifies the captured microphone signal before it is encoded and sent to other players. 100 is unity gain (no amplification), 200 is a 2x boost, and 400 is a 4x boost. Raise this if remote players say you sound too quiet; lower it if your voice clips or sounds distorted. The operating system microphone level still applies first, so set that to a sensible recording level before tuning the in-game gain.
 
 ### 11.4 Volume Settings
 Volume settings let you prioritize what you hear during racing.
@@ -346,6 +352,8 @@ Ambients and sound sources controls ambient loops and track sound sources.
 Music volume controls music layers.
 
 Online server event sounds controls multiplayer session event sounds.
+
+Communicator volume controls the loudness of communicator activation cues, the local open and close cues you hear when you start or stop transmitting, and the voice playback of other players speaking through the communicator. It is independent of Radio volume; lowering Radio does not lower the communicator, and vice versa. Streamed media played through the communicator also obeys this slider.
 
 All sliders in this section use the same slider gestures and keys described earlier in section 8.
 
@@ -451,33 +459,43 @@ The following actions are available for the host only:
 "Add"/"Remove a bot": Adds or removes a bot, if the room type allows that. They are hidden if the room type is either "race without bots" or "one-on-one without bots".
 
 ### Chat, history, and ping
-The new game adds text chat features, globally and per-room chat, as well as the ability to check the current ping.
+The remake adds text chat (global and per-room), voice chat through the communicator covered in section 13, and a quick way to check your current ping. Each of these has its own controls, but they all share the same multiplayer history buffers — every chat message, server announcement, and room event you receive is stored in a history category you can scroll back through later.
 
-When you are in the multiplayer lobby, on desktop the menu has 2 screens. The first screen is where all normal options are located.
+The default shortcut to open the global chat on keyboard is the slash (`/`) key. Room chat is opened with the backslash (`\`) key while you are inside a room. To check the ping, press F1.
 
-The second screen is where all buffers such as chat and server messages are located. You switch between screens with the Tab key.
+#### Two ways to navigate history buffers
+History buffers (global chat, room chat, server messages, room events) can be reviewed in two different ways on desktop. Pick whichever fits the moment — both end up in the same place.
 
-The default shortcut to open the global chat feature on keyboard is the slash (/) key.
+The first way is the dedicated history screen. The multiplayer lobby and the in-room controls each have two screens on desktop: the first screen holds normal menu options, and the second screen is the history buffer. Press Tab to move to the next screen and Shift+Tab to move back. On the history screen, every entry appears as a normal menu item, so you can browse messages with the usual Up Arrow / Down Arrow keys (or the menu navigation gestures on mobile in the top zone). Activating an entry copies it to the clipboard.
 
-Room chat is accessed using the backslash (\) key on the keyboard.
+The second way is the inline history shortcuts. These work anywhere in the multiplayer menus (and during a multiplayer race, for the in-race overlay), without having to switch screens. They are the fastest way to glance back at a message while you are doing something else:
 
-To check the ping, press F1 on the keyboard.
+- `,` (comma) — previous history item in the current category.
+- `.` (period) — next history item in the current category.
+- `Shift+,` — first history item in the current category.
+- `Shift+.` — last history item in the current category.
+- `[` — previous history category (e.g. global chat → server messages).
+- `]` — next history category.
+- `Ctrl+Space` — copy the currently focused history item to the clipboard.
 
-On mobile multiplayer menus, the top zone handles chat history and chat shortcuts, while the bottom zone keeps normal menu navigation.
+When you change category with `[` or `]`, the game plays a short buffer-switch cue and announces the new category. Item navigation announces the message text. Both styles share the same focused item: if you scroll on the history screen and then leave it, `,` / `.` continue from where you stopped.
 
-This layout is commonly used on mobile to split the screen into different areas. The same layout is used for driving controls.
+#### Mobile layout
+On mobile, the multiplayer menus are split into two zones. The bottom zone is for normal menu navigation (move, activate, back out). The top zone is reserved for history buffers, chat shortcuts, the communicator, and ping — the same conceptual split is used on desktop with Tab, but on mobile the two zones are on the screen at the same time.
 
-In the multiplayer lobby on mobile, the top zone controls buffers and chat features. The following is a list of gestures related to this section.
+All gestures below assume you hold the phone in landscape mode, and they only fire when the gesture starts inside the top zone:
 
-In the top zone, you switch between different buffers by swiping up or down with one finger.
+- Swipe up or down with one finger: switch to the previous or next history category.
+- Swipe left or right with one finger: move to the previous or next history item in the current category.
+- Two-finger swipe right: open the global chat input.
+- Two-finger swipe left: open the room chat input (only when you are inside a room).
+- Double tap with one finger: check the current ping.
+- Two-finger swipe down: toggle the communicator on or off (see section 13).
+- Two-finger swipe up: open frequency input for the communicator.
+- Three-finger tap: speak the current communicator frequency.
+- Two-finger double tap: toggle voice activation on the communicator.
 
-To navigate between items in the selected buffer, swipe left or right with one finger in the top zone.
-
-To open the global chat, swipe right with 2 fingers.
-
-To open the room chat if you are in a room, swipe left with 2 fingers.
-
-All gestures here assume that you hold the phone in landscape mode, and all gestures mentioned in this section explicitly work only in the top zone of the screen.
+This is the same multiplayer top-zone layout the driving controls use during a multiplayer race, so the buffer and communicator gestures you learn in the lobby keep working once a race starts.
 
 ### List of common community servers
 These servers are fully maintained by community members and I myself have no control on any of these servers in any way. They exist for everyone to quickly connect and play with their friends without needing to host a server.
@@ -512,7 +530,79 @@ Address: iks2101.keenetic.pro
 
 Port: 25255
 
-## 13. Dedicated Server Guide
+## 13. Communicator (Multiplayer Voice and Streaming)
+The communicator is a virtual radio device built into the multiplayer client. Once you connect to a server, you can turn it on, tune it to a frequency, and either talk to other players with your microphone or stream audio files through it. Anyone tuned to the same frequency on the same server hears you, regardless of which room they are in or whether they are in a room at all. This is what makes the communicator useful before, during, and after a race: lobby chatter, room coordination, and a private channel for friends all use the same device.
+
+The in-vehicle radio described later in section 15 is a separate feature and only plays on your own car. The communicator is for talking to other players and for streaming media that other players can hear.
+
+### How the communicator works
+The communicator has one frequency, between 0.0 MHz and 1000.0 MHz, adjustable in 0.1 steps. The public default that every new player is tuned to is 1.0 MHz. Setting a frequency to 0.0 is treated as "no channel" and keeps the communicator silent until you tune to a real value.
+
+Transmissions are relayed by the server to every connected player, and each receiving client decides what to play based on its own frequency. A listener tuned to a different number simply hears nothing. There is no per-room scope; the communicator works in the lobby, inside a room, and across rooms.
+
+The communicator has two transmit modes that are mutually exclusive:
+
+- Push-to-talk (PTT) is the default. You hold a key or gesture while you speak; the moment you release it, transmission stops.
+- Voice activation (VOX) is a toggle. While it is on, the communicator transmits continuously with whatever the microphone is capturing. VOX does not use a voice detector to gate transmission; it stays open until you turn it off.
+
+Audio is encoded as 48 kHz mono Opus in 20 ms frames. The encoder runs the moment the communicator is armed (turned on, tuned to a non-zero frequency, and connected), so the operating system microphone is opened as soon as the communicator becomes ready and is released the moment the communicator turns off. The communicator also turns off automatically when you disconnect from the server, when you press Ctrl+Shift+C to turn it off (which also turns voice activation off), or when you set the frequency to 0.0; in each of these cases the microphone is released so nothing is captured.
+
+You hear a short local cue when transmission opens and another when it closes; remote listeners hear a separate release cue after you let go of PTT so they know you finished talking. Turning the communicator on or off also plays its own short cue. All communicator cues and remote voice playback share the same Communicator volume slider in the audio settings.
+
+### Turning it on and using it
+All communicator gestures on mobile live in the multiplayer menu top zone, the same zone used for chat history and ping. They work whenever the multiplayer menu is on screen, including the lobby and inside a room.
+
+1. Connect to a server.
+2. Turn the communicator on or off with Ctrl+Shift+C on desktop, or a two-finger swipe down in the multiplayer top zone on mobile.
+3. The default frequency is 1.0. To change it, press Ctrl+Shift+F on desktop, or two-finger swipe up in the multiplayer top zone on mobile, then type a value between 0.0 and 1000.0.
+4. To hear the current frequency announced, press F on desktop, or three-finger tap in the multiplayer top zone on mobile.
+5. To talk, hold V on desktop. On mobile, single-finger tap in the multiplayer top zone, then within about 0.4 seconds press and hold a single finger in the same zone; the communicator transmits while the second touch is held and stops the moment you release.
+6. To switch to voice activation instead, press Ctrl+Shift+V on desktop, or two-finger double tap in the multiplayer top zone on mobile. The communicator now transmits continuously until you toggle it off again.
+
+Push-to-talk explicitly ignores key presses while Ctrl, Shift, or Alt are held, so toggling VOX with Ctrl+Shift+V never bleeds into the PTT path. The frequency announcement (F) and PTT (V) are deliberately separate keys: a tap on F speaks the current frequency without transmitting anything; pressing and holding V transmits without speaking the frequency. The mobile PTT gesture is intentionally a tap followed by a press-and-hold so it cannot trigger from a single accidental touch, and the ping gesture is briefly suppressed while it is active so the press-and-hold is not interpreted as the start of a triple-tap ping check.
+
+Changing frequency does not break an active transmission. If you change frequency while talking, the communicator restarts the transmission on the new value, so listeners on the old frequency hear it end and listeners on the new frequency hear it begin.
+
+### Volume
+The communicator has its own slider in the volume settings, separate from the in-vehicle radio. It controls how loud the communicator activation cues are and how loud other players sound when they speak through the communicator. The in-vehicle radio volume is unaffected.
+
+Lower this slider if voice traffic is loud compared to your race audio. Raise it if remote players sound too quiet even after they adjust their own microphone gain.
+
+### Microphone settings
+Two audio settings affect how your microphone is captured and sent to other players:
+
+- Voice input device chooses which microphone the communicator listens to. The default is your system's default capture device. Switching device while the communicator is off takes effect the next time you turn it on; switching while it is on rearms the device automatically.
+- Microphone input gain is a 0–400 percent slider with a default of 200. 100 is unity gain (no amplification); 200 is a 2x boost; 400 is a 4x boost. The gain is applied to the captured samples before they are encoded. Raise it if other players report you sound too quiet at default Windows microphone level; lower it if your voice clips or sounds distorted.
+
+The Windows (or Android, or Linux, or macOS) microphone level slider in the operating system still applies first, then the in-game gain runs on top of it. For best quality, set the system microphone close to its normal recording level and then adjust the in-game gain to taste.
+
+### Streaming media through the communicator
+The communicator can also stream audio files into the same channel. This is useful for sharing music with people on your frequency, or for verifying that the communicator path works without needing two players in the same room.
+
+While the communicator is on:
+
+- Ctrl+O: load a single audio file.
+- Ctrl+F: load a folder (builds a playlist from the supported files inside that folder).
+- Ctrl+P: play or pause.
+- Ctrl+Page Up: previous track.
+- Ctrl+Page Down: next track.
+- Ctrl+Up Arrow: media volume up.
+- Ctrl+Down Arrow: media volume down.
+- Ctrl+L: toggle loop.
+- Ctrl+S: toggle shuffle.
+
+Streamed media goes out on your current communicator frequency. Everyone tuned in hears it; everyone else does not. Folder loading is not recursive, like the in-vehicle radio: only files directly inside the chosen folder are added to the playlist.
+
+Streaming media and talking work side by side. Holding push-to-talk (or transmitting through VOX) while media is playing sends your voice on the same frequency in parallel with the media, and remote listeners on that frequency hear both at once.
+
+### Troubleshooting voice chat
+- Remote players hear nothing while I can hear my own open cue: check that both sides have the communicator on, that the frequency is the same on both ends (try pressing F on both clients), and that both clients are connected to the same server. The most common cause is a frequency mismatch.
+- I sound too quiet to other players: raise Microphone input gain in Audio settings. If you are already at 200% or higher and it is still quiet, raise the operating system microphone level first, then retune the in-game gain.
+- I sound distorted or clipping: lower Microphone input gain. Distortion is usually upstream gain being too high, not the encoder.
+- Voice activation (VOX) is on but nothing transmits: confirm the communicator itself is on (Ctrl+Shift+C), the frequency is non-zero, and the right voice input device is selected. VOX has no VAD gate, so if the device is the wrong one, you may have toggled VOX on for a silent microphone.
+- Pressing V plays no local open cue: the communicator is off; turn it on first with Ctrl+Shift+C.
+
+## 14. Dedicated Server Guide
 Dedicated server is the best choice when you want a stable multiplayer session that does not depend on one player keeping the game client open. The server is a separate program. Players connect to it, create rooms, join rooms, chat, and race through it, but the server itself does not need to drive a vehicle or play the game.
 
 If you are only testing with one or two people, you can still host casually. For public rooms, planned events, or a server that should stay available for a long time, use the dedicated server. This keeps hosting separate from playing, makes restarts easier to schedule, and avoids the problem where a whole session depends on the host player's client staying open.
@@ -533,14 +623,36 @@ The server supports command-line overrides for a few common settings. Use `--por
 
 When the server is running in an interactive console, it also has a command interface. Type `help` to list available commands. Current commands include `options`, `players`, `version`, `update`, and `shutdown`. `players` is useful when you want to confirm who is connected. `version` is useful when checking whether a client and server are from compatible builds. `shutdown` tells connected players the server is closing and then stops the process.
 
-Use the `options` command for server-side settings that can be edited from the console. It lets you review or change language, message of the day, server port, discovery port, maximum players, server architecture used for update selection, and startup update checks. Some changes are useful immediately, while port-related changes are safest after a restart because connected clients and router rules already depend on the old values.
+Use the `options` command for server-side settings that can be edited from the console. It lets you review or change language, message of the day, server port, discovery port, maximum players, server architecture used for update selection, startup update checks, and the per-feature flags described below. Some changes are useful immediately, while port-related changes are safest after a restart because connected clients and router rules already depend on the old values.
+
+### Server feature flags
+The server has a small set of feature flags that turn major features on or off for everyone connected to it. They are all on by default. Each flag can be toggled from the `options` command in the server console, or set directly in the server settings file.
+
+- `text_chat` enables global and per-room text chat. With it off, the chat shortcuts on clients have no effect and chat history stays empty for everything that happens after the flag is turned off.
+- `voice_chat` enables the voice relay used by the communicator. With it off, communicator transmissions are silently dropped on the server side; clients can still toggle their own communicator on, but no audio reaches other players. Streamed media through the communicator also goes through this flag.
+- `custom_tracks` enables custom track use across the whole server. With it off, room hosts cannot enable the "Custom tracks" game rule, and the server's custom track catalog is not offered to clients. Built-in tracks are unaffected. See section 16 for how custom tracks move between client and server when this is on.
+
+Changes to feature flags apply to traffic that arrives after the flag is changed. Players already in the middle of a transmission, chat send, or upload usually finish their current action; new ones honor the new flag.
+
+### Hosting custom tracks from the server
+The dedicated server can hold a library of custom tracks that every client sees when the room host opens the custom track catalog. To do this, create a folder named `Tracks` next to the server executable and drop one complete track package into it per track — that is, the whole folder you would normally put under your game's `Tracks` directory, with the track's `.tsm` file and every sound or other asset it references kept in the same place relative to the `.tsm`. A loose `.tsm` on its own is not enough as soon as the track references any external assets; the server resolves sound paths relative to the `.tsm`, so the assets have to travel with it.
+
+Subfolders inside `Tracks` are scanned recursively, so a layout like `Tracks/<track-name>/track.tsm` (plus any sound subfolders the package needs) works, and you can group packages into category folders if you want. The server reads each package's `.tsm` at scan time and serves it to clients as one self-contained download.
+
+The server scans `Tracks` at startup and again whenever a client requests the custom track catalog. New packages appear on the next catalog request; you do not have to restart the server for them to show up, but a restart is the cleanest way to refresh after a bulk update. Packages with broken or unsupported `.tsm` contents — including a `.tsm` that references sound files that are not next to it — are skipped with a warning in the server console.
+
+In addition to the static `Tracks` folder, the server accepts uploads from room hosts who use "Upload a local track" in their room. Uploaded packages are stored server-side alongside the static library and offered through the same catalog. Section 16 covers the client-side flow in detail.
+
+The `custom_tracks` flag must be on for any of this to be visible to clients; with it off, the catalog stays empty even if the `Tracks` folder is full.
 
 Do not make disruptive changes while players are preparing or racing unless you have to. If you need to update the server or change network settings, announce it first, wait for the current race to finish, shut the server down cleanly, apply the change, and then start it again.
 
 After an update or configuration change, test it before inviting players back. Connect with a client, create a room, join it, start a short race, finish or leave, then disconnect and reconnect once. That simple check catches the most common mistakes: wrong port, blocked firewall, missing content folders, incompatible version, or a server that starts but cannot actually host a room.
 
-## 14. Panels and Vehicle Radio
+## 15. Panels and Vehicle Radio
 During a race, Top Speed has more than one input panel. The normal driving panel is the control panel. That is where steering, throttle, brake, clutch, shifting, horn, engine start, and race information keys are handled. The radio panel is a separate panel for playing music while driving.
+
+The radio in this section is your own car's in-vehicle radio — only you hear it (other players hear it as a faint stream coming from your car if they are nearby). If you want to share audio with other players over a frequency, that is a separate feature called the communicator; see section 13.
 
 When you switch panels, the game announces the new panel name. This matters because the same physical key can mean different things depending on the active panel. For example, while you are in the control panel, arrow keys are part of driving. While you are in the radio panel, the radio uses its own commands for volume and track movement.
 
@@ -576,10 +688,10 @@ If a radio command appears to do nothing, first make sure you are actually in th
 
 Please note that folder loading is not recursive. That means it only scans for top-level files inside a particular folder. It does not scan all subfolders inside it, even if there are supported media files.
 
-## 15. Custom Tracks and Custom Vehicles
+## 16. Custom Tracks and Custom Vehicles
 Top Speed supports custom tracks and custom vehicles, but the game only loads files it understands and only from the expected folders.
 
-Custom tracks use `.tsm` files and belong in the `Tracks` folder. Custom vehicles use `.tsv` files and belong in the `Vehicles` folder. Do not place them inside the sounds folder, language folder, or a random subfolder unless the authoring guide for that content type says otherwise.
+Custom tracks use `.tsm` files and belong in the `Tracks` folder. Custom vehicles use `.tsv` files and belong in the `Vehicles` folder. Both folders sit next to the game executable on desktop, and inside the app's data folder on mobile. Do not place them inside the sounds folder, language folder, or a random subfolder unless the authoring guide for that content type says otherwise.
 
 If a custom file does not appear in selection menus, check the simple things first. Make sure the extension is correct. Make sure the file is in the correct folder. Then make sure the file itself is valid. A file with the right extension can still fail if its contents are not in the format the game expects.
 
@@ -589,7 +701,44 @@ For creating new tracks or vehicles, use the dedicated authoring guides. This pl
 
 Important note: all previous tracks and vehicles from the original game are incompatible, and they cannot be made compatible unless you rewrite them entirely. There is no possibility of adding a compatibility mode for these legacy tracks or vehicles because my project aims to add new features and details, and these can't be preserved or implicitly calculated based on non-existent values from the legacy files.
 
-## 16. Updater Behavior on Desktop and Android
+### Custom tracks in multiplayer
+Custom tracks work in multiplayer races as well as single player, but they have a few extra moving parts because the host's chosen track has to be available on every other client before the race can start. The game handles the transfer automatically; this section explains what is happening so it is easier to understand when something goes wrong.
+
+For a custom track to appear in a multiplayer room, three things have to be true:
+
+1. The server has `custom_tracks` turned on. Section 14 describes the server-side flag.
+2. The room host has enabled "Custom tracks" under Game rules in room options.
+3. The chosen track is available either in the server's catalog (hosted on the server, or uploaded earlier by another host) or as a local file in the host's own `Tracks` folder that can be uploaded.
+
+When all three are true, the host's track selection menu inside the room gains two extra entries:
+
+- "Custom" opens the server's catalog. This includes tracks the server operator placed in the server's `Tracks` folder and tracks that previous room hosts uploaded.
+- "Upload a local track" opens a list of the host's own `Tracks` folder. Picking one uploads it to the server. After the upload finishes, that track joins the server's catalog and is available to future rooms too.
+
+Only the room host sees these menus; joining players see the chosen track but cannot upload or change it.
+
+### How clients receive a custom track
+The first time the host picks a custom track that a particular client does not already have, that client receives the entire track package from the server. The flow runs like this:
+
+1. The server announces the chosen track to everyone in the room.
+2. Each client checks its local cache for a track with the same content hash. If it is already cached, the client uses the cached copy directly and no download happens.
+3. If the cache does not have it, the client receives the package in chunks and shows a short download progress dialog so the player knows something is happening.
+4. After the last chunk arrives, the client verifies the hash to make sure transmission was not corrupted, then stores the package under the game's app data folder in `track_packages/<hash>.tspkg`. Any custom sounds or assets bundled with the package are extracted into the same cache so the race can load them.
+5. Once a client has the package cached and reports it as ready, the race can start for that client. Players who already had it cached are ready immediately; players who had to download wait for the transfer to finish.
+
+After the first time a client has a given package, the cache is used directly on every subsequent join — the same custom track never needs to be re-downloaded for that client, even across game sessions, unless the package contents change (which produces a new hash).
+
+If a transfer is interrupted (the player disconnects, the room is closed, the server restarts), the partial download is discarded and the next attempt starts from the beginning. Uploaded packages exceed a fixed maximum size on the server side; oversized files are rejected with a message in the server console and on the host's client.
+
+### Hosting custom tracks for everyone on a server
+If you run a dedicated server, there are two ways custom tracks get added to its catalog:
+
+- The server operator drops `*.tsm` files into a `Tracks` folder next to the server executable. The server scans this folder recursively, so the files can sit in subfolders. New files appear on the next catalog request; a server restart is the cleanest way to refresh after a bulk update.
+- A room host on a connected client uses "Upload a local track" inside a room. The upload is delivered to the server, validated, stored, and added to the catalog for future rooms.
+
+Both paths go through the same catalog, and both are gated by the server's `custom_tracks` flag. Section 14 covers the server-side details.
+
+## 17. Updater Behavior on Desktop and Android
 The updater is designed to keep the installed game current without making the player manually replace files every time. You can check for updates from the menu, and the game can also check automatically on startup if that setting is enabled.
 
 The update process has three stages. First, the game checks the published version information. Second, if an update is available, it asks before downloading. Third, after download finishes, it starts the platform-specific install step.
@@ -604,7 +753,7 @@ If a download fails, the current game installation remains as it is. If a downlo
 
 Please report bugs if you see any weird behavior with updater.
 
-## 17. Detailed Driving Tutorials
+## 18. Detailed Driving Tutorials
 This chapter is for learning how to drive, not only for learning which key does what. Top Speed is an audio racing game, so driving well means listening to the engine, surface, curve calls, position information, and the behavior of your own vehicle.
 
 ### Automatic mode training
@@ -642,7 +791,7 @@ After that, add the top-zone controls one at a time. Practice reporting speed, g
 
 When learning touch controls, drive slower than you would on desktop. The goal is to build reliable hand movement first. Speed comes later.
 
-## 18. Multiplayer Setup Walkthroughs
+## 19. Multiplayer Setup Walkthroughs
 This chapter gives practical examples of how to set up multiplayer sessions. The goal is to make sure every player understands the same sequence: connect to server, enter lobby, create or join room, prepare for race, then start.
 
 ### Local network session
@@ -667,7 +816,7 @@ Use room chat for messages related to the current room or race. Use global chat 
 
 If a player disconnects, crashes, or needs to stop, the host should decide whether to continue or restart based on the room's expectations. For casual rooms, restarting may be fine. For organized events, decide rules before the race begins.
 
-## 19. Settings Tuning Profiles
+## 20. Settings Tuning Profiles
 There is no single best settings setup. A new player needs more guidance and spoken information. An experienced player may want fewer interruptions. A controller user may need dead zone tuning. An Android player needs to choose between touch steering and motion steering.
 
 ### New player profile
@@ -695,7 +844,7 @@ For translation testing, enable usage hints and walk through menus slowly. Recor
 
 After replacing a language file, restart the game once before deciding that a string is still untranslated. This avoids confusing stale menu text with a missing translation.
 
-## 20. Additional Notes for Testers and Release Preparation
+## 21. Additional Notes for Testers and Release Preparation
 Testing is most useful when the report can be repeated by someone else. Always include the platform, game version, what you were doing, what you expected, and what actually happened.
 
 ### Minimum test
@@ -718,7 +867,7 @@ Common testing mistakes are stale Android installs, typing the wrong server host
 
 Check those first. If the issue remains after that, write the report with the exact steps and keep the broken setup available in case more logs are needed.
 
-## 21. Troubleshooting
+## 22. Troubleshooting
 This section explains common problems in plain terms. When something goes wrong, change one thing at a time and test again. If you change several settings at once, it becomes much harder to know which change actually fixed or caused the problem.
 
 ### Game starts but no speech
@@ -798,9 +947,9 @@ If the game reports a settings warning on startup, it means a saved setting was 
 
 Read the warning, open the related settings menu, and set that option again. If many settings are broken, move the settings file aside and let the game create a new one, then reapply your preferred options gradually.
 
-## 22. Frequently Asked Questions
+## 23. Frequently Asked Questions
 ### Is Top Speed keyboard-only?
-No. Desktop supports keyboard and controller input. Android is designed around touch gestures and can also use motion steering if the device supports the required sensors. The keyboard still work on Android devices, but Android play should not depend on keyboard shortcuts and keyboard is optional on Android.
+No. Desktop supports keyboard and controller input. Android is designed around touch gestures and can also use motion steering if the device supports the required sensors. A keyboard still works on Android if one is attached, but Android play should not depend on it; the keyboard is optional there.
 
 ### Can I play multiplayer without hosting my own server?
 Yes. If a community server is available and reachable from your network, you can join it. You only need to host your own server if you want to run a private session, test locally, or maintain a public server yourself.
@@ -808,13 +957,13 @@ Yes. If a community server is available and reachable from your network, you can
 ### Can I remap controls?
 Yes. Driving controls can be mapped for keyboard and controller. Menu shortcuts can also be mapped for keyboard. Some platform or safety actions may stay fixed, and Android gestures are handled separately from keyboard mapping.
 
-It is very hard to implement gesture mapping for Android, so please do not request this to be added.
+Custom gesture mapping on Android is not currently supported and is unlikely to be added in the near future.
 
 ### Why are some gestures limited to specific parts of the screen?
 During a race, touch controls are split into zones so the same gesture can mean different things depending on where it starts. This is necessary because driving needs continuous controls, while race information needs quick gestures that should not interfere with throttle, brake, steering, clutch, or horn.
 
 ### Can I disable startup logo and automatic update checks?
-Yes. Startup logo behavior and automatic update checks are controlled from settings. Open the options, > game settings. From there you can manage these.
+Yes. Open Settings → Game settings; both "Play logo at startup" and "Check for updates on startup" live there.
 
 ### I changed language, but one menu still sounds untranslated. Is this normal?
 It can happen while testing a language file, especially if menus were already opened before the new language was selected. Restart once after switching language. If the same text remains English after restart, the language file needs those strings added or updated.
@@ -825,10 +974,10 @@ Yes, but only if the matching custom randomization option is enabled. Otherwise 
 ### Where are track and vehicle authoring rules documented?
 Use the dedicated track and vehicle creation guides. You can find them in the "docs" folder that ships with the game. This guide is for playing, installing, hosting, and troubleshooting; the authoring guides explain the file formats.
 
-## 23. Control Reference
+## 24. Control Reference
 This reference includes every supported action, along with its hotkey on keyboard, or the equivalent gesture on mobile if available.
 
-### 23.1 Menu Navigation
+### 24.1 Menu Navigation
 Move to previous menu item:
 Desktop: Up Arrow.
 Mobile: Swipe left.
@@ -899,7 +1048,7 @@ Previous screen inside current menu:
 Desktop: Shift+Tab.
 Mobile: No global default gesture for this action.
 
-### 23.2 Main Menu and Startup
+### 24.2 Main Menu and Startup
 Skip startup logo:
 Desktop: Enter or Numpad Enter.
 Mobile: Swipe up with one finger.
@@ -908,7 +1057,7 @@ Exit game from root menu:
 Desktop: Activate Exit Game item, or Escape from root when no deeper stack exists.
 Mobile: Activate Exit Game item, or back out from root menu.
 
-### 23.3 Driving Core Intents
+### 24.3 Driving Core Intents
 A few things to note for mobile:
 
 1. The screen on mobile during driving is divided into 2 essential parts. The names in the guide follow the race gesture zones, but the phone is meant to be held in landscape mode. In that position, these areas are felt as left and right parts of the phone.
@@ -963,7 +1112,7 @@ Toggle shift-on-demand:
 Desktop: M (fixed default shortcut).
 Mobile: No dedicated gesture.
 
-### 23.4 Driving Information Requests
+### 24.4 Driving Information Requests
 Speak current gear:
 Desktop: Q by default.
 Mobile: Three-finger tap in the top-right information zone. This is a single tap using three fingers.
@@ -1018,7 +1167,7 @@ Exit the race:
 Desktop: Escape.
 Mobile: Swipe down with one finger in the top-left information zone.
 
-### 23.5 Direct Player Number and Position Keys During Race
+### 24.5 Direct Player Number and Position Keys During Race
 Speak vehicle name for player slot 1:
 Desktop: F1.
 Mobile: No direct equivalent gesture.
@@ -1087,7 +1236,7 @@ Speak your own player number:
 Desktop: F11.
 Mobile: No direct equivalent gesture.
 
-### 23.6 Panel and Radio Controls
+### 24.6 Panel and Radio Controls
 Switch to next panel:
 Desktop: Ctrl+Tab.
 Mobile: No dedicated touch gesture.
@@ -1132,7 +1281,7 @@ Toggle looping of the file in the radio:
 Desktop: L while radio panel is active.
 Mobile: No dedicated touch gesture.
 
-### 23.7 Multiplayer Menu Touch Layout (Android)
+### 24.7 Multiplayer Menu Touch Layout (Android)
 Navigate previous item in multiplayer menus:
 Desktop: Up Arrow.
 Mobile: Swipe left with one finger in the multiplayer bottom zone.
@@ -1145,21 +1294,37 @@ Back out of the multiplayer menu:
 Desktop: Escape.
 Mobile: Swipe down with one finger in the multiplayer bottom zone.
 
-Switch to next chat history category:
-Desktop: Right Arrow in chat history view.
+Open the history buffer screen (chat, server messages, room events):
+Desktop: Tab to move forward to the next screen, Shift+Tab to move back. The history buffer is the second screen of the multiplayer lobby and the in-room controls.
+Mobile: The history buffer lives in the top zone of the multiplayer menu; there is no separate screen to switch to.
+
+Switch to next history category:
+Desktop: `]` (right bracket).
 Mobile: Swipe up with one finger in the multiplayer top zone.
 
-Switch to previous chat history category:
-Desktop: Left Arrow in chat history view.
+Switch to previous history category:
+Desktop: `[` (left bracket).
 Mobile: Swipe down with one finger in the multiplayer top zone.
 
-Move to next history message:
-Desktop: Right Arrow in the selected history category.
+Move to next history item:
+Desktop: `.` (period) anywhere in multiplayer menus, or Down Arrow on the history buffer screen.
 Mobile: Swipe right with one finger in the multiplayer top zone.
 
-Move to previous history message:
-Desktop: Left Arrow in the selected history category.
+Move to previous history item:
+Desktop: `,` (comma) anywhere in multiplayer menus, or Up Arrow on the history buffer screen.
 Mobile: Swipe left with one finger in the multiplayer top zone.
+
+Jump to the last history item in the current category:
+Desktop: Shift+. (Shift + period).
+Mobile: No dedicated gesture; use the menu navigation on the history buffer screen to jump to the end.
+
+Jump to the first history item in the current category:
+Desktop: Shift+, (Shift + comma).
+Mobile: No dedicated gesture; use the menu navigation on the history buffer screen to jump to the start.
+
+Copy the focused history item to the clipboard:
+Desktop: Ctrl+Space, or activate the focused entry on the history buffer screen (Enter).
+Mobile: Activate the focused entry on the history buffer screen.
 
 Check ping:
 Desktop: F1.
@@ -1173,7 +1338,11 @@ Open room chat input:
 Desktop: Backslash (`\`) shortcut while in room.
 Mobile: Two-finger swipe left in the multiplayer top zone.
 
-### 23.8 Multiplayer Race Overlay Controls
+View current room game rules:
+Desktop: R while inside a room.
+Mobile: No dedicated gesture.
+
+### 24.8 Multiplayer Race Overlay Controls
 Open global chat during multiplayer race:
 Desktop: Slash (`/`).
 Mobile: No dedicated race gesture.
@@ -1186,7 +1355,70 @@ Open quit prompt during multiplayer race:
 Desktop: Escape.
 Mobile: Swipe down with one finger in the top-left information zone. This is the race back-out gesture.
 
-## 24. Credits and Acknowledgements
+In addition to the controls above, the inline history shortcuts (`,` `.` `Shift+,` `Shift+.` `[` `]` `Ctrl+Space`) and the core communicator shortcuts (Ctrl+Shift+C, Ctrl+Shift+F, F, V, Ctrl+Shift+V) keep working during a multiplayer race. Use them to scroll back through chat or talk to other players without leaving the driving panels. The streaming media shortcuts (Ctrl+O, Ctrl+F, Ctrl+P, Ctrl+L, Ctrl+S, Ctrl+Page Up / Page Down, Ctrl+Up / Down) are menu-only and do not respond during a race.
+
+### 24.9 Communicator Controls
+These controls are available whenever you are in the multiplayer lobby or inside a room. The core communicator controls (toggle, set frequency, announce frequency, push to talk, voice activation) also stay active during a multiplayer race, so you can talk to other players without leaving the driving panels. The streaming media controls listed at the end of this section only respond from the multiplayer menus, not during a race. Section 13 explains the feature itself.
+
+Toggle communicator on or off:
+Desktop: Ctrl+Shift+C.
+Mobile: Two-finger swipe down in the multiplayer top zone.
+
+Open frequency input (set frequency):
+Desktop: Ctrl+Shift+F.
+Mobile: Two-finger swipe up in the multiplayer top zone.
+
+Announce current frequency:
+Desktop: F.
+Mobile: Three-finger tap in the multiplayer top zone.
+
+Push to talk (hold while speaking):
+Desktop: V. PTT explicitly ignores key presses while Ctrl, Shift, or Alt are held.
+Mobile: Single-finger tap in the multiplayer top zone, then within about 0.4 seconds press and hold a single finger in the same zone. Release the held finger to stop transmitting.
+
+Toggle voice activation (VOX) on or off:
+Desktop: Ctrl+Shift+V.
+Mobile: Two-finger double tap in the multiplayer top zone.
+
+Load a single audio file for streaming through the communicator:
+Desktop: Ctrl+O while the communicator is on.
+Mobile: No dedicated gesture.
+
+Load a folder for streaming through the communicator:
+Desktop: Ctrl+F while the communicator is on.
+Mobile: No dedicated gesture.
+
+Play or pause the streaming media:
+Desktop: Ctrl+P while the communicator is on.
+Mobile: No dedicated gesture.
+
+Previous streaming track:
+Desktop: Ctrl+Page Up while the communicator is on.
+Mobile: No dedicated gesture.
+
+Next streaming track:
+Desktop: Ctrl+Page Down while the communicator is on.
+Mobile: No dedicated gesture.
+
+Streaming media volume up:
+Desktop: Ctrl+Up Arrow while the communicator is on.
+Mobile: No dedicated gesture.
+
+Streaming media volume down:
+Desktop: Ctrl+Down Arrow while the communicator is on.
+Mobile: No dedicated gesture.
+
+Toggle streaming media loop:
+Desktop: Ctrl+L while the communicator is on.
+Mobile: No dedicated gesture.
+
+Toggle streaming media shuffle:
+Desktop: Ctrl+S while the communicator is on.
+Mobile: No dedicated gesture.
+
+All communicator shortcuts on desktop can be remapped from Settings → Controls → Map menu shortcuts. The mobile gestures cannot be remapped.
+
+## 25. Credits and Acknowledgements
 Top Speed Remake continues the original open-source Top Speed project while rebuilding the game on a modern C# codebase.
 
 Project code is distributed under GNU GPL v3. Third-party components keep their own upstream licenses.
@@ -1201,7 +1433,7 @@ This project exists because of long-term community effort: players, translators,
 
 Thanks to anyone who helped in any way to keep this project going, whether with financial support, helping with bugs, new features, or sharing the game with their friends. I am truly thankful for the wonderful community that supports the project and keeps it going.
 
-## 25. Contact me
+## 26. Contact me
 If you wish to report bugs, please open new issues on [GitHub](https://github.com/diamondStar35/top_speed) directly so we can track the issue.
 
 Please make sure you are using the latest version of the game, and be sure to include the game version, the operating system, and any other details when reporting issues. Do not open issues to suggest new features; use the discussions instead.

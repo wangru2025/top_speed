@@ -352,10 +352,10 @@ def render_all_docs(script_dir: Path) -> int:
     markdown_paths = sorted(
         (
             path
-            for path in script_dir.glob("*.md")
+            for path in script_dir.rglob("*.md")
             if path.name.lower() not in EXCLUDED_MARKDOWN_FILENAMES
         ),
-        key=lambda p: p.name.lower(),
+        key=lambda p: str(p.relative_to(script_dir)).lower(),
     )
     if not markdown_paths:
         print(f"No markdown files found in: {script_dir}", file=sys.stderr)
@@ -371,6 +371,11 @@ def render_all_docs(script_dir: Path) -> int:
         output_path = input_path.with_suffix(".html")
         render_markdown(input_path, output_path)
         print(f"Rendered HTML: {output_path}")
+
+        if input_path.parent != script_dir and input_path.parent.name.lower() == "en":
+            legacy_output = script_dir / output_path.name
+            render_markdown(input_path, legacy_output)
+            print(f"Rendered legacy HTML: {legacy_output}")
 
     return 0
 

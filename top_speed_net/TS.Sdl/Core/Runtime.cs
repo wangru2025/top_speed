@@ -92,14 +92,6 @@ namespace TS.Sdl
             return SDL_PollEvent(out value);
         }
 
-        public static bool WaitEventTimeout(int timeoutMs)
-        {
-            if (!IsAvailable)
-                return false;
-
-            return SDL_WaitEventTimeout(IntPtr.Zero, timeoutMs);
-        }
-
         public static bool IsMainThread()
         {
             if (!IsAvailable)
@@ -148,10 +140,6 @@ namespace TS.Sdl
         [DllImport(LibraryName, EntryPoint = "SDL_PollEvent", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         private static extern bool SDL_PollEvent(out Event value);
-
-        [DllImport(LibraryName, EntryPoint = "SDL_WaitEventTimeout", CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        private static extern bool SDL_WaitEventTimeout(IntPtr eventPtr, int timeoutMs);
 
         [DllImport(LibraryName, EntryPoint = "SDL_IsMainThread", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]

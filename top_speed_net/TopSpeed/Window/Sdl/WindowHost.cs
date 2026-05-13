@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using TopSpeed.Localization;
 using TopSpeed.Runtime;
 using TS.Sdl;
@@ -15,7 +16,6 @@ namespace TopSpeed.Windowing.Sdl
     internal sealed class WindowHost : IWindowHost, ITextInputService, IGestureEventSource, ITouchZoneGestureEventSource, ITouchZoneTouchEventSource, IControllerEventSource
     {
         private static readonly InitFlags RequiredInit = InitFlags.Video | InitFlags.Events | InitFlags.Sensor;
-        private const int WaitEventTimeoutMs = 16;
         private readonly object _sync = new object();
         private readonly TouchZoneRouter _touchZoneRouter;
         private readonly Queue<TextInputResult> _textResults;
@@ -62,15 +62,11 @@ namespace TopSpeed.Windowing.Sdl
                 Loaded?.Invoke();
             }
 
-            // Event-driven main loop. SDL_WaitEventTimeout blocks the thread until
-            // an event arrives (or the timeout elapses), so an idle game does not
-            // burn CPU spinning. The 16 ms timeout still drives the touch-zone
-            // gesture state machine at ~60 Hz for long-press / swipe timing.
             while (_running && !_closeRequested && !_disposed)
             {
-                SdlRuntime.WaitEventTimeout(WaitEventTimeoutMs);
                 PumpEvents();
                 _touchZoneRouter.Update();
+                Thread.Sleep(4);
             }
 
             _running = false;

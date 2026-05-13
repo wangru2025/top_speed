@@ -48,13 +48,10 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private string _captureDeviceName = string.Empty;
         private int _captureChannels = 1;
         private int _captureInputSampleRate = ProtocolConstants.VoiceSampleRate;
-        private int _captureMeasuredInputSampleRate = ProtocolConstants.VoiceSampleRate;
         private long _captureSourceFrameIndex;
         private double _captureNextOutputSourceFrame;
         private bool _captureHasPreviousSample;
         private float _capturePreviousSample;
-        private long _captureRateMeasureStartTimestamp;
-        private long _captureRateMeasureFrameCount;
 
         private Network.MultiplayerSession? _boundSession;
         private bool _transmitting;

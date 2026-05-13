@@ -4,7 +4,7 @@ namespace TopSpeed.Menu
 {
     internal sealed partial class MenuScreen
     {
-        public MenuUpdateResult Update(IInputService input, bool suppressLetterNavigation = false)
+        public MenuUpdateResult Update(IInputService input, in MenuLetterPress letterPress)
         {
             if (_items.Count == 0)
                 return MenuUpdateResult.None;
@@ -17,7 +17,7 @@ namespace TopSpeed.Menu
             if (input.ShouldIgnoreMenuBack())
                 return MenuUpdateResult.None;
 
-            if (!suppressLetterNavigation && TryHandleLetterNavigation(input))
+            if (TryHandleLetterNavigation(in letterPress))
                 return MenuUpdateResult.None;
 
             if (state.NextScreen && SwitchToNextScreen())

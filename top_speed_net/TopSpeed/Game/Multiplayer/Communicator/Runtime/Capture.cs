@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using SoundFlow.Backends.MiniAudio;
 using SoundFlow.Enums;
 using SoundFlow.Structs;
@@ -68,7 +67,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
 
                 _captureChannels = Math.Max(1, captureDevice.Format.Channels);
                 _captureInputSampleRate = Math.Max(1, captureDevice.Format.SampleRate);
-                _captureMeasuredInputSampleRate = _captureInputSampleRate;
                 ResetCaptureResamplerState();
 
                 captureDevice.OnAudioProcessed += OnCapturedAudio;
@@ -107,7 +105,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 _captureDevice = null;
                 _captureChannels = 1;
                 _captureInputSampleRate = ProtocolConstants.VoiceSampleRate;
-                _captureMeasuredInputSampleRate = ProtocolConstants.VoiceSampleRate;
                 _captureDeviceName = string.Empty;
                 ResetCaptureResamplerState();
                 return false;
@@ -154,7 +151,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             _captureDeviceName = string.Empty;
             _captureChannels = 1;
             _captureInputSampleRate = ProtocolConstants.VoiceSampleRate;
-            _captureMeasuredInputSampleRate = ProtocolConstants.VoiceSampleRate;
             ResetCaptureResamplerState();
             DiscardCapturedSamples();
         }
@@ -162,15 +158,7 @@ namespace TopSpeed.Game.Multiplayer.Communicator
         private AudioFormat ResolveCaptureFormat(DeviceInfo? preferredDevice)
         {
             if (TryResolveCaptureFormat(preferredDevice, out var sampleRate, out var channels))
-            {
-                return new AudioFormat
-                {
-                    SampleRate = sampleRate,
-                    Channels = channels,
-                    Format = SampleFormat.F32,
-                    Layout = AudioFormat.GetLayoutFromChannels(channels)
-                };
-            }
+                return CreateCaptureFormat(sampleRate, channels);
 
             if (_captureEngine != null && _captureEngine.CaptureDevices.Length > 0)
             {
@@ -178,42 +166,34 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 {
                     if (_captureEngine.CaptureDevices[i].IsDefault
                         && TryResolveCaptureFormat(_captureEngine.CaptureDevices[i], out sampleRate, out channels))
-                    {
-                        return new AudioFormat
-                        {
-                            SampleRate = sampleRate,
-                            Channels = channels,
-                            Format = SampleFormat.F32,
-                            Layout = AudioFormat.GetLayoutFromChannels(channels)
-                        };
-                    }
+                        return CreateCaptureFormat(sampleRate, channels);
                 }
 
-                if (TryResolveCaptureFormat(_captureEngine.CaptureDevices[0], out sampleRate, out channels))
+                for (var i = 0; i < _captureEngine.CaptureDevices.Length; i++)
                 {
-                    return new AudioFormat
-                    {
-                        SampleRate = sampleRate,
-                        Channels = channels,
-                        Format = SampleFormat.F32,
-                        Layout = AudioFormat.GetLayoutFromChannels(channels)
-                    };
+                    if (TryResolveCaptureFormat(_captureEngine.CaptureDevices[i], out sampleRate, out channels))
+                        return CreateCaptureFormat(sampleRate, channels);
                 }
             }
 
+            return CreateCaptureFormat(ProtocolConstants.VoiceSampleRate, 1);
+        }
+
+        private static AudioFormat CreateCaptureFormat(int sampleRate, int channels)
+        {
             return new AudioFormat
             {
-                SampleRate = ProtocolConstants.VoiceSampleRate,
-                Channels = 1,
+                SampleRate = sampleRate,
+                Channels = channels,
                 Format = SampleFormat.F32,
-                Layout = AudioFormat.GetLayoutFromChannels(1)
+                Layout = AudioFormat.GetLayoutFromChannels(channels)
             };
         }
 
         private static bool TryResolveCaptureFormat(DeviceInfo? device, out int sampleRate, out int channels)
         {
-            sampleRate = ProtocolConstants.VoiceSampleRate;
-            channels = 1;
+            sampleRate = 0;
+            channels = 0;
             if (!device.HasValue)
                 return false;
 
@@ -221,10 +201,9 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             if (supported == null || supported.Length == 0)
                 return false;
 
-            var bestScore = int.MaxValue;
-            var bestRateDiff = int.MaxValue;
-            uint bestRate = 0;
-            uint bestChannels = 0;
+            NativeDataFormat? firstValid = null;
+            NativeDataFormat? monoMatch = null;
+            NativeDataFormat? stereoMatch = null;
 
             for (var i = 0; i < supported.Length; i++)
             {
@@ -232,48 +211,20 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 if (format.SampleRate == 0 || format.Channels == 0)
                     continue;
 
-                var candidateChannels = Math.Clamp(format.Channels, 1u, 2u);
-                var rateScore = ScoreCaptureSampleRate(format.SampleRate);
-                var rateDiff = (int)Math.Abs((long)format.SampleRate - ProtocolConstants.VoiceSampleRate);
-
-                if (rateScore > bestScore)
-                    continue;
-
-                if (rateScore == bestScore && rateDiff > bestRateDiff)
-                    continue;
-
-                if (rateScore == bestScore && rateDiff == bestRateDiff && candidateChannels < bestChannels)
-                    continue;
-
-                bestScore = rateScore;
-                bestRateDiff = rateDiff;
-                bestRate = format.SampleRate;
-                bestChannels = candidateChannels;
+                firstValid ??= format;
+                if (format.Channels == 1)
+                    monoMatch ??= format;
+                else if (format.Channels == 2)
+                    stereoMatch ??= format;
             }
 
-            if (bestRate == 0 || bestChannels == 0)
+            var selected = monoMatch ?? stereoMatch ?? firstValid;
+            if (!selected.HasValue)
                 return false;
 
-            sampleRate = (int)bestRate;
-            channels = (int)bestChannels;
+            sampleRate = (int)selected.Value.SampleRate;
+            channels = Math.Clamp((int)selected.Value.Channels, 1, 2);
             return true;
-        }
-
-        private static int ScoreCaptureSampleRate(uint sampleRate)
-        {
-            if (sampleRate == ProtocolConstants.VoiceSampleRate)
-                return 0;
-
-            if (sampleRate == ProtocolConstants.VoiceSampleRate * 2)
-                return 1;
-
-            if (sampleRate % ProtocolConstants.VoiceSampleRate == 0)
-                return 2;
-
-            if (sampleRate < ProtocolConstants.VoiceSampleRate && ProtocolConstants.VoiceSampleRate % sampleRate == 0)
-                return 3;
-
-            return 4;
         }
 
         private static int SelectDominantChannel(Span<float> samples, int channels, int frameCount)
@@ -312,54 +263,11 @@ namespace TopSpeed.Game.Multiplayer.Communicator
             _captureNextOutputSourceFrame = 0d;
             _captureHasPreviousSample = false;
             _capturePreviousSample = 0f;
-            _captureRateMeasureStartTimestamp = 0;
-            _captureRateMeasureFrameCount = 0;
-        }
-
-        private void UpdateMeasuredCaptureSampleRate(int sourceFrames)
-        {
-            if (sourceFrames <= 0)
-                return;
-
-            var now = Stopwatch.GetTimestamp();
-            if (_captureRateMeasureStartTimestamp == 0)
-            {
-                _captureRateMeasureStartTimestamp = now;
-                _captureRateMeasureFrameCount = 0;
-            }
-
-            _captureRateMeasureFrameCount += sourceFrames;
-            var elapsedTicks = now - _captureRateMeasureStartTimestamp;
-            if (elapsedTicks < Stopwatch.Frequency / 4)
-                return;
-
-            var measured = (int)Math.Round(_captureRateMeasureFrameCount * (double)Stopwatch.Frequency / elapsedTicks);
-            measured = Math.Clamp(measured, 8000, 192000);
-            if (measured > 0)
-            {
-                var current = _captureMeasuredInputSampleRate;
-                if (current <= 0)
-                {
-                    _captureMeasuredInputSampleRate = measured;
-                }
-                else
-                {
-                    var drift = Math.Abs(measured - current) / (double)current;
-                    _captureMeasuredInputSampleRate = drift >= 0.2
-                        ? measured
-                        : (int)Math.Round((current * 0.8) + (measured * 0.2));
-                }
-            }
-
-            _captureRateMeasureStartTimestamp = now;
-            _captureRateMeasureFrameCount = 0;
         }
 
         private void AppendResampledCapturedFrames(Span<float> samples, int channels, int frameCount, int dominantChannel, float gain)
         {
-            var sourceRate = _captureMeasuredInputSampleRate > 0
-                ? _captureMeasuredInputSampleRate
-                : (_captureInputSampleRate <= 0 ? ProtocolConstants.VoiceSampleRate : _captureInputSampleRate);
+            var sourceRate = _captureInputSampleRate <= 0 ? ProtocolConstants.VoiceSampleRate : _captureInputSampleRate;
             var targetRate = ProtocolConstants.VoiceSampleRate;
             if (sourceRate == targetRate)
             {
@@ -438,7 +346,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
 
             lock (_captureLock)
             {
-                UpdateMeasuredCaptureSampleRate(frameCount);
                 AppendResampledCapturedFrames(samples, channels, frameCount, dominantChannel, gain);
                 TrimCapturedSamples();
             }

@@ -97,6 +97,26 @@ namespace TopSpeed.Core.Multiplayer
             OpenRoomChatHotkey();
         }
 
+        void IMultiplayerMenuTouch.ToggleCommunicator()
+        {
+            ToggleCommunicator();
+        }
+
+        void IMultiplayerMenuTouch.ToggleCommunicatorVoiceActivation()
+        {
+            ToggleCommunicatorVoiceActivation();
+        }
+
+        void IMultiplayerMenuTouch.BeginCommunicatorFrequencyInput()
+        {
+            BeginCommunicatorFrequencyInput();
+        }
+
+        void IMultiplayerMenuTouch.AnnounceCommunicatorFrequency()
+        {
+            AnnounceCommunicatorFrequency();
+        }
+
         string IMultiplayerRuntime.ResolvePlayerName(byte playerNumber)
         {
             return ResolvePlayerName(playerNumber);

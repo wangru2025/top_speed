@@ -35,7 +35,14 @@ namespace TopSpeed.Game
 
         private void OpenHelpDocument(string fileName)
         {
-            var path = AssetPaths.ResolveExistingPath("docs", fileName);
+            string? path = null;
+            foreach (var candidate in HelpDocumentResolver.BuildCandidateRelativePaths(fileName, _settings.Language))
+            {
+                path = AssetPaths.ResolveExistingPath("docs", candidate);
+                if (path != null)
+                    break;
+            }
+
             if (path == null)
             {
                 ShowMessageDialog(

@@ -130,13 +130,17 @@ namespace TopSpeed.Server.Network
                 return;
             player = resolvedPlayer;
             player.Handshake = HandshakeState.AwaitingPlayerHello;
-            player.NegotiatedProtocol = compat.NegotiatedVersion;
+            var negotiatedProtocol = ResolveNegotiatedVersionForSessionForTest(
+                effectiveStatus,
+                compat.NegotiatedVersion,
+                hello.ClientVersion);
+            player.NegotiatedProtocol = negotiatedProtocol;
             player.MarkProtocolNegotiated();
 
             var welcome = new PacketProtocolWelcome
             {
                 Status = effectiveStatus,
-                NegotiatedVersion = compat.NegotiatedVersion,
+                NegotiatedVersion = negotiatedProtocol,
                 ServerMinSupported = serverRange.MinSupported,
                 ServerMaxSupported = serverRange.MaxSupported,
                 ResumeToken = player.ResumeToken,
@@ -153,6 +157,16 @@ namespace TopSpeed.Server.Network
             return clientVersion == ProtocolProfile.Current
                 ? ProtocolCompatStatus.Exact
                 : ProtocolCompatStatus.CompatibleDowngrade;
+        }
+
+        internal static ProtocolVer ResolveNegotiatedVersionForSessionForTest(
+            ProtocolCompatStatus status,
+            ProtocolVer negotiatedVersion,
+            ProtocolVer clientVersion)
+        {
+            return status == ProtocolCompatStatus.Exact
+                ? clientVersion
+                : negotiatedVersion;
         }
 
         private void RejectHandshake(PlayerConnection player, string message)

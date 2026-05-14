@@ -5,7 +5,7 @@ This file tracks new changes to the game for both client and server to make it e
 The game versioning follows a specific pattern by using year.month.day.revision, where revision is an incremental number if there is more than one release in a single day.
 
 
-## 2026.5.13.1
+## 2026.5.14.1
 ### Game Changes
 - Added a full voice chat system to the game. Any player who is connected to a server can enable their communicator by pressing ctrl+shift+c to listen to other players, and either holding v or ctrl+shift+v to talk.
 - The communicator has a frequency, between 0.0 and 1000.0. The default public frequency is 1.0 which is by default all players are tuned to. You can read the current frequency by pressing f, and change it by pressing ctrl+f.
@@ -13,6 +13,7 @@ The game versioning follows a specific pattern by using year.month.day.revision,
 - Added a new category in the volume settings for communicator. This controls the loudness of communicator sounds as well as other players. This does not affect the radio.
 - You now have the ability to stream files anywhere using your communicator by pressing ctrl+f to load a folder, or ctrl+o to load a file, then playing it with ctrl+p. Shortcut keys are similar to the radio, except adding ctrl with the key. For example, toggle loop is ctrl+l.
 - Added a new quicker way of controling different volume categories, by pressing f6 and shift+f6 to switch between different categories, and f7, f8 + adding shift with those keys control the actual volume.
+- Added proxy support to the game when downloading updates or external requests.
 
 
 ### Server Changes

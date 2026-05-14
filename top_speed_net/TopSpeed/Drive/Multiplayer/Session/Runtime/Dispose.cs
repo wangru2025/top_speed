@@ -7,6 +7,7 @@ namespace TopSpeed.Drive.Multiplayer
         public void Dispose()
         {
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _liveTx.Dispose();
             _panelManager.Dispose();
             _localRadio.Dispose();
@@ -27,6 +28,7 @@ namespace TopSpeed.Drive.Multiplayer
             for (var i = 0; i < _soundPlayerNr.Length; i++)
             {
                 DisposeSound(_soundPlayerNr[i]);
+                DisposeSound(_soundPlayerNrInfo[i]);
                 DisposeSound(_soundPosition[i]);
                 DisposeSound(_soundFinished[i]);
             }

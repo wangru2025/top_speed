@@ -9,12 +9,25 @@ namespace TopSpeed.Drive.Multiplayer
     {
         private void Speak(AudioSource sound, bool unKey = false)
         {
+            SpeakCore(sound, queueToRaceInfo: false, unKey);
+        }
+
+        private void SpeakRaceInfo(AudioSource sound, bool unKey = false)
+        {
+            SpeakCore(sound, queueToRaceInfo: true, unKey);
+        }
+
+        private void SpeakCore(AudioSource sound, bool queueToRaceInfo, bool unKey)
+        {
             if (sound == null)
                 return;
 
             var length = Math.Max(0.05f, sound.LengthSeconds);
             _speakTime = Math.Max(_speakTime, _session.Context.ProgressSeconds) + length;
-            QueueSound(sound);
+            if (queueToRaceInfo)
+                QueueRaceInfoSound(sound);
+            else
+                QueueSound(sound);
             if (unKey)
             {
                 _unkeyQueue++;
@@ -31,6 +44,12 @@ namespace TopSpeed.Drive.Multiplayer
         {
             if (sound != null)
                 _soundQueue.Enqueue(sound);
+        }
+
+        private void QueueRaceInfoSound(AudioSource? sound)
+        {
+            if (sound != null)
+                _raceInfoQueue.Enqueue(sound);
         }
 
         private bool TrySendRace(bool sent)

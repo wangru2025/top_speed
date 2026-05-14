@@ -51,6 +51,8 @@ namespace TopSpeed.Input
         public string LastServerAddress { get; set; } = string.Empty;
         public int DefaultServerPort { get; set; }
         public string DefaultCallSign { get; set; } = string.Empty;
+        public bool UseUpdateProxy { get; set; }
+        public string UpdateProxyUrlPrefix { get; set; } = string.Empty;
         public float ScreenReaderRateMs { get; set; }
         public ulong? SpeechBackendId { get; set; }
         public SpeechOutputMode SpeechMode { get; set; }
@@ -139,6 +141,8 @@ namespace TopSpeed.Input
             LastServerAddress = string.Empty;
             DefaultServerPort = 28630;
             DefaultCallSign = string.Empty;
+            UseUpdateProxy = false;
+            UpdateProxyUrlPrefix = string.Empty;
             ScreenReaderRateMs = 0f;
             SpeechBackendId = null;
             SpeechMode = SpeechOutputMode.Speech;

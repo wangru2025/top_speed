@@ -68,7 +68,7 @@ namespace TopSpeed.Drive.Multiplayer
                 return false;
             if (_requirePostFinishStopBeforeExit && !AreVehiclesSettledForExit())
                 return false;
-            if (!_soundQueue.IsIdle)
+            if (!_soundQueue.IsIdle || !_raceInfoQueue.IsIdle)
                 return false;
             if (_session.Context.Phase == Phase.Finishing)
                 _session.SetPhase(Phase.Finished);

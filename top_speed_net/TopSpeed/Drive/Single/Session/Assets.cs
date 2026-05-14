@@ -116,6 +116,14 @@ namespace TopSpeed.Drive.Single
             return _soundPlayerNr[index] ??= LoadLanguageSound($"race\\info\\player{index + 1}");
         }
 
+        private Source? GetPlayerNumberInfoSoundByIndex(int index)
+        {
+            if (index < 0 || index >= _soundPlayerNrInfo.Length)
+                return null;
+
+            return _soundPlayerNrInfo[index] ??= LoadLanguageSound($"race\\info\\player{index + 1}");
+        }
+
         private Source? GetPositionSoundByIndex(int index)
         {
             var slots = Math.Max(0, Math.Min(_nComputerPlayers + 1, _soundPosition.Length));
@@ -145,6 +153,7 @@ namespace TopSpeed.Drive.Single
             for (var i = 0; i < players; i++)
             {
                 GetPlayerNumberSoundByIndex(i);
+                GetPlayerNumberInfoSoundByIndex(i);
                 GetPositionSoundByIndex(i);
                 GetFinishedSoundByIndex(i);
             }
@@ -190,13 +199,13 @@ namespace TopSpeed.Drive.Single
 
         private void AnnounceFinishOrder(int playerNumber)
         {
-            var playerSound = GetPlayerNumberSoundByIndex(playerNumber);
+            var playerSound = GetPlayerNumberInfoSoundByIndex(playerNumber);
             var finishSound = GetFinishedSoundByIndex(_positionFinish);
             if (playerSound == null || finishSound == null)
                 return;
 
-            SpeakIfLoaded(playerSound, true);
-            SpeakIfLoaded(finishSound, true);
+            SpeakRaceInfoIfLoaded(playerSound, true);
+            SpeakRaceInfoIfLoaded(finishSound, true);
             _positionFinish++;
         }
 
@@ -205,6 +214,13 @@ namespace TopSpeed.Drive.Single
             if (sound == null)
                 return;
             Speak(sound, unKey);
+        }
+
+        private void SpeakRaceInfoIfLoaded(Source? sound, bool unKey = false)
+        {
+            if (sound == null)
+                return;
+            SpeakRaceInfo(sound, unKey);
         }
 
         private Source LoadLanguageSound(string key, bool streamFromDisk = false)

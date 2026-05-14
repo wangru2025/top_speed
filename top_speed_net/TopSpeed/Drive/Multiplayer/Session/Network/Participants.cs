@@ -167,13 +167,13 @@ namespace TopSpeed.Drive.Multiplayer
 
         private void AnnounceFinishOrder(int playerNumber, ref int positionFinish)
         {
-            var playerSound = GetPlayerNumberSoundByIndex(playerNumber);
+            var playerSound = GetPlayerNumberInfoSoundByIndex(playerNumber);
             var finishSound = GetFinishedSoundByIndex(positionFinish);
             if (playerSound == null || finishSound == null)
                 return;
 
-            SpeakIfLoaded(playerSound, true);
-            SpeakIfLoaded(finishSound, true);
+            SpeakRaceInfoIfLoaded(playerSound, true);
+            SpeakRaceInfoIfLoaded(finishSound, true);
             positionFinish++;
         }
     }

@@ -28,6 +28,8 @@ namespace TopSpeed.Menu
         void SetSpeechMode(SpeechOutputMode mode);
         void SetSpeechVoice(int? voiceIndex);
         void SetSpeechRate(float rate);
+        void SetUseUpdateProxy(bool enabled);
+        void EditUpdateProxyUrl();
         void UpdateSetting(Action update);
     }
 }

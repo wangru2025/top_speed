@@ -56,7 +56,6 @@ namespace TopSpeed.Server.Network
                 room.TrackReadyPlayers.Remove(player.Id);
                 room.MediaMap.Remove(player.Id);
                 _owner.StopLive(player, room, notifyRoom: notify);
-                _owner.StopVoice(player, notifyRoom: notify);
                 player.IncomingMedia = null;
                 player.MediaLoaded = false;
                 player.MediaPlaying = false;

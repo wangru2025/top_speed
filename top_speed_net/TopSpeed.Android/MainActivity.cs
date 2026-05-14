@@ -54,6 +54,7 @@ public class MainActivity : SdlActivityBase
     private AndroidSpeechThreadDispatcher? _speechDispatcher;
     private AndroidUpdatePackageInstaller? _updateInstaller;
     private AndroidDocumentOpener? _documentOpener;
+    private AndroidMicrophonePermissionService? _microphonePermission;
 
     public MainActivity()
     {
@@ -74,10 +75,12 @@ public class MainActivity : SdlActivityBase
         _speechDispatcher = new AndroidSpeechThreadDispatcher();
         _updateInstaller = new AndroidUpdatePackageInstaller(this);
         _documentOpener = new AndroidDocumentOpener(this);
+        _microphonePermission = new AndroidMicrophonePermissionService(this);
         global::TopSpeed.Runtime.MotionSteeringRuntime.SetSource(_motionSteering);
         global::TopSpeed.Runtime.SpeechThreadRuntime.SetDispatcher(_speechDispatcher);
         global::TopSpeed.Runtime.UpdatePackageRuntime.SetInstaller(_updateInstaller);
         global::TopSpeed.Runtime.DocumentOpenRuntime.SetOpener(_documentOpener);
+        global::TopSpeed.Runtime.MicrophonePermissionRuntime.SetService(_microphonePermission);
         base.OnCreate(savedInstanceState);
         ApplyImmersiveMode();
     }
@@ -99,17 +102,25 @@ public class MainActivity : SdlActivityBase
         base.OnPause();
     }
 
+    public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+    {
+        _microphonePermission?.HandlePermissionResult(requestCode);
+        base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     protected override void OnDestroy()
     {
         global::TopSpeed.Runtime.MotionSteeringRuntime.SetSource(null);
         global::TopSpeed.Runtime.SpeechThreadRuntime.SetDispatcher(null);
         global::TopSpeed.Runtime.UpdatePackageRuntime.SetInstaller(null);
         global::TopSpeed.Runtime.DocumentOpenRuntime.SetOpener(null);
+        global::TopSpeed.Runtime.MicrophonePermissionRuntime.SetService(null);
         _speechDispatcher?.Dispose();
         _speechDispatcher = null;
         _motionSteering = null;
         _updateInstaller = null;
         _documentOpener = null;
+        _microphonePermission = null;
         global::TopSpeed.AndroidLauncher.RequestClose();
         base.OnDestroy();
     }

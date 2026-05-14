@@ -8,6 +8,7 @@ namespace TopSpeed.Drive.Session
         public const EventId ProgressFinish = EventId.ProgressFinish;
         public const EventId FinalizeResults = EventId.FinalizeResults;
         public const EventId PlaySound = EventId.PlaySound;
+        public const EventId PlayInfoSound = EventId.PlayInfoSound;
         public const EventId PlayUnkey = EventId.PlayUnkey;
     }
 }

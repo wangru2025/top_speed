@@ -94,6 +94,14 @@ namespace TopSpeed.Drive.Multiplayer
             return _soundPlayerNr[index] ??= LoadLanguageSound($"race\\info\\player{index + 1}");
         }
 
+        private Source? GetPlayerNumberInfoSoundByIndex(int index)
+        {
+            if (index < 0 || index >= _soundPlayerNrInfo.Length)
+                return null;
+
+            return _soundPlayerNrInfo[index] ??= LoadLanguageSound($"race\\info\\player{index + 1}");
+        }
+
         private Source? GetPositionSoundByIndex(int index)
         {
             if (index < 0 || index >= _soundPosition.Length)
@@ -119,6 +127,7 @@ namespace TopSpeed.Drive.Multiplayer
             {
                 GetNumberSound(i + 1);
                 GetPlayerNumberSoundByIndex(i);
+                GetPlayerNumberInfoSoundByIndex(i);
                 GetPositionSoundByIndex(i);
                 GetFinishedSoundByIndex(i);
             }
@@ -166,6 +175,13 @@ namespace TopSpeed.Drive.Multiplayer
             if (sound == null)
                 return;
             Speak(sound, unKey);
+        }
+
+        private void SpeakRaceInfoIfLoaded(Source? sound, bool unKey = false)
+        {
+            if (sound == null)
+                return;
+            SpeakRaceInfo(sound, unKey);
         }
 
         private Source LoadLanguageSound(string key, bool streamFromDisk = false)

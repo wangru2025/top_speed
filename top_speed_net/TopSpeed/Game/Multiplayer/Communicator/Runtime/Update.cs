@@ -1,4 +1,5 @@
 using TopSpeed.Core.Multiplayer;
+using TopSpeed.Runtime;
 
 namespace TopSpeed.Game.Multiplayer.Communicator
 {
@@ -34,6 +35,20 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 return;
             }
 
+            var shouldTransmit = ShouldTransmit(out var pushToTalk);
+            var hasMicrophonePermission = MicrophonePermissionRuntime.IsPermissionGranted();
+            if (!hasMicrophonePermission && shouldTransmit)
+                hasMicrophonePermission = MicrophonePermissionRuntime.EnsurePermissionGranted();
+
+            if (!hasMicrophonePermission)
+            {
+                if (_transmitting)
+                    EndTransmission();
+                DiscardCapturedSamples();
+                DisposeCapture();
+                return;
+            }
+
             // Arm: bring up the capture device the moment the communicator is enabled,
             // so VOX and PTT can transmit immediately instead of losing the first frames
             // to a cold-start of MiniAudio while the user is already talking.
@@ -43,7 +58,6 @@ namespace TopSpeed.Game.Multiplayer.Communicator
                 return;
             }
 
-            var shouldTransmit = ShouldTransmit(out var pushToTalk);
             var frequencyTenths = _multiplayer.CommunicatorFrequencyTenths;
 
             if (_transmitting &&

@@ -30,6 +30,7 @@ namespace TopSpeed.Drive.Multiplayer
             _pendingResultSummary = null;
             _localCrashCount = 0;
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _unkeyQueue = 0;
             _speakTime = 0f;
             _lap = 0;

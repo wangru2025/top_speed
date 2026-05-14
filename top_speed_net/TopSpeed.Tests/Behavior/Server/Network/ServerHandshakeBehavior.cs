@@ -129,6 +129,40 @@ public sealed class ServerHandshakeBehaviorTests
         status.Should().Be(ProtocolCompatStatus.CompatibleDowngrade);
     }
 
+    [Fact]
+    public void HandshakeNegotiatedVersion_ShouldUseClientVersion_WhenStatusIsExact()
+    {
+        var negotiated = RaceServer.ResolveNegotiatedVersionForSessionForTest(
+            ProtocolCompatStatus.Exact,
+            ProtocolProfile.ServerSupported.MaxSupported,
+            ProtocolProfile.Current);
+
+        negotiated.Should().Be(ProtocolProfile.Current);
+    }
+
+    [Fact]
+    public void HandshakeNegotiatedVersion_ShouldKeepNegotiated_WhenStatusIsCompatibleDowngrade()
+    {
+        var negotiated = RaceServer.ResolveNegotiatedVersionForSessionForTest(
+            ProtocolCompatStatus.CompatibleDowngrade,
+            ProtocolProfile.ServerSupported.MaxSupported,
+            ProtocolProfile.ClientSupported.MinSupported);
+
+        negotiated.Should().Be(ProtocolProfile.ServerSupported.MaxSupported);
+    }
+
+    [Fact]
+    public void PlayersSnapshot_ShouldReportClientVersion_NotNegotiatedRangeMax()
+    {
+        using var fixture = new HandshakeFixture();
+        fixture.SendProtocolHello();
+        fixture.SendPlayerHello("pilot");
+
+        var players = fixture.Server.GetPlayersSnapshot();
+        players.Should().HaveCount(1);
+        players[0].ProtocolVersion.Should().Be(ProtocolProfile.Current);
+    }
+
     private sealed class HandshakeFixture : IDisposable
     {
         public HandshakeFixture(ServerModerationSettings? moderation = null)

@@ -48,7 +48,7 @@ namespace TopSpeed.Server.Network
                 for (var i = 0; i < players.Length; i++)
                 {
                     var player = players[i];
-                    result.Add(new ServerPlayerInfo(GetPlayerDisplayName(player), player.NegotiatedProtocol));
+                    result.Add(new ServerPlayerInfo(GetPlayerDisplayName(player), player.ClientVersion));
                 }
 
                 return result.ToArray();

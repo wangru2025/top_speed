@@ -93,9 +93,7 @@ namespace TopSpeed.Server.Network
 
             var serverRange = ProtocolProfile.ServerSupported;
             var compat = ProtocolCompat.Resolve(clientRange, serverRange);
-            var effectiveStatus = compat.Status;
-            if (compat.IsCompatible && compat.NegotiatedVersion != hello.ClientVersion)
-                effectiveStatus = ProtocolCompatStatus.CompatibleDowngrade;
+            var effectiveStatus = ResolveEffectiveCompatibilityStatusForTest(compat, hello.ClientVersion);
 
             if (!compat.IsCompatible)
             {
@@ -105,7 +103,7 @@ namespace TopSpeed.Server.Network
                     NegotiatedVersion = compat.NegotiatedVersion,
                     ServerMinSupported = serverRange.MinSupported,
                     ServerMaxSupported = serverRange.MaxSupported,
-                    Message = BuildHandshakeMessage(effectiveStatus, hello.ClientVersion, serverRange)
+                    Message = BuildHandshakeMessage(effectiveStatus, hello.ClientVersion, ProtocolProfile.Current, serverRange)
                 };
                 SendStream(player, PacketSerializer.WriteProtocolWelcome(rejectedWelcome), PacketStream.Control);
                 _logger.Warning(
@@ -142,9 +140,19 @@ namespace TopSpeed.Server.Network
                 ServerMinSupported = serverRange.MinSupported,
                 ServerMaxSupported = serverRange.MaxSupported,
                 ResumeToken = player.ResumeToken,
-                Message = BuildHandshakeMessage(effectiveStatus, hello.ClientVersion, serverRange)
+                Message = BuildHandshakeMessage(effectiveStatus, hello.ClientVersion, ProtocolProfile.Current, serverRange)
             };
             SendStream(player, PacketSerializer.WriteProtocolWelcome(welcome), PacketStream.Control);
+        }
+
+        internal static ProtocolCompatStatus ResolveEffectiveCompatibilityStatusForTest(ProtocolCompatResult compat, ProtocolVer clientVersion)
+        {
+            if (!compat.IsCompatible)
+                return compat.Status;
+
+            return clientVersion == ProtocolProfile.Current
+                ? ProtocolCompatStatus.Exact
+                : ProtocolCompatStatus.CompatibleDowngrade;
         }
 
         private void RejectHandshake(PlayerConnection player, string message)
@@ -181,22 +189,24 @@ namespace TopSpeed.Server.Network
                 disconnectMessage: welcome.Message);
         }
 
-        private static string BuildHandshakeMessage(ProtocolCompatStatus status, ProtocolVer clientVersion, ProtocolRange serverRange)
+        private static string BuildHandshakeMessage(ProtocolCompatStatus status, ProtocolVer clientVersion, ProtocolVer serverCurrentVersion, ProtocolRange serverRange)
         {
             switch (status)
             {
                 case ProtocolCompatStatus.Exact:
                     return LocalizationService.Mark("Protocol compatibility verified.");
                 case ProtocolCompatStatus.CompatibleDowngrade:
-                    if (clientVersion > serverRange.MaxSupported)
+                    if (clientVersion > serverCurrentVersion)
                         return LocalizationService.Format(
-                            LocalizationService.Mark("Your client protocol version is newer than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
+                            LocalizationService.Mark("Your client protocol version {0} is newer than this server protocol version {1}. This server supports protocol versions {2}. You can continue, but some features may behave differently or may not work at all."),
                             clientVersion,
+                            serverCurrentVersion,
                             serverRange);
 
                     return LocalizationService.Format(
-                        LocalizationService.Mark("Your client protocol version is older than this server: {0}. This server supports protocol versions {1}. You can continue, but some features may behave differently or may not work at all."),
+                        LocalizationService.Mark("Your client protocol version {0} is older than this server protocol version {1}. This server supports protocol versions {2}. You can continue, but some features may behave differently or may not work at all."),
                         clientVersion,
+                        serverCurrentVersion,
                         serverRange);
                 case ProtocolCompatStatus.ClientTooOld:
                     return LocalizationService.Format(

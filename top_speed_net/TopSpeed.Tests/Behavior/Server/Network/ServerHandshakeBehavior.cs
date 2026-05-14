@@ -109,6 +109,26 @@ public sealed class ServerHandshakeBehaviorTests
         fixture.Server.GetStressSnapshotForTest().PlayerCount.Should().Be(1);
     }
 
+    [Fact]
+    public void HandshakeCompatibilityStatus_ShouldStayExact_WhenClientCurrentMatchesServerCurrent()
+    {
+        var compat = ProtocolCompat.Resolve(ProtocolProfile.ClientSupported, ProtocolProfile.ServerSupported);
+        compat.IsCompatible.Should().BeTrue();
+
+        var status = RaceServer.ResolveEffectiveCompatibilityStatusForTest(compat, ProtocolProfile.Current);
+        status.Should().Be(ProtocolCompatStatus.Exact);
+    }
+
+    [Fact]
+    public void HandshakeCompatibilityStatus_ShouldDowngrade_WhenClientCurrentDiffersFromServerCurrent()
+    {
+        var compat = ProtocolCompat.Resolve(ProtocolProfile.ClientSupported, ProtocolProfile.ServerSupported);
+        compat.IsCompatible.Should().BeTrue();
+
+        var status = RaceServer.ResolveEffectiveCompatibilityStatusForTest(compat, ProtocolProfile.ClientSupported.MinSupported);
+        status.Should().Be(ProtocolCompatStatus.CompatibleDowngrade);
+    }
+
     private sealed class HandshakeFixture : IDisposable
     {
         public HandshakeFixture(ServerModerationSettings? moderation = null)

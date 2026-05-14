@@ -33,6 +33,7 @@ namespace TopSpeed.Drive.Single
             _pendingResultSummary = null;
             _localCrashCount = 0;
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _unkeyQueue = 0;
             _speakTime = 0f;
             _lap = 0;
@@ -88,6 +89,7 @@ namespace TopSpeed.Drive.Single
         public void Dispose()
         {
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _panelManager.Dispose();
             _localRadio.Dispose();
             _car.Dispose();
@@ -109,6 +111,7 @@ namespace TopSpeed.Drive.Single
             for (var i = 0; i < _soundPlayerNr.Length; i++)
             {
                 DisposeSound(_soundPlayerNr[i]);
+                DisposeSound(_soundPlayerNrInfo[i]);
                 DisposeSound(_soundPosition[i]);
                 DisposeSound(_soundFinished[i]);
             }
@@ -146,6 +149,9 @@ namespace TopSpeed.Drive.Single
                 case Events.PlaySound:
                     QueueSound(sessionEvent.Data as Source);
                     break;
+                case Events.PlayInfoSound:
+                    QueueRaceInfoSound(sessionEvent.Data as Source);
+                    break;
                 case Events.PlayUnkey:
                     _unkeyQueue--;
                     if (_unkeyQueue == 0)
@@ -164,6 +170,7 @@ namespace TopSpeed.Drive.Single
             if (phaseChanged.Current == Phase.Paused)
             {
                 _soundQueue.Pause();
+                _raceInfoQueue.Pause();
                 _track.PauseAudio();
                 _soundTheme?.Play(loop: true);
                 FadeInTheme();
@@ -178,6 +185,7 @@ namespace TopSpeed.Drive.Single
             if (phaseChanged.Previous == Phase.Paused)
             {
                 _soundQueue.Resume();
+                _raceInfoQueue.Resume();
                 _track.ResumeAudio();
                 _car.Unpause();
                 for (var i = 0; i < _nComputerPlayers; i++)
@@ -222,7 +230,7 @@ namespace TopSpeed.Drive.Single
                 return false;
             if (_requirePostFinishStopBeforeExit && !AreVehiclesSettledForExit())
                 return false;
-            return _soundQueue.IsIdle;
+            return _soundQueue.IsIdle && _raceInfoQueue.IsIdle;
         }
 
         private float CalculateGridStartX(int gridIndex, float vehicleWidth, float startLineY)

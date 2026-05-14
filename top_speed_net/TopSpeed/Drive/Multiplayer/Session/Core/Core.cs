@@ -46,6 +46,7 @@ namespace TopSpeed.Drive.Multiplayer
             _resolvePlayerName = resolvePlayerName ?? throw new ArgumentNullException(nameof(resolvePlayerName));
             _finishLockController = new FinishLockInputController(input);
             _soundQueue = new Queue();
+            _raceInfoQueue = new Queue();
             _manualTransmission = !automaticTransmission;
             _lapLimit = laps;
             _participants = new ParticipantState(MaxPlayers);
@@ -53,6 +54,7 @@ namespace TopSpeed.Drive.Multiplayer
             _runtime = new RuntimeState();
             _soundPosition = new AudioSource?[MaxPlayers];
             _soundPlayerNr = new AudioSource?[MaxPlayers];
+            _soundPlayerNrInfo = new AudioSource?[MaxPlayers];
             _soundFinished = new AudioSource?[MaxPlayers];
             _liveTx = new Tx(_network);
 

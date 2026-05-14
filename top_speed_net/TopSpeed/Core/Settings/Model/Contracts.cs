@@ -229,6 +229,8 @@ namespace TopSpeed.Core.Settings
         [DataMember(Name = "lastServerAddress")] public string? LastServerAddress { get; set; }
         [DataMember(Name = "defaultServerPort")] public int? DefaultServerPort { get; set; }
         [DataMember(Name = "defaultCallSign")] public string? DefaultCallSign { get; set; }
+        [DataMember(Name = "useUpdateProxy")] public bool? UseUpdateProxy { get; set; }
+        [DataMember(Name = "updateProxyUrlPrefix")] public string? UpdateProxyUrlPrefix { get; set; }
         [DataMember(Name = "savedServers")] public SettingsSavedServersDocument? SavedServers { get; set; }
     }
 

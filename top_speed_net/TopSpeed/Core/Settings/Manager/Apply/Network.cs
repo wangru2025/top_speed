@@ -14,6 +14,10 @@ namespace TopSpeed.Core.Settings
             settings.DefaultServerPort = ReadDefaultServerPort(network.DefaultServerPort, settings.DefaultServerPort, "network.defaultServerPort", issues);
             if (network.DefaultCallSign != null)
                 settings.DefaultCallSign = (network.DefaultCallSign ?? string.Empty).Trim();
+            if (network.UseUpdateProxy.HasValue)
+                settings.UseUpdateProxy = network.UseUpdateProxy.Value;
+            if (network.UpdateProxyUrlPrefix != null)
+                settings.UpdateProxyUrlPrefix = (network.UpdateProxyUrlPrefix ?? string.Empty).Trim();
             settings.SavedServers = ParseSavedServers(network.SavedServers?.Servers, issues);
         }
 

@@ -6,14 +6,14 @@ namespace TopSpeed.Protocol
         // Client release version used by updater checks and release packaging.
         public const ushort ClientYear = 2026;
         public const byte ClientMonth = 5;
-        public const byte ClientDay = 9;
+        public const byte ClientDay = 14;
         public const byte ClientRevision = 1;
 
         // Server release version used by updater checks and packaging.
         public const ushort ServerYear = 2026;
         public const byte ServerMonth = 5;
-        public const byte ServerDay = 5;
-        public const byte ServerRevision = 3;
+        public const byte ServerDay = 14;
+        public const byte ServerRevision = 1;
     }
 
     // Edit protocol compatibility values here (network handshake only).
@@ -25,8 +25,8 @@ namespace TopSpeed.Protocol
         // Current protocol implementation version (year.month.day.revision).
         public const ushort CurrentYear = 2026;
         public const byte CurrentMonth = 5;
-        public const byte CurrentDay = 5;
-        public const byte CurrentRevision = 2;
+        public const byte CurrentDay = 14;
+        public const byte CurrentRevision = 1;
 
         // Client supported protocol range (explicit values by design).
         public const ushort ClientMinYear = 2026;
@@ -35,7 +35,7 @@ namespace TopSpeed.Protocol
         public const byte ClientMinRevision = 1;
         public const ushort ClientMaxYear = 2026;
         public const byte ClientMaxMonth = 5;
-        public const byte ClientMaxDay = 5;
+        public const byte ClientMaxDay = 14;
         public const byte ClientMaxRevision = 2;
 
         // Server supported protocol range (explicit values by design).
@@ -45,7 +45,7 @@ namespace TopSpeed.Protocol
         public const byte ServerMinRevision = 1;
         public const ushort ServerMaxYear = 2026;
         public const byte ServerMaxMonth = 5;
-        public const byte ServerMaxDay = 5;
+        public const byte ServerMaxDay = 14;
         public const byte ServerMaxRevision = 2;
     }
 }

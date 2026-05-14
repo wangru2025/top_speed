@@ -10,6 +10,16 @@ namespace TopSpeed.Menu
     {
         private MenuScreen BuildOptionsGameSettingsMenu()
         {
+            return BackMenu("options_game", BuildGeneralSettingsItems());
+        }
+
+        internal void RefreshGeneralSettingsMenu()
+        {
+            _menu.UpdateItems("options_game", BuildGeneralSettingsItems(), preserveSelection: true);
+        }
+
+        private List<MenuItem> BuildGeneralSettingsItems()
+        {
             var items = new List<MenuItem>
             {
                 new MenuItem(
@@ -58,9 +68,24 @@ namespace TopSpeed.Menu
                 new CheckBox(LocalizationService.Mark("Check for updates on startup"),
                     () => _settings.AutoCheckUpdates,
                     value => _settingsActions.UpdateSetting(() => _settings.AutoCheckUpdates = value),
-                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, the game checks for updates automatically after the logo.")))
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, the game checks for updates automatically after the logo."))),
+                new CheckBox(LocalizationService.Mark("Use proxy for updates and changes"),
+                    () => _settings.UseUpdateProxy,
+                    value => _settingsActions.SetUseUpdateProxy(value),
+                    onChanged: _ => RefreshGeneralSettingsMenu(),
+                    hintProvider: HintToggleProvider(LocalizationService.Mark("When checked, update checks, update downloads, and latest changes requests are routed through your proxy URL.")))
             };
-            return BackMenu("options_game", items);
+
+            if (_settings.UseUpdateProxy)
+            {
+                items.Add(new MenuItem(
+                    BuildProxyUrlItemText,
+                    MenuAction.None,
+                    onActivate: _settingsActions.EditUpdateProxyUrl,
+                    hintProvider: HintSelectProvider(LocalizationService.Mark("Edit the proxy URL used for update checks, downloads, and latest changes requests."))));
+            }
+
+            return items;
         }
 
         private string BuildLanguageOptionText()
@@ -102,6 +127,15 @@ namespace TopSpeed.Menu
             }
 
             return 0;
+        }
+
+        private string BuildProxyUrlItemText()
+        {
+            return string.IsNullOrWhiteSpace(_settings.UpdateProxyUrlPrefix)
+                ? LocalizationService.Mark("Proxy URL, currently empty.")
+                : LocalizationService.Format(
+                    LocalizationService.Mark("Proxy URL, currently set to {0}"),
+                    _settings.UpdateProxyUrlPrefix);
         }
     }
 }

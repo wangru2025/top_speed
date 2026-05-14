@@ -104,6 +104,8 @@ namespace TopSpeed.Core.Settings
                     LastServerAddress = settings.LastServerAddress,
                     DefaultServerPort = settings.DefaultServerPort,
                     DefaultCallSign = settings.DefaultCallSign,
+                    UseUpdateProxy = settings.UseUpdateProxy,
+                    UpdateProxyUrlPrefix = settings.UpdateProxyUrlPrefix,
                     SavedServers = new SettingsSavedServersDocument
                     {
                         Servers = BuildSavedServers(settings.SavedServers)

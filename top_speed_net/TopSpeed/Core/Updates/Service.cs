@@ -13,6 +13,9 @@ namespace TopSpeed.Core.Updates
     {
         private readonly UpdateConfig _config;
         private readonly HttpClient _http;
+        private readonly object _proxyLock = new object();
+        private bool _useProxy;
+        private string _proxyPrefix = string.Empty;
 
         public UpdateService(UpdateConfig config)
         {
@@ -20,6 +23,15 @@ namespace TopSpeed.Core.Updates
             _http = new HttpClient();
             _http.DefaultRequestHeaders.UserAgent.ParseAdd("TopSpeedUpdater/1.0");
             _http.Timeout = TimeSpan.FromSeconds(25);
+        }
+
+        public void ConfigureProxy(bool enabled, string? urlPrefix)
+        {
+            lock (_proxyLock)
+            {
+                _useProxy = enabled;
+                _proxyPrefix = (urlPrefix ?? string.Empty).Trim();
+            }
         }
 
         public async Task<UpdateCheckResult> CheckAsync(GameVersion current, CancellationToken cancellationToken)
@@ -123,10 +135,11 @@ namespace TopSpeed.Core.Updates
                 throw new ArgumentException("Target directory is required.", nameof(targetDirectory));
 
             var zipPath = Path.Combine(targetDirectory, _config.BuildExpectedAssetName(update.VersionText));
+            var downloadUrl = ResolveProxyUrl(update.DownloadUrl);
 
             try
             {
-                using (var response = await _http.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+                using (var response = await _http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                         return new DownloadResult
@@ -212,7 +225,7 @@ namespace TopSpeed.Core.Updates
 
         private async Task<InfoDoc?> ReadInfoAsync(CancellationToken cancellationToken)
         {
-            using (var response = await _http.GetAsync(_config.InfoUrl, cancellationToken).ConfigureAwait(false))
+            using (var response = await _http.GetAsync(ResolveProxyUrl(_config.InfoUrl), cancellationToken).ConfigureAwait(false))
             {
                 if (!response.IsSuccessStatusCode)
                     return null;
@@ -225,7 +238,7 @@ namespace TopSpeed.Core.Updates
 
         private async Task<ReleaseDoc?> ReadLatestReleaseAsync(CancellationToken cancellationToken)
         {
-            using (var response = await _http.GetAsync(_config.LatestReleaseApiUrl, cancellationToken).ConfigureAwait(false))
+            using (var response = await _http.GetAsync(ResolveProxyUrl(_config.LatestReleaseApiUrl), cancellationToken).ConfigureAwait(false))
             {
                 if (!response.IsSuccessStatusCode)
                     return null;
@@ -240,6 +253,33 @@ namespace TopSpeed.Core.Updates
         {
             var serializer = new DataContractJsonSerializer(typeof(T));
             return serializer.ReadObject(stream) as T;
+        }
+
+        private string ResolveProxyUrl(string? url)
+        {
+            var value = (url ?? string.Empty).Trim();
+            if (value.Length == 0)
+                return value;
+
+            bool useProxy;
+            string prefix;
+            lock (_proxyLock)
+            {
+                useProxy = _useProxy;
+                prefix = _proxyPrefix;
+            }
+
+            if (!useProxy || string.IsNullOrWhiteSpace(prefix))
+                return value;
+
+            var trimmedPrefix = prefix.Trim();
+            if (value.StartsWith(trimmedPrefix, StringComparison.OrdinalIgnoreCase))
+                return value;
+
+            if (!trimmedPrefix.EndsWith("/", StringComparison.Ordinal))
+                trimmedPrefix += "/";
+
+            return trimmedPrefix + value;
         }
 
         private static ReleaseAssetDoc? FindAsset(ReleaseDoc? release, string expectedName)

@@ -9,7 +9,7 @@ namespace TopSpeed.Menu
         {
             var items = new List<MenuItem>
             {
-                new MenuItem(LocalizationService.Mark("Game settings"),
+                new MenuItem(LocalizationService.Mark("General"),
                     MenuAction.None,
                     nextMenuId: "options_game",
                     hint: LocalizationService.Mark("Configure general gameplay and interface behavior, including units, usage hints, menu behavior, and update checking.")),

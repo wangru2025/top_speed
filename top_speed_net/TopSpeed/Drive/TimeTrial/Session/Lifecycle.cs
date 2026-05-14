@@ -26,6 +26,7 @@ namespace TopSpeed.Drive.TimeTrial
             _lapTimes.Clear();
             _lastLapRaceTimeMs = 0;
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _unkeyQueue = 0;
             _speakTime = 0f;
             _lap = 0;
@@ -73,6 +74,7 @@ namespace TopSpeed.Drive.TimeTrial
         public void Dispose()
         {
             _soundQueue.Clear();
+            _raceInfoQueue.Clear();
             _panelManager.Dispose();
             _localRadio.Dispose();
             _car.Dispose();
@@ -103,7 +105,7 @@ namespace TopSpeed.Drive.TimeTrial
                 return false;
             if (_requirePostFinishStopBeforeExit && _car.Speed > PostFinishStopSpeedKph)
                 return false;
-            return _soundQueue.IsIdle;
+            return _soundQueue.IsIdle && _raceInfoQueue.IsIdle;
         }
 
         private void RequestExitWhenQueueIdle()

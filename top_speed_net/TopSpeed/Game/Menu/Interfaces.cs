@@ -53,6 +53,8 @@ namespace TopSpeed.Game
         void IMenuSettingsActions.SetSpeechMode(SpeechOutputMode mode) => SetSpeechMode(mode);
         void IMenuSettingsActions.SetSpeechVoice(int? voiceIndex) => SetSpeechVoice(voiceIndex);
         void IMenuSettingsActions.SetSpeechRate(float rate) => SetSpeechRate(rate);
+        void IMenuSettingsActions.SetUseUpdateProxy(bool enabled) => SetUseUpdateProxy(enabled);
+        void IMenuSettingsActions.EditUpdateProxyUrl() => EditUpdateProxyUrl();
         void IMenuSettingsActions.UpdateSetting(Action update) => UpdateSetting(update);
 
         void IMenuMappingActions.BeginMapping(InputMappingMode mode, DriveIntent action) => _inputMapping.BeginMapping(mode, action);

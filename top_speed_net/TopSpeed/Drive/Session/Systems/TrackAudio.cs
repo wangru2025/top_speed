@@ -66,7 +66,7 @@ namespace TopSpeed.Drive.Session.Systems
             if ((int)_settings.Copilot > 1 && nextRoad.Surface != currentRoad.Surface)
             {
                 var index = (int)nextRoad.Surface + 8;
-                _queueEvent(new Event(Events.PlaySound, _getRandomSound(index)), 1.0f);
+                _queueEvent(new Event(Events.PlayInfoSound, _getRandomSound(index)), 1.0f);
             }
 
             return nextRoad;

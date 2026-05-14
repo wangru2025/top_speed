@@ -1,17 +1,17 @@
 {
-  "version": "2026.5.9.1",
-  "serverVersion": "2026.5.5.3",
+  "version": "2026.5.14.1",
+  "serverVersion": "2026.5.14.1",
   "changes": [
-    "Fixed many bugs with the multiplayer server.",
-    "Added a new way of navigating through message history by using the comma to move to the previous item, period to move to the next item, and left/right brackets are used to navigate between buffers. The separate history screen is still available.",
-    "Added an ability to copy the current buffer item to the clipboard by pressing ctrl+space, or by going to the history and pressing enter on any message there.",
-    "Added the ability to reset menu shortcuts to their defaults.",
-    "Fixed the in-vehicle radio in multiplayer crashing when a track finishes and loops back to the start (notably with FLAC files).",
-    "Added a Communicator volume slider in audio options that controls both communicator activation cues and remote voice playback, independent of the radio volume.",
-    "Added a Microphone input gain slider in audio options so quiet microphones can be boosted before being sent over voice chat. Defaults to 200 percent."
+    "Added a full voice chat system to the game. Any player who is connected to a server can enable their communicator by pressing ctrl+shift+c to listen to other players, and either holding v or ctrl+shift+v to talk.",
+    "The communicator has a frequency, between 0.0 and 1000.0. The default public frequency is 1.0 which is by default all players are tuned to. You can read the current frequency by pressing f, and change it by pressing ctrl+f.",
+    "There are new settings in the audio to choose the default voice input device and Microphone gain.",
+    "Added a new category in the volume settings for communicator. This controls the loudness of communicator sounds as well as other players. This does not affect the radio.",
+   " You now have the ability to stream files anywhere using your communicator by pressing ctrl+f to load a folder, or ctrl+o to load a file, then playing it with ctrl+p. Shortcut keys are similar to the radio, except adding ctrl with the key. For example, toggle loop is ctrl+l.",
+    "Added a new quicker way of controling different volume categories, by pressing f6 and shift+f6 to switch between different categories, and f7, f8 + adding shift with those keys control the actual volume.",
+    "Added proxy support to the game when downloading updates or external requests."
   ],
   "serverChanges": [
-    "Fixed some deadlock bugs with rooms where players would get stuck in a room after a while.",
-    "Voice chat is now relayed to every connected player on the server (filtered client-side by communicator frequency) instead of being scoped to a single room, so voice works in the multiplayer lobby and across rooms."
+    "Added voice chat support.",
+    "Added a new flag to control voice chat on the server level."
   ]
 }

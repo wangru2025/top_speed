@@ -11,12 +11,25 @@ namespace TopSpeed.Drive.TimeTrial
     {
         private void Speak(Source sound, bool unKey = false)
         {
+            SpeakCore(sound, queueToRaceInfo: false, unKey);
+        }
+
+        private void SpeakRaceInfo(Source sound, bool unKey = false)
+        {
+            SpeakCore(sound, queueToRaceInfo: true, unKey);
+        }
+
+        private void SpeakCore(Source sound, bool queueToRaceInfo, bool unKey)
+        {
             if (sound == null)
                 return;
 
             var length = Math.Max(0.05f, sound.LengthSeconds);
             _speakTime = Math.Max(_speakTime, _session.Context.ProgressSeconds) + length;
-            QueueSound(sound);
+            if (queueToRaceInfo)
+                QueueRaceInfoSound(sound);
+            else
+                QueueSound(sound);
 
             if (unKey)
             {
@@ -36,6 +49,14 @@ namespace TopSpeed.Drive.TimeTrial
                 return;
 
             _soundQueue.Enqueue(sound);
+        }
+
+        private void QueueRaceInfoSound(Source? sound)
+        {
+            if (sound == null)
+                return;
+
+            _raceInfoQueue.Enqueue(sound);
         }
 
         private void RefreshCategoryVolumes()
@@ -78,7 +99,7 @@ namespace TopSpeed.Drive.TimeTrial
         {
             var finishSound = GetRandomSoundBySlot((int)RandomSoundSlot.Finish);
             if (finishSound != null)
-                Speak(finishSound, true);
+                SpeakRaceInfo(finishSound, true);
         }
     }
 }

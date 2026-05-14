@@ -31,6 +31,9 @@ namespace TopSpeed.Drive.Multiplayer
                 case Events.PlaySound:
                     QueueSound(sessionEvent.Data as TS.Audio.Source);
                     break;
+                case Events.PlayInfoSound:
+                    QueueRaceInfoSound(sessionEvent.Data as TS.Audio.Source);
+                    break;
                 case Events.PlayUnkey:
                     _unkeyQueue--;
                     if (_unkeyQueue == 0)
@@ -48,6 +51,7 @@ namespace TopSpeed.Drive.Multiplayer
             if (phaseChanged.Current == Phase.Paused)
             {
                 _soundQueue.Pause();
+                _raceInfoQueue.Pause();
                 _track.PauseAudio();
                 _car.Pause();
                 foreach (var remote in _remotePlayers.Values)
@@ -61,6 +65,7 @@ namespace TopSpeed.Drive.Multiplayer
             if (phaseChanged.Previous == Phase.Paused)
             {
                 _soundQueue.Resume();
+                _raceInfoQueue.Resume();
                 _track.ResumeAudio();
                 _car.Unpause();
                 foreach (var remote in _remotePlayers.Values)
@@ -105,7 +110,7 @@ namespace TopSpeed.Drive.Multiplayer
                 return;
 
             _finished = true;
-            SpeakIfLoaded(GetRandomSoundBySlot((int)RandomSoundSlot.Finish), true);
+            SpeakRaceInfoIfLoaded(GetRandomSoundBySlot((int)RandomSoundSlot.Finish), true);
 
             TopSpeed.Drive.Session.FinishVehicle.Apply(_car, _finishLockController);
             _raceTime = Math.Max(0, _session.Context.ProgressMilliseconds);

@@ -30,6 +30,8 @@ namespace TopSpeed.Game
             _menu.SetMenuAutoFocus(_settings.MenuAutoFocus);
             _menu.ResetShortcutBindings();
             _menuRegistry.RefreshSpeechSettingsMenu();
+            _menuRegistry.RefreshGeneralSettingsMenu();
+            ApplyUpdateProxySettings();
             ApplyAudioSettings();
             SaveSettings();
             _speech.Speak(LocalizationService.Mark("Defaults restored."));

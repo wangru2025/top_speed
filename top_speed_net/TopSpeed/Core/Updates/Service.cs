@@ -13,6 +13,8 @@ namespace TopSpeed.Core.Updates
     {
         private readonly UpdateConfig _config;
         private readonly HttpClient _http;
+        private bool _useProxy;
+        private string _proxyUrlPrefix = string.Empty;
 
         public UpdateService(UpdateConfig config)
             : this(config, CreateDefaultHttpClient())
@@ -23,6 +25,12 @@ namespace TopSpeed.Core.Updates
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _http = http ?? throw new ArgumentNullException(nameof(http));
+        }
+
+        public void ConfigureProxy(bool enabled, string urlPrefix)
+        {
+            _useProxy = enabled && !string.IsNullOrWhiteSpace(urlPrefix);
+            _proxyUrlPrefix = NormalizeProxyUrlPrefix(urlPrefix);
         }
 
         public async Task<UpdateCheckResult> CheckAsync(GameVersion current, CancellationToken cancellationToken)
@@ -205,7 +213,10 @@ namespace TopSpeed.Core.Updates
             Action<DownloadProgress> onProgress,
             CancellationToken cancellationToken)
         {
-            using (var response = await _http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
+            using (var response = await _http.GetAsync(
+                RewriteUrl(downloadUrl),
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken).ConfigureAwait(false))
             {
                 if (!response.IsSuccessStatusCode)
                     return new DownloadResult
@@ -275,7 +286,7 @@ namespace TopSpeed.Core.Updates
                 var source = _config.Sources[i];
                 try
                 {
-                    using (var response = await _http.GetAsync(source.InfoUrl, cancellationToken).ConfigureAwait(false))
+                    using (var response = await _http.GetAsync(RewriteUrl(source.InfoUrl), cancellationToken).ConfigureAwait(false))
                     {
                         if (!response.IsSuccessStatusCode)
                             continue;
@@ -338,7 +349,7 @@ namespace TopSpeed.Core.Updates
         {
             try
             {
-                using (var response = await _http.GetAsync(source.LatestReleaseApiUrl, cancellationToken).ConfigureAwait(false))
+                using (var response = await _http.GetAsync(RewriteUrl(source.LatestReleaseApiUrl), cancellationToken).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                         return null;
@@ -432,6 +443,24 @@ namespace TopSpeed.Core.Updates
             http.DefaultRequestHeaders.UserAgent.ParseAdd("TopSpeedUpdater/1.0");
             http.Timeout = TimeSpan.FromSeconds(25);
             return http;
+        }
+
+        private string RewriteUrl(string url)
+        {
+            if (!_useProxy || string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(_proxyUrlPrefix))
+                return url;
+
+            return _proxyUrlPrefix + Uri.EscapeDataString(url);
+        }
+
+        private static string NormalizeProxyUrlPrefix(string urlPrefix)
+        {
+            var trimmed = (urlPrefix ?? string.Empty).Trim();
+            if (trimmed.Length == 0)
+                return string.Empty;
+            if (!trimmed.EndsWith("/", StringComparison.Ordinal))
+                trimmed += "/";
+            return trimmed;
         }
 
         private static UpdateCheckResult Fail(string message)

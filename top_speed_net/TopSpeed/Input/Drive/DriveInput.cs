@@ -83,6 +83,7 @@ namespace TopSpeed.Input
         private AxisOrButton _startEngine;
         private AxisOrButton _reportDistance;
         private AxisOrButton _reportSpeed;
+        private AxisOrButton _reportFuel;
         private AxisOrButton _trackName;
         private AxisOrButton _pause;
         private InputDeviceMode _deviceMode;
@@ -103,6 +104,7 @@ namespace TopSpeed.Input
         private Key _kbStartEngine;
         private Key _kbReportDistance;
         private Key _kbReportSpeed;
+        private Key _kbReportFuel;
         private Key _kbPlayer1;
         private Key _kbPlayer2;
         private Key _kbPlayer3;
@@ -152,6 +154,7 @@ namespace TopSpeed.Input
         private bool _touchStartEngine;
         private bool _touchReportDistance;
         private bool _touchReportSpeed;
+        private bool _touchReportFuel;
         private bool _touchCurrentGear;
         private bool _touchCurrentLapNr;
         private bool _touchCurrentRacePerc;

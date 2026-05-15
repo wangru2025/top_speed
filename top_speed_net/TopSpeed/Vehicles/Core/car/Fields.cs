@@ -161,6 +161,7 @@ namespace TopSpeed.Vehicles
         private bool _fuelLow;
         private bool _fuelEmpty;
         private float _fuelPowerScale = 1f;
+        private float _fuelWarningPulseTimerSeconds;
 
         private Source _soundEngine = default!;
         private Source? _soundThrottle;
@@ -179,6 +180,7 @@ namespace TopSpeed.Vehicles
         private Source? _soundWipers;
         private Source _soundBump = default!;
         private Source _soundBadSwitch = default!;
+        private Source _soundFuelWarning = default!;
         private Source? _soundBackfire;
         private Source[] _soundBackfireVariants = Array.Empty<Source>();
         private int _lastPlayerEngineVolumePercent = -1;

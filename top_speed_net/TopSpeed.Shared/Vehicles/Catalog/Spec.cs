@@ -87,7 +87,9 @@ namespace TopSpeed.Vehicles
             float idleControlGainNmPerRpm = -1f,
             float minCoupledRiseIdleRpmPerSecond = -1f,
             float minCoupledRiseFullRpmPerSecond = -1f,
-            float overrunCurveExponent = -1f)
+            float overrunCurveExponent = -1f,
+            float fuelTankCapacityLiters = -1f,
+            float engineDisplacementLiters = -1f)
         {
             CarType = carType;
             Name = name;
@@ -104,8 +106,12 @@ namespace TopSpeed.Vehicles
             RevLimiter = revLimiter;
             AutoShiftRpm = autoShiftRpm;
             EngineBraking = engineBraking;
-            FuelTankCapacityLiters = FuelDefaults.DefaultTankCapacityLiters;
-            EngineDisplacementLiters = ResolveDefaultEngineDisplacementLiters(carType);
+            FuelTankCapacityLiters = fuelTankCapacityLiters > 0f
+                ? Math.Max(FuelDefaults.MinTankCapacityLiters, Math.Min(FuelDefaults.MaxTankCapacityLiters, fuelTankCapacityLiters))
+                : FuelDefaults.DefaultTankCapacityLiters;
+            EngineDisplacementLiters = engineDisplacementLiters > 0f
+                ? Math.Max(FuelDefaults.MinEngineDisplacementLiters, Math.Min(FuelDefaults.MaxEngineDisplacementLiters, engineDisplacementLiters))
+                : ResolveDefaultEngineDisplacementLiters(carType);
             MassKg = massKg;
             DrivetrainEfficiency = drivetrainEfficiency;
             EngineBrakingTorqueNm = engineBrakingTorqueNm;

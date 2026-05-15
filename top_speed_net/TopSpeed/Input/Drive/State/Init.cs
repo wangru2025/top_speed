@@ -25,6 +25,7 @@ namespace TopSpeed.Input
             _startEngine = AxisOrButton.AxisNone;
             _reportDistance = AxisOrButton.AxisNone;
             _reportSpeed = AxisOrButton.AxisNone;
+            _reportFuel = AxisOrButton.AxisNone;
             _trackName = AxisOrButton.AxisNone;
             _pause = AxisOrButton.AxisNone;
             ReadFromSettings();
@@ -75,6 +76,7 @@ namespace TopSpeed.Input
             _startEngine = _settings.GetControllerBinding(DriveIntent.StartEngine);
             _reportDistance = _settings.GetControllerBinding(DriveIntent.ReportDistance);
             _reportSpeed = _settings.GetControllerBinding(DriveIntent.ReportSpeed);
+            _reportFuel = _settings.GetControllerBinding(DriveIntent.ReportFuel);
             _trackName = _settings.GetControllerBinding(DriveIntent.TrackName);
             _pause = _settings.GetControllerBinding(DriveIntent.Pause);
             _center = _settings.ControllerCenter;
@@ -96,6 +98,7 @@ namespace TopSpeed.Input
             _kbStartEngine = _settings.GetKeyboardBinding(DriveIntent.StartEngine);
             _kbReportDistance = _settings.GetKeyboardBinding(DriveIntent.ReportDistance);
             _kbReportSpeed = _settings.GetKeyboardBinding(DriveIntent.ReportSpeed);
+            _kbReportFuel = _settings.GetKeyboardBinding(DriveIntent.ReportFuel);
             _kbTrackName = _settings.GetKeyboardBinding(DriveIntent.TrackName);
             _kbPause = _settings.GetKeyboardBinding(DriveIntent.Pause);
             _deviceMode = _settings.DeviceMode;

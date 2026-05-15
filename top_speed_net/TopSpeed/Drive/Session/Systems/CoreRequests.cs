@@ -63,6 +63,7 @@ namespace TopSpeed.Drive.Session.Systems
             HandleCurrentRaceTimeRequest();
             HandleTrackNameRequest();
             HandleSpeedReportRequest();
+            HandleFuelReportRequest();
             HandleDistanceReportRequest();
         }
 
@@ -170,25 +171,30 @@ namespace TopSpeed.Drive.Session.Systems
             var speedKmh = _car.SpeedKmh;
             var rpm = _car.EngineRpm;
             var horsepower = _car.EngineNetHorsepower;
-            var fuelStatus = BuildFuelStatusPhrase();
             if (_settings.Units == UnitSystem.Imperial)
             {
                 _speakText(LocalizationService.Format(
-                    LocalizationService.Mark("{0:F0} miles per hour, {1:F0} RPM, {2:F0} horsepower, {3}"),
+                    LocalizationService.Mark("{0:F0} miles per hour, {1:F0} RPM, {2:F0} horsepower"),
                     speedKmh * KmToMiles,
                     rpm,
-                    horsepower,
-                    fuelStatus));
+                    horsepower));
             }
             else
             {
                 _speakText(LocalizationService.Format(
-                    LocalizationService.Mark("{0:F0} kilometers per hour, {1:F0} RPM, {2:F0} horsepower, {3}"),
+                    LocalizationService.Mark("{0:F0} kilometers per hour, {1:F0} RPM, {2:F0} horsepower"),
                     speedKmh,
                     rpm,
-                    horsepower,
-                    fuelStatus));
+                    horsepower));
             }
+        }
+
+        private void HandleFuelReportRequest()
+        {
+            if (!_input.Intents.IsTriggered(DriveIntent.ReportFuel) || !IsActiveLapRange())
+                return;
+
+            _speakText(BuildFuelStatusPhrase());
         }
 
         private void HandleDistanceReportRequest()

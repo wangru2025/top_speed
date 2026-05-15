@@ -8,15 +8,15 @@ namespace TopSpeed.Physics.Fuel
             float tankCapacityLiters,
             float engineDisplacementLiters,
             float fuelDensityKgPerLiter = 0.745f,
-            float baseIdleBurnLitersPerHourPerLiter = 0.35f,
-            float bsfcLowLoadGPerKwh = 330f,
-            float bsfcHighLoadGPerKwh = 255f,
-            float displacementEfficiencyPenaltyPerLiter = 0.06f,
-            float referencePowerKw = 220f,
-            float lowFuelFraction = 0.15f,
-            float leanStartFuelFraction = 0.08f,
-            float emptyFuelPowerScale = 0.35f,
-            float burnSmoothingTimeConstantSeconds = 3f)
+            float baseIdleBurnLitersPerHourPerLiter = 0.30f,
+            float bsfcLowLoadGPerKwh = 360f,
+            float bsfcHighLoadGPerKwh = 250f,
+            float displacementEfficiencyPenaltyPerLiter = 0.045f,
+            float referencePowerKw = 180f,
+            float lowFuelFraction = 0.12f,
+            float leanStartFuelFraction = 0.06f,
+            float emptyFuelPowerScale = 0.30f,
+            float burnSmoothingTimeConstantSeconds = 2.5f)
         {
             TankCapacityLiters = Math.Max(FuelDefaults.MinTankCapacityLiters, Math.Min(FuelDefaults.MaxTankCapacityLiters, tankCapacityLiters));
             EngineDisplacementLiters = Math.Max(FuelDefaults.MinEngineDisplacementLiters, Math.Min(FuelDefaults.MaxEngineDisplacementLiters, engineDisplacementLiters));

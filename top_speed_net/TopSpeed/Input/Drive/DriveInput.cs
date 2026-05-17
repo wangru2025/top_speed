@@ -105,14 +105,6 @@ namespace TopSpeed.Input
         private Key _kbReportDistance;
         private Key _kbReportSpeed;
         private Key _kbReportFuel;
-        private Key _kbPlayer1;
-        private Key _kbPlayer2;
-        private Key _kbPlayer3;
-        private Key _kbPlayer4;
-        private Key _kbPlayer5;
-        private Key _kbPlayer6;
-        private Key _kbPlayer7;
-        private Key _kbPlayer8;
         private Key _kbTrackName;
         private Key _kbPlayerNumber;
         private Key _kbPause;
@@ -124,6 +116,8 @@ namespace TopSpeed.Input
         private Key _kbPlayerPos6;
         private Key _kbPlayerPos7;
         private Key _kbPlayerPos8;
+        private Key _kbPlayerPos9;
+        private Key _kbPlayerPos0;
         private Key _kbFlush;
         private State _center;
         private State _lastController;

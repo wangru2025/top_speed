@@ -180,6 +180,7 @@ namespace TopSpeed.Drive.Multiplayer
                     _input,
                     () => MaxPlayers - 1,
                     HasPlayerInRace,
+                    GetPlayerNameForPlayer,
                     GetVehicleNameForPlayer,
                     () => _started,
                     SpeakText,

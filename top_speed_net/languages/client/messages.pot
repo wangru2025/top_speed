@@ -787,7 +787,7 @@ msgstr ""
 msgid "Controller selected. {0}."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:38
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:34
 #, csharp-format
 msgid "Controller {0}"
 msgstr ""
@@ -1195,9 +1195,7 @@ msgid "Edit"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:85
-msgid ""
-"Edit the proxy URL used for update checks, downloads, and latest changes "
-"requests."
+msgid "Edit the proxy URL used for update package downloads."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Audio.cs:13
@@ -1213,7 +1211,7 @@ msgid "Enable menu wrapping"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\Proxy.cs:22
-msgid "Enable proxy for updates and changes first."
+msgid "Enable update download proxy first."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:44
@@ -1234,7 +1232,7 @@ msgid "England"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Localization\ClientLanguages.cs:27
-#: D:\top_speed\top_speed_net\TopSpeed\Localization\ClientLanguages.cs:38
+#: D:\top_speed\top_speed_net\TopSpeed\Localization\ClientLanguages.cs:35
 msgid "English (Original)"
 msgstr ""
 
@@ -1491,7 +1489,7 @@ msgstr ""
 msgid "Game rules"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:115
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:113
 msgid "Game rules changed."
 msgstr ""
 
@@ -1504,7 +1502,7 @@ msgstr ""
 msgid "Game version: {0}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:48
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:44
 msgid "Gamepad"
 msgstr ""
 
@@ -1792,7 +1790,7 @@ msgstr ""
 msgid "Join an existing game"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:50
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:46
 msgid "Joystick"
 msgstr ""
 
@@ -2143,7 +2141,7 @@ msgstr ""
 msgid "Maximum players allowed in this room"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:82
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:80
 #, csharp-format
 msgid "Maximum players changed to {0}."
 msgstr ""
@@ -2230,7 +2228,7 @@ msgstr ""
 msgid "Modifier"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\KeyMapManager.cs:99
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\KeyMapManager.cs:97
 #, csharp-format
 msgid "Move or press the controller control for {0}."
 msgstr ""
@@ -2548,7 +2546,7 @@ msgstr ""
 msgid "Number of laps"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:77
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:75
 #, csharp-format
 msgid "Number of laps changed to {0}."
 msgstr ""
@@ -2765,11 +2763,15 @@ msgstr ""
 msgid "Player "
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:133
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:131
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\State\Rooms\Store.cs:114
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu\Players.cs:30
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Online.cs:58
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Network\Participants.cs:132
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Runtime\Results.cs:31
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:172
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Single\Session\Format.cs:41
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\TimeTrial\Session\Format.cs:19
 #, csharp-format
 msgid "Player {0}"
 msgstr ""
@@ -2841,7 +2843,7 @@ msgstr ""
 msgid "Press right arrow to view."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\KeyMapManager.cs:98
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Mapping\KeyMapManager.cs:96
 #, csharp-format
 msgid "Press the new key for {0}."
 msgstr ""
@@ -2978,7 +2980,7 @@ msgstr ""
 msgid "Race complete."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:118
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:116
 msgid "Race paused."
 msgstr ""
 
@@ -2987,15 +2989,15 @@ msgstr ""
 msgid "Race percentage {0} percent"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:103
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:101
 msgid "Race preparation started."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:106
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:104
 msgid "Race preparation was cancelled."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:121
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:119
 msgid "Race resumed."
 msgstr ""
 
@@ -3003,7 +3005,7 @@ msgstr ""
 msgid "Race settings"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:109
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:107
 msgid "Race started."
 msgstr ""
 
@@ -3025,7 +3027,7 @@ msgstr ""
 msgid "Race without bots"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:45
+#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:41
 msgid "Racing wheel"
 msgstr ""
 
@@ -3263,12 +3265,7 @@ msgstr ""
 msgid "Room controls"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:59
-#, csharp-format
-msgid "Room created: {0}."
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:68
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:66
 msgid "Room host changed."
 msgstr ""
 
@@ -3290,7 +3287,7 @@ msgstr ""
 msgid "Room options updated."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:64
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:62
 #, csharp-format
 msgid "Room removed: {0}."
 msgstr ""
@@ -4031,7 +4028,7 @@ msgstr ""
 msgid "The connection attempt failed for an unknown reason."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:112
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:110
 msgid "The current race was stopped."
 msgstr ""
 
@@ -4327,7 +4324,7 @@ msgid ""
 "default'."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:72
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:70
 #, csharp-format
 msgid "Track changed to {0}."
 msgstr ""
@@ -4479,7 +4476,7 @@ msgstr ""
 msgid "Units"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:148
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:146
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options\Formatting.cs:20
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Updates\Dialog.cs:60
 #: D:\top_speed\top_speed_net\TopSpeed\Input\Display\Text.cs:13
@@ -4687,10 +4684,10 @@ msgid "Use motion sensors for steering"
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:72
-msgid "Use proxy for updates and changes"
+msgid "Use proxy for update downloads"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Network\Participants.cs:135
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Multiplayer\Session\Network\Participants.cs:149
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Text\SessionText.cs:86
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Single\Session\Format.cs:35
 #: D:\top_speed\top_speed_net\TopSpeed\Vehicles\Car.cs:38
@@ -4875,8 +4872,7 @@ msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Game.cs:76
 msgid ""
-"When checked, update checks, update downloads, and latest changes requests "
-"are routed through your proxy URL."
+"When checked, update package downloads are routed through your proxy URL."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Options\Menus.cs:94
@@ -5222,7 +5218,7 @@ msgstr ""
 msgid "game cancel request"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:141
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:139
 msgid "game room"
 msgstr ""
 
@@ -5376,7 +5372,6 @@ msgstr ""
 msgid "player count change request"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:148
 #: D:\top_speed\top_speed_net\TopSpeed\Drive\Single\Session\Results.cs:50
 #, csharp-format
 msgid "player {0}"
@@ -5595,17 +5590,6 @@ msgstr ""
 msgid "{0}  dialog  {1}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Localization\ClientLanguages.cs:31
-#: D:\top_speed\top_speed_net\TopSpeed\Menu\Build\Options\Speech.cs:181
-#, csharp-format
-msgid "{0} ({1})"
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Input\Backends\Sdl\Discovery\Display.cs:26
-#, csharp-format
-msgid "{0} ({1}, {2})"
-msgstr ""
-
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Coordinator\Communicator.cs:65
 #, csharp-format
 msgid "{0} MHz"
@@ -5627,7 +5611,7 @@ msgstr ""
 msgid "{0} and {1}"
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:93
+#: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Chat\HistoryText.cs:91
 #, csharp-format
 msgid "{0} changed ready state."
 msgstr ""
@@ -5759,11 +5743,6 @@ msgstr ""
 msgid "{0} was removed from the current room."
 msgstr ""
 
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Panels\RadioPanel\Feedback.cs:35
-#, csharp-format
-msgid "{0}%"
-msgstr ""
-
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Menu\Players.cs:33
 #, csharp-format
 msgid "{0}, host"
@@ -5782,16 +5761,6 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Core\Multiplayer\Rooms\Browser.cs:76
 #, csharp-format
 msgid "{0}, {1} game with {2} people, maximum {3} players"
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:161
-#, csharp-format
-msgid "{0}, {1}, {2}."
-msgstr ""
-
-#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:153
-#, csharp-format
-msgid "{0}, {1}."
 msgstr ""
 
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Drive\Results\ResultCatalog.cs:74
@@ -5819,4 +5788,14 @@ msgstr ""
 #: D:\top_speed\top_speed_net\TopSpeed\Game\Settings\VolumeShortcuts.cs:161
 #, csharp-format
 msgid "{0}: {1} percent"
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:156
+#, csharp-format
+msgid "{0}: {1}, using {2}."
+msgstr ""
+
+#: D:\top_speed\top_speed_net\TopSpeed\Drive\Session\Systems\PlayerInfo.cs:147
+#, csharp-format
+msgid "{0}: {1}, {2}, using {3}."
 msgstr ""

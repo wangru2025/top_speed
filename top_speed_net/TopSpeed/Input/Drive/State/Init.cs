@@ -37,14 +37,6 @@ namespace TopSpeed.Input
             ClearTouchInputState();
             ResetPedalCalibration();
 
-            _kbPlayer1 = Key.F1;
-            _kbPlayer2 = Key.F2;
-            _kbPlayer3 = Key.F3;
-            _kbPlayer4 = Key.F4;
-            _kbPlayer5 = Key.F5;
-            _kbPlayer6 = Key.F6;
-            _kbPlayer7 = Key.F7;
-            _kbPlayer8 = Key.F8;
             _kbPlayerNumber = Key.F11;
             _kbPlayerPos1 = Key.D1;
             _kbPlayerPos2 = Key.D2;
@@ -54,6 +46,8 @@ namespace TopSpeed.Input
             _kbPlayerPos6 = Key.D6;
             _kbPlayerPos7 = Key.D7;
             _kbPlayerPos8 = Key.D8;
+            _kbPlayerPos9 = Key.D9;
+            _kbPlayerPos0 = Key.D0;
             _kbFlush = Key.LeftAlt;
         }
 

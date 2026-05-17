@@ -211,6 +211,7 @@ namespace TopSpeed.Drive.Single
                 _input,
                 () => _nComputerPlayers,
                 player => player >= 0 && player <= _nComputerPlayers,
+                GetPlayerNameForPlayer,
                 GetVehicleNameForPlayer,
                 () => _started,
                 SpeakText,

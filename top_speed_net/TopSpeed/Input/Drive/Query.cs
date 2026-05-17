@@ -213,6 +213,8 @@ namespace TopSpeed.Input
                     return _touchReportDistance;
                 case DriveIntent.ReportSpeed:
                     return _touchReportSpeed;
+                case DriveIntent.ReportFuel:
+                    return _touchReportFuel;
                 case DriveIntent.CurrentGear:
                     return _touchCurrentGear;
                 case DriveIntent.CurrentLapNr:
